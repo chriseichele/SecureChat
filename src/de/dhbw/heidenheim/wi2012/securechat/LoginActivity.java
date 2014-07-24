@@ -164,11 +164,16 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
     public void userRegister(View view) {
         //Login
     	
+    	//Nachricht mit uebergeben
+    	Bundle daten = new Bundle();
+    	daten.putString("error_message", "Sie wurden erfolgreich registriert!"
+    									+ "\nBitte merken sie sich ihre ID!");
     	//Chatliste in Hintergrund oeffnen
     	Intent intent1 = new Intent(this,ContactListActivity.class);
         startActivity(intent1);
         //Profil anzeigen
     	Intent intent2 = new Intent(this,ShowProfileActivity.class);
+    	intent2.putExtras(daten);
         startActivity(intent2);
         //Activity beenden, um nicht mehr zurueckkehren zu koennen
         finish();

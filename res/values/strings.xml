@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="app_name">SecureChat</string>
+    <string name="app_description">SecureChat created by Students during a IT-Security Project at DHBW Heidenheim</string>
+    <string name="action_showProfile">show profile</string>
+    <string name="action_addContact">add Contact</string>
+    <string name="button_send">Send</string>
+    <string name="button_login">Login</string>
+    <string name="button_register">Register</string>
+    <string name="button_addContact">Add Contact</string>
+    <string name="edit_message">Enter a message&#8230;</string>
+    
+    <string name="label_id">ID</string>
+    <string name="label_username">Nickname</string>
+    
+    <string name="insert_id">insert Contact ID here&#8230;</string>
+    <string name="insert_username">nickname</string>
+    <string name="insert_password">password</string>
+    <string name="insert_password2">repeat password</string>
+    
+    <string name="title_activity_contact_list">Contact List</string>
+    <string name="title_activity_chat">Chat</string>
+    <string name="title_activity_add_contact">Add Contact</string>
+    <string name="title_section1">Login</string>
+    <string name="title_section2">Register</string>
+    <string name="title_activity_show_profile">My Profile</string>
+
+</resources>

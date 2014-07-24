@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="de.dhbw.heidenheim.wi2012.securechat.ContactListActivity" >
+    
+    <!-- AddContact, should appear as action button -->
+    <item android:id="@+id/action_addContact"
+          android:icon="@drawable/ic_action_add_person"
+          android:title="@string/action_addContact"
+          android:showAsAction="always" />
+    
+    <!-- ShowProfile, should appear in dropdown menu -->
+    <item android:id="@+id/action_showProfile"
+          android:title="@string/action_showProfile"
+          android:showAsAction="never" />
+
+</menu>

@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 /**
@@ -44,42 +45,37 @@ public class ChatListAdapter extends BaseAdapter{
 		{
 			holder = new ViewHolder();
 			convertView = LayoutInflater.from(mContext).inflate(R.layout.message_row, parent, false);
-			holder.message = (TextView) convertView.findViewById(R.id.message_text);
+			holder.message_bubble = (LinearLayout) convertView.findViewById(R.id.message_bubble);
+			holder.message_text = (TextView) convertView.findViewById(R.id.message_text);
+			holder.message_time = (TextView) convertView.findViewById(R.id.message_time);
 			convertView.setTag(holder);
 		}
 		else
 			holder = (ViewHolder) convertView.getTag();
+
+		holder.message_text.setText(message.getMessage());
+		holder.message_time.setText(message.getMessageTime());
 		
-		holder.message.setText(message.getMessage());
-		
-		LayoutParams lp = (LayoutParams) holder.message.getLayoutParams();
-		//check if it is a status message then remove background
-		if(message.isStatusMessage())
-		{
-			holder.message.setBackground(null);
-			lp.gravity = Gravity.LEFT;
-		}
-		else
-		{		
-			//Check whether message is mine to show green background and align to right
-			if(message.isMine())
+		LayoutParams lp = (LayoutParams) holder.message_bubble.getLayoutParams();
+		if(message.isMine())
 			{
-				holder.message.setBackgroundResource(R.drawable.speech_bubble_me);
+				holder.message_bubble.setBackgroundResource(R.drawable.speech_bubble_me);
 				lp.gravity = Gravity.RIGHT;
 			}
 			//If not mine then it is from sender to show orange background and align to left
 			else
 			{
-				holder.message.setBackgroundResource(R.drawable.speech_bubble_opponent);
+				holder.message_bubble.setBackgroundResource(R.drawable.speech_bubble_opponent);
 				lp.gravity = Gravity.LEFT;
 			}
-			holder.message.setLayoutParams(lp);
-		}
+			holder.message_bubble.setLayoutParams(lp);
 		return convertView;
 	}
 	private static class ViewHolder
 	{
-		TextView message;
+		LinearLayout message_bubble;
+		TextView message_text;
+		TextView message_time;
 	}
 
 	@Override

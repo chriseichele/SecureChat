@@ -1,6 +1,7 @@
 package de.dhbw.heidenheim.wi2012.securechat;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -33,12 +34,12 @@ public class ChatActivity extends Activity {
 		this.setTitle(chat_opponent);
 		messages = new ArrayList<Message>();
 
-		messages.add(new Message("Hey", false));
-		messages.add(new Message("Hi!", true));
-		messages.add(new Message("Wie gehts??", false));
-		messages.add(new Message("Ganz gut ;)", true));
-		messages.add(new Message("arbeite gerade an einer sicheren Chat-App", true));
-		messages.add(new Message("Wow, cool!", false));
+		messages.add(new Message("Hey", false, new Date(1406066828000L)));
+		messages.add(new Message("Hi!", true, new Date(1406146928000L)));
+		messages.add(new Message("Wie gehts??", false, new Date(1406156958000L)));
+		messages.add(new Message("Ganz gut ;)", true, new Date(1406207028000L)));
+		messages.add(new Message("arbeite gerade an einer sicheren Chat-App", true, new Date(1406267128000L)));
+		messages.add(new Message("Wow, cool!", false, new Date(1406267338000L)));
 
 
 		adapter = new ChatListAdapter(this, messages);

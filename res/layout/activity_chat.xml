@@ -25,7 +25,7 @@
         android:layout_height="wrap_content"
     	android:minHeight="48dp"
         android:layout_gravity="bottom"
-        android:background="@color/silver"
+        android:background="@color/white"
         android:orientation="horizontal" >
 
         <EditText
@@ -48,12 +48,14 @@
         android:gravity="bottom"
         android:orientation="vertical" >
 
-	        <Button
+	        <ImageButton
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
 	            android:onClick="sendMessage"
-	            android:text="@string/button_send"
-	            android:textColor="@color/black" />
+	            android:padding="5dp"
+	            android:src="@drawable/ic_action_send_now"
+	            android:contentDescription="@string/button_send"
+	            android:background="@null" />
 
     	</LinearLayout>
     	

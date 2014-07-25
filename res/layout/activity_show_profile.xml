@@ -24,7 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
     		android:layout_marginBottom="5dp"
-    		android:color="@color/darkgrey"
+    		android:textIsSelectable="true"
         	android:text="@string/label_username" />
         <TextView
     		android:id="@+id/show_username"
@@ -34,6 +34,7 @@
     		android:padding="10dp"
     		android:textSize="24sp"
     		android:background="@color/white"
+    		android:textIsSelectable="true"
         	android:text="" />
 
         <TextView
@@ -51,6 +52,7 @@
     		android:padding="10dp"
     		android:textSize="24sp"
     		android:background="@color/white"
+    		android:color="@color/darkgrey"
         	android:text="" />
 
 	</LinearLayout>

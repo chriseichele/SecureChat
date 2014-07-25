@@ -1,23 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:id="@+id/message_bubble"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="5sp"
+    android:background="@drawable/speech_bubble_opponent"
     android:orientation="vertical" >
-    
-    <LinearLayout
-        android:id="@+id/message_bubble"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="5sp"
-        android:background="@drawable/speech_bubble_opponent"
-    	android:orientation="vertical" >
     
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="5sp"
         android:id="@+id/message_text"
-        android:text="Sample Message Text"
+    	android:textIsSelectable="true"
         android:textSize="15sp" />
     
     <TextView
@@ -27,7 +22,5 @@
         android:text="dd.MM.yyyy HH:mm"
         android:textColor="@color/grey"
         android:textSize="10sp" />
-    
-    </LinearLayout>
 
 </LinearLayout>

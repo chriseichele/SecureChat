@@ -28,5 +28,9 @@
     <string name="title_section1">Login</string>
     <string name="title_section2">Registrieren</string>
     <string name="title_activity_show_profile">Mein Profil</string>
+    
+    <string name="message_registered_success">Sie wurden erfolgreich registriert!
+        									\nBitte merken sie sich ihre ID!</string>
+    
 
 </resources>

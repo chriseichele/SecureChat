@@ -3,35 +3,58 @@ package de.dhbw.heidenheim.wi2012.securechat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.app.Fragment;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ListView;
 
-public class ChatActivity extends Activity {
+/**
+ * A fragment representing a single Contact detail screen. This fragment is
+ * either contained in a {@link ContactListActivity} in two-pane mode (on
+ * tablets) or a {@link ChatDetailActivity} on handsets.
+ */
+public class ChatDetailFragment extends Fragment {
 
 	ListView chatList;
 	ArrayList<Message> messages;
 	ChatListAdapter adapter;
 	EditText textfield;
+	
+	/**
+	 * The fragment argument representing the item ID that this fragment
+	 * represents.
+	 */
+	public static final String CHAT_OPPONENT = "Name of Chat Partner";
+
+	/**
+	 * Mandatory empty constructor for the fragment manager to instantiate the
+	 * fragment (e.g. upon screen orientation changes).
+	 */
+	public ChatDetailFragment() {
+	}
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_chat);
+
+		if (getArguments().containsKey(CHAT_OPPONENT)) {
+			// In a real-world scenario, use a Loader
+			// to load content from a content provider.
+		}
+	}
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		View rootView = inflater.inflate(R.layout.activity_chat,
+				container, false);
 		
 		//Textnachricht holen
-		textfield = (EditText) this.findViewById(R.id.edit_message);
-		
- 	    // Get the ChatOpponent from the intent
- 	    Intent intent = getIntent();
- 	    String chat_opponent = intent.getStringExtra(ContactListActivity.CHAT_OPPONENT);
-		
-		this.setTitle(chat_opponent);
+		textfield = (EditText) rootView.findViewById(R.id.edit_message);
+ 	    
 		messages = new ArrayList<Message>();
 
 		messages.add(new Message("Hey", false, new Date(1406066828000L)));
@@ -42,29 +65,13 @@ public class ChatActivity extends Activity {
 		messages.add(new Message("Wow, cool!", false, new Date(1406267338000L)));
 
 
-		adapter = new ChatListAdapter(this, messages);
-		chatList = (ListView) findViewById(R.id.chatList);
+		adapter = new ChatListAdapter(getActivity(), messages);
+		chatList = (ListView) rootView.findViewById(R.id.chatList);
 		chatList.setAdapter(adapter);
 		
 		addNewMessage(new Message("Und was kann die App bis jetzt schon alles?", false));
-	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.chat, menu);
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
-		
-		//int id = item.getItemId();
-		
-		return super.onOptionsItemSelected(item);
+		return rootView;
 	}
     
     /** Called when the user clicks the Send button */

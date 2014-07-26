@@ -1,9 +1,9 @@
 package de.dhbw.heidenheim.wi2012.securechat;
 
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Message is a Custom Object to encapsulate message information/fields
@@ -47,9 +47,9 @@ public class Message {
 	public String getMessageTime() {
 		DateFormat dateFormat;
 		if(isToday(this.datetime)) {
-			dateFormat= new SimpleDateFormat("HH:mm");
+			dateFormat = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.getDefault());
 		} else {
-			dateFormat= new SimpleDateFormat("dd.MM.yyyy - HH:mm");
+			dateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT, Locale.getDefault());
 		}
 		return dateFormat.format(this.datetime);
 	}

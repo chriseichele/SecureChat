@@ -18,10 +18,9 @@ import android.widget.TextView;
  *
  */
 public class ChatListAdapter extends BaseAdapter{
+
 	private Context mContext;
 	private ArrayList<Message> mMessages;
-
-
 
 	public ChatListAdapter(Context context, ArrayList<Message> messages) {
 		super();
@@ -41,7 +40,7 @@ public class ChatListAdapter extends BaseAdapter{
 		Message message = (Message) this.getItem(position);
 
 		ViewHolder holder; 
-		if(convertView == null)
+		if(convertView == null) 
 		{
 			holder = new ViewHolder();
 			convertView = LayoutInflater.from(mContext).inflate(R.layout.message_row, parent, false);
@@ -49,26 +48,28 @@ public class ChatListAdapter extends BaseAdapter{
 			holder.message_text = (TextView) convertView.findViewById(R.id.message_text);
 			holder.message_time = (TextView) convertView.findViewById(R.id.message_time);
 			convertView.setTag(holder);
-		}
-		else
+		} 
+		else 
+		{
 			holder = (ViewHolder) convertView.getTag();
+		}
 
 		holder.message_text.setText(message.getMessage());
 		holder.message_time.setText(message.getMessageTime());
-		
+
 		LayoutParams lp = (LayoutParams) holder.message_bubble.getLayoutParams();
 		if(message.isMine())
-			{
-				holder.message_bubble.setBackgroundResource(R.drawable.speech_bubble_me);
-				lp.gravity = Gravity.RIGHT;
-			}
-			//If not mine then it is from sender to show orange background and align to left
-			else
-			{
-				holder.message_bubble.setBackgroundResource(R.drawable.speech_bubble_opponent);
-				lp.gravity = Gravity.LEFT;
-			}
-			holder.message_bubble.setLayoutParams(lp);
+		{
+			holder.message_bubble.setBackgroundResource(R.drawable.speech_bubble_me);
+			lp.gravity = Gravity.RIGHT;
+		}
+		//If not mine then it is from sender to show orange background and align to left
+		else 
+		{
+			holder.message_bubble.setBackgroundResource(R.drawable.speech_bubble_opponent);
+			lp.gravity = Gravity.LEFT;
+		}
+		holder.message_bubble.setLayoutParams(lp);
 		return convertView;
 	}
 	private static class ViewHolder
@@ -80,7 +81,7 @@ public class ChatListAdapter extends BaseAdapter{
 
 	@Override
 	public long getItemId(int position) {
-		//Unimplemented, because we aren't using Sqlite.
+		//Unimplemented, because we aren't using Site.
 		return position;
 	}
 

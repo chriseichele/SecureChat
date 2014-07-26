@@ -14,6 +14,7 @@ import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 
 public class LoginActivity extends Activity implements ActionBar.TabListener {
 
@@ -162,12 +163,17 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
     
     /** Called when the user clicks the Register button */
     public void userRegister(View view) {
+    	//Eingaben testen
+
+		//Passwort Hash
+    	String password1_hash = (((EditText) this.findViewById(R.id.insert_password1)).getText().toString());
+		String password2_hash = ((EditText) this.findViewById(R.id.insert_password1)).getText().toString();
+
         //Login
-    	
+		
     	//Nachricht mit uebergeben
     	Bundle daten = new Bundle();
-    	daten.putString("error_message", "Sie wurden erfolgreich registriert!"
-    									+ "\nBitte merken sie sich ihre ID!");
+    	daten.putString("error_message", getString(R.string.message_registered_success));
     	//Chatliste in Hintergrund oeffnen
     	Intent intent1 = new Intent(this,ContactListActivity.class);
         startActivity(intent1);

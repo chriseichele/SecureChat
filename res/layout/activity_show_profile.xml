@@ -11,7 +11,7 @@
 	    tools:context="de.dhbw.heidenheim.wi2012.securechat.AddContactActivity" >
 	    
     <TextView
-        android:id="@+id/error_message"
+        	android:id="@+id/error_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/android_red_dark"
@@ -24,7 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
     		android:layout_marginBottom="5dp"
-    		android:textIsSelectable="true"
+    		android:textColor="@color/darkgrey"
         	android:text="@string/label_username" />
         <TextView
     		android:id="@+id/show_username"
@@ -42,7 +42,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
     		android:layout_marginBottom="5dp"
-    		android:color="@color/darkgrey"
+    		android:textColor="@color/darkgrey"
         	android:text="@string/label_id" />
         <TextView
     		android:id="@+id/show_id"
@@ -52,7 +52,7 @@
     		android:padding="10dp"
     		android:textSize="24sp"
     		android:background="@color/white"
-    		android:color="@color/darkgrey"
+    		android:textIsSelectable="true"
         	android:text="" />
 
 	</LinearLayout>

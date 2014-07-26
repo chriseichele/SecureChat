@@ -23,6 +23,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+    	android:paddingLeft="@dimen/textfield_margin"
+    	android:paddingTop="@dimen/textfield_margin"
+    	android:paddingBottom="@dimen/textfield_margin"
     	android:minHeight="48dp"
         android:layout_gravity="bottom"
         android:background="@color/white"
@@ -52,7 +55,7 @@
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
 	            android:onClick="sendMessage"
-	            android:padding="5dp"
+    			android:padding="@dimen/textfield_margin"
 	            android:src="@drawable/ic_action_send_now"
 	            android:contentDescription="@string/button_send"
 	            android:background="@null" />

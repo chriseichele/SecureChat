@@ -1,58 +1,89 @@
 package de.dhbw.heidenheim.wi2012.securechat;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.app.Activity;
 
-public class ContactListActivity extends Activity implements OnItemClickListener {
+/**
+ * An activity representing a list of Contacts. This activity has different
+ * presentations for handset and tablet-size devices. On handsets, the activity
+ * presents a list of items, which when touched, lead to a
+ * {@link ChatDetailActivity} representing item details. On tablets, the
+ * activity presents the list of items and item details side-by-side using two
+ * vertical panes.
+ * <p>
+ * The activity makes heavy use of fragments. The list of items is a
+ * {@link ContactListFragment} and the item details (if present) is a
+ * {@link ChatDetailFragment}.
+ * <p>
+ * This activity also implements the required
+ * {@link ContactListFragment.Callbacks} interface to listen for item
+ * selections.
+ */
+public class ContactListActivity extends Activity implements
+		ContactListFragment.Callbacks {
+
+    //Contact Name
+	public final static String CHAT_OPPONENT = "";
 	
-    public final static String CHAT_OPPONENT = "";
-	
-	private ListView contactListView;
+	private ChatDetailFragment detailFragment;
+
+	/**
+	 * Whether or not the activity is in two-pane mode, i.e. running on a tablet
+	 * device.
+	 */
+	private boolean mTwoPane;
 
 	@Override
-    public void onCreate(Bundle savedInstanceState) {
-	    super.onCreate(savedInstanceState);
-	    
-         //Activity Layout Setzen
-	     setContentView(R.layout.activity_contact_list);
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_contact_list);
 
-         //List View Element fuer Kontaktliste finden
-	     contactListView = (ListView) findViewById(R.id.contactList);
+		if (findViewById(R.id.contact_detail_container) != null) {
+			// The detail container view will be present only in the
+			// large-screen layouts (res/values-large and
+			// res/values-sw600dp). If this view is present, then the
+			// activity should be in two-pane mode.
+			mTwoPane = true;
 
-         // Instanciating an array list with data
-         List<String> contactList = new ArrayList<String>();
-         contactList.add("Schnulf");
-         contactList.add("Dennis");
-         contactList.add("Martin");
-         contactList.add("Flo");
-         contactList.add("Vera");
-         contactList.add("Chris");
+			// In two-pane mode, list items should be given the
+			// 'activated' state when touched.
+			((ContactListFragment) getFragmentManager().findFragmentById(
+					R.id.contact_list)).setActivateOnItemClick(true);
+		}
 
-         // This is the array adapter, it takes the context of the activity as a 
-         // first parameter, the type of list view as a second parameter and your 
-         // array as a third parameter.
-         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
-                 this, 
-                 android.R.layout.simple_list_item_1,
-                 contactList );
+		// TODO: If exposing deep links into your app, handle intents here.
+	}
 
-         contactListView.setAdapter(arrayAdapter); 
-         
-         contactListView.setOnItemClickListener(this); 
-    }
+	/**
+	 * Callback method from {@link ContactListFragment.Callbacks} indicating
+	 * that the item with the given ID was selected.
+	 */
+	@Override
+	public void onItemSelected(String id) {
+		if (mTwoPane) {
+			// In two-pane mode, show the detail view in this activity by
+			// adding or replacing the detail fragment using a
+			// fragment transaction.
+			Bundle arguments = new Bundle();
+			arguments.putString(ChatDetailFragment.CHAT_OPPONENT, id);
+			this.detailFragment = new ChatDetailFragment();
+			this.detailFragment.setArguments(arguments);
+			getFragmentManager().beginTransaction()
+					.replace(R.id.contact_detail_container, this.detailFragment).commit();
 
+		} else {
+			// In single-pane mode, simply start the detail activity
+			// for the selected item ID.
+			Intent detailIntent = new Intent(this, ChatDetailActivity.class);
+			detailIntent.putExtra(ChatDetailFragment.CHAT_OPPONENT, id);
+			startActivity(detailIntent);
+		}
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -81,12 +112,11 @@ public class ContactListActivity extends Activity implements OnItemClickListener
                 return super.onOptionsItemSelected(item);
         }
 	}
-	
-	@Override
-	public void onItemClick(AdapterView<?> parent, View view, int position,long id) {
-        //startChat
-    	Intent intent = new Intent(this, ChatActivity.class);
-    	intent.putExtra(CHAT_OPPONENT, ((TextView) view).getText());	
-        startActivity(intent);
-	}
+    
+    /** Called when the user clicks the Send button */
+    public void sendMessage(View view) {
+		if (mTwoPane) {
+			this.detailFragment.sendMessage(view);
+		}
+    }
 }

@@ -14,9 +14,15 @@
         android:label="@string/app_name"
         android:theme="@style/MyAppTheme" 
         android:description="@string/app_description">
-        <activity
-            android:name=".ContactListActivity"
-            android:label="@string/title_activity_contact_list" >
+        <activity android:name=".ContactListActivity"
+            android:label="@string/title_activity_contact_list"
+            >
+        </activity>
+        <activity android:name="de.dhbw.heidenheim.wi2012.securechat.ChatDetailActivity"
+            android:label="@string/title_activity_chat"
+            android:parentActivityName="de.dhbw.heidenheim.wi2012.securechat.ContactListActivity">
+            <meta-data android:name="android.support.PARENT_ACTIVITY"
+                android:value="de.dhbw.heidenheim.wi2012.securechat.ContactListActivity" />
         </activity>
         <activity
             android:name=".AddContactActivity"

@@ -31,6 +31,10 @@
     
     <string name="message_registered_success">Sie wurden erfolgreich registriert!
         									\nBitte merken sie sich ihre ID!</string>
+    <string name="message_password_not_identical">Die eingegebenen Passwörter stimmen nicht überein!</string>
+    <string name="message_wrong_login">Falsche Benutzer ID oder Passwort!</string>
+    <string name="message_empty_login">Benutzer ID oder Passwort sind leer!</string>
+    <string name="message_empty_register">Benutzername oder Passwort sind leer!</string>
     
 
 </resources>

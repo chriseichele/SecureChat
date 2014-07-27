@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -15,6 +16,7 @@ public class LoginFragment extends Fragment {
 	 * fragment.
 	 */
 	private static final String ARG_SECTION_NUMBER = "section_number";
+	private View rootView;
 
 	/**
 	 * Returns a new instance of this fragment for the given section number.
@@ -33,7 +35,14 @@ public class LoginFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		View rootView = inflater.inflate(R.layout.fragment_login, container, false);
+		this.rootView = inflater.inflate(R.layout.fragment_login, container, false);
 		return rootView;
+	}
+	
+	public void displayErrorMessage(String text) {
+		//Fehlermeldung anzeigen, wenn nicht leer
+		if(text != null) {
+			((TextView) this.rootView.findViewById(R.id.login_error_message)).setText(text);
+		}
 	}
 }

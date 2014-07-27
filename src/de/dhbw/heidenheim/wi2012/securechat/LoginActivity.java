@@ -114,6 +114,9 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
 	 */
 	public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
+		private LoginFragment loginFragment;
+		private RegisterFragment registerFragment;
+
 		public SectionsPagerAdapter(FragmentManager fm) {
 			super(fm);
 		}
@@ -121,16 +124,22 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
 		@Override
 		public Fragment getItem(int position) {
 			// getItem is called to instantiate the fragment for the given page.
-			// Return a PlaceholderFragment (defined as a static inner class
-			// below).
 			switch (position) {
-			case 0:
-				return LoginFragment.newInstance(position + 1);
-			case 1:
-				return RegisterFragment.newInstance(position + 1);
 			default:
-				return LoginFragment.newInstance(position + 1);
+			case 0:
+				loginFragment = LoginFragment.newInstance(position + 1);
+				return loginFragment;
+			case 1:
+				registerFragment = RegisterFragment.newInstance(position + 1);
+				return registerFragment;
 			}
+		}
+
+		public LoginFragment getLoginFragment() {
+			return loginFragment;
+		}
+		public RegisterFragment getRegisterFragment() {
+			return registerFragment;
 		}
 
 		@Override
@@ -154,35 +163,66 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
     
     /** Called when the user clicks the Login button */
     public void userLogin(View view) {
-        //Login
-    	Intent intent = new Intent(this,ContactListActivity.class);
-        startActivity(intent);
-        //Activity beenden, um nicht mehr zurueckkehren zu koennen
-        finish();
+    	//Eingaben Testen und Login
+
+		//Benutzername
+    	String user_id = (((EditText) this.findViewById(R.id.login_insert_id)).getText().toString());
+    	//Passwort
+    	String password = (((EditText) this.findViewById(R.id.login_insert_password)).getText().toString());
+    	
+    	//Eingaben leer?
+    	if (user_id.trim().equals("") || password.trim().equals("")) {
+    		//Leer? -> Fehlermeldung
+    		mSectionsPagerAdapter.getLoginFragment().displayErrorMessage(getString(R.string.message_empty_login));
+      	}
+		//Richtige Account Details?
+    	else if(true) {
+        	//Nein? -> Fehlermeldung
+			mSectionsPagerAdapter.getLoginFragment().displayErrorMessage(getString(R.string.message_wrong_login));
+        } else {
+	        //Login
+	    	Intent intent = new Intent(this,ContactListActivity.class);
+	        startActivity(intent);
+	        //Activity beenden, um nicht mehr zurueckkehren zu koennen
+	        finish();
+        }
     }
     
     /** Called when the user clicks the Register button */
     public void userRegister(View view) {
-    	//Eingaben testen
+    	//Eingaben testen und Registrieren
 
-		//Passwort Hash
-    	String password1_hash = (((EditText) this.findViewById(R.id.insert_password1)).getText().toString());
-		String password2_hash = ((EditText) this.findViewById(R.id.insert_password1)).getText().toString();
-
-        //Login
+		//Benutzername
+    	String user = (((EditText) this.findViewById(R.id.register_insert_username)).getText().toString());
+    	//Passwort
+    	String password1 = (((EditText) this.findViewById(R.id.register_insert_password1)).getText().toString());
+		String password2 = ((EditText) this.findViewById(R.id.register_insert_password2)).getText().toString();
 		
-    	//Nachricht mit uebergeben
-    	Bundle daten = new Bundle();
-    	daten.putString("error_message", getString(R.string.message_registered_success));
-    	//Chatliste in Hintergrund oeffnen
-    	Intent intent1 = new Intent(this,ContactListActivity.class);
-        startActivity(intent1);
-        //Profil anzeigen
-    	Intent intent2 = new Intent(this,ShowProfileActivity.class);
-    	intent2.putExtras(daten);
-        startActivity(intent2);
-        //Activity beenden, um nicht mehr zurueckkehren zu koennen
-        finish();
+		//Eingaben leer?
+		if (user.trim().equals("") || password1.trim().equals("") || password2.trim().equals("")) {
+			//Leer? -> Fehlermeldung
+			mSectionsPagerAdapter.getRegisterFragment().displayErrorMessage(getString(R.string.message_empty_register));
+    	}
+        //Gewaehltes Passwort identitsch?
+		else if(!password1.equals(password2)) {
+        	//Nein? -> Fehlermeldung
+			mSectionsPagerAdapter.getRegisterFragment().displayErrorMessage(getString(R.string.message_password_not_identical));
+        } else {
+			//Registrieren
+			
+	    	//Nachricht mit uebergeben
+	    	Bundle daten = new Bundle();
+	    	daten.putString("error_message", getString(R.string.message_registered_success));
+	    	//Chatliste in Hintergrund oeffnen
+	    	Intent intent1 = new Intent(this,ContactListActivity.class);
+	        startActivity(intent1);
+	        //Profil anzeigen
+	    	Intent intent2 = new Intent(this,ShowProfileActivity.class);
+	    	intent2.putExtras(daten);
+	        startActivity(intent2);
+	        //Activity beenden, um nicht mehr zurueckkehren zu koennen
+	        finish();
+        }
     }
 
 }

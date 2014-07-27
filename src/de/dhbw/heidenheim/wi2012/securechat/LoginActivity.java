@@ -176,15 +176,18 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
     		mSectionsPagerAdapter.getLoginFragment().displayErrorMessage(getString(R.string.message_empty_login));
       	}
 		//Richtige Account Details?
-    	else if(true) {
-        	//Nein? -> Fehlermeldung
-			mSectionsPagerAdapter.getLoginFragment().displayErrorMessage(getString(R.string.message_wrong_login));
-        } else {
-	        //Login
-	    	Intent intent = new Intent(this,ContactListActivity.class);
-	        startActivity(intent);
-	        //Activity beenden, um nicht mehr zurueckkehren zu koennen
-	        finish();
+    	else {
+    		boolean valid_user = user_id.equals("admin"); // TODO User mit Datenbank ueberpruefen
+    		if(!valid_user) { 
+	        	//Nein? -> Fehlermeldung
+				mSectionsPagerAdapter.getLoginFragment().displayErrorMessage(getString(R.string.message_wrong_login));
+	        } else {
+		        //Login
+		    	Intent intent = new Intent(this,ContactListActivity.class);
+		        startActivity(intent);
+		        //Activity beenden, um nicht mehr zurueckkehren zu koennen
+		        finish();
+	        }
         }
     }
     

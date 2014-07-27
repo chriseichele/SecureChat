@@ -36,5 +36,12 @@
     <string name="message_empty_login">Benutzer ID oder Passwort sind leer!</string>
     <string name="message_empty_register">Benutzername oder Passwort sind leer!</string>
     
+    <string name="password_strength_very_very_weak">Sehr sehr schwaches Passwort</string>
+    <string name="password_strength_very_weak">Sehr schwaches Passwort</string>
+    <string name="password_strength_weak">Schwaches Passwort</string>
+    <string name="password_strength_moderate">Akzeptables Passwort</string>
+    <string name="password_strength_strong">Starkes Passwort</string>
+    <string name="password_strength_very_strong">Sehr starkes Passwort</string>
+    
 
 </resources>

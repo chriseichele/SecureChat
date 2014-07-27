@@ -29,5 +29,12 @@
     <string name="message_wrong_login">Wrong user ID or password!</string>
     <string name="message_empty_login">Empty user ID or password!</string>
     <string name="message_empty_register">Empty user or password!</string>
+    
+    <string name="password_strength_very_very_weak">Very very weak password</string>
+    <string name="password_strength_very_weak">Very weak password</string>
+    <string name="password_strength_weak">Weak password</string>
+    <string name="password_strength_moderate">Moderate password</string>
+    <string name="password_strength_strong">Strong password</string>
+    <string name="password_strength_very_strong">Very strong password</string>
 
 </resources>

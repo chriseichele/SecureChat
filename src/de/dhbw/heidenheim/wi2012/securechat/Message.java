@@ -46,11 +46,15 @@ public class Message {
 	}
 	public String getMessageTime() {
 		DateFormat dateFormat;
+		// Datum/Zeit nach lokalem Standard formatieren
 		if(isToday(this.datetime)) {
+			//Wenn heute, nur Zeit
 			dateFormat = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.getDefault());
 		} else {
+			//Wenn vergangener Tag, Datum und Uhrzeit
 			dateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT, Locale.getDefault());
 		}
+		//return Datum/Zeit der Nachricht formatiert als String
 		return dateFormat.format(this.datetime);
 	}
 	public void setMessage(String message) {
@@ -66,7 +70,7 @@ public class Message {
 	private boolean isToday(Date datetime) {
 		//current Date
 		Calendar cal1 = Calendar.getInstance();
-		//test date
+		//Date to Text
 		Calendar cal2 = Calendar.getInstance();
         cal2.setTime(datetime);
         //return true, if same day

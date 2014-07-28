@@ -48,6 +48,9 @@ public class ContactListActivity extends Activity implements
 			// res/values-sw600dp). If this view is present, then the
 			// activity should be in two-pane mode.
 			mTwoPane = true;
+			
+			//App name als Titel zeigen
+			this.setTitle(getResources().getString(R.string.app_name));
 
 			// In two-pane mode, list items should be given the
 			// 'activated' state when touched.
@@ -65,8 +68,6 @@ public class ContactListActivity extends Activity implements
 	@Override
 	public void onItemSelected(String id) {
 		if (mTwoPane) {
-			//App name als Titel
-			this.setTitle(getResources().getString(R.string.app_name));
 			// In two-pane mode, show the detail view in this activity by
 			// adding or replacing the detail fragment using a
 			// fragment transaction.

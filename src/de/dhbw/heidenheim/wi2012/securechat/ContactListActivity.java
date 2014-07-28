@@ -65,6 +65,8 @@ public class ContactListActivity extends Activity implements
 	@Override
 	public void onItemSelected(String id) {
 		if (mTwoPane) {
+			//App name als Titel
+			this.setTitle(getResources().getString(R.string.app_name));
 			// In two-pane mode, show the detail view in this activity by
 			// adding or replacing the detail fragment using a
 			// fragment transaction.

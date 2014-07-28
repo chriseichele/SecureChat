@@ -1,7 +1,6 @@
 package de.dhbw.heidenheim.wi2012.securechat;
 
 import android.app.Fragment;
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -101,7 +100,7 @@ public class RegisterFragment extends Fragment {
             	//Result Variablen
             	String result_text = "";
             	int result_color = 0;
-            	//Show result with according color
+            	//Anzeigewerte fuer Passwortstaerke bestimmen
             	if(value <= 0) {
             		result_text = "";
             		result_color = getResources().getColor(R.color.transparent);
@@ -130,6 +129,7 @@ public class RegisterFragment extends Fragment {
             		result_text = getResources().getString(R.string.password_strength_very_strong);
             		result_color = getResources().getColor(R.color.android_green_dark);
             	}
+            	//Show Password Strength
         		password_strength_view.setText(result_text);
         		password_strength_view.setBackgroundColor(result_color);
             }
@@ -139,7 +139,7 @@ public class RegisterFragment extends Fragment {
 	}
 	
 	public void displayErrorMessage(String text) {
-		//Fehlermeldung anzeigen, wenn nicht leer
+		//Fehlermeldung als Text anzeigen, wenn Text nicht leer
 		if(text != null) {
 			((TextView) this.rootView.findViewById(R.id.register_error_message)).setText(text);
 		}

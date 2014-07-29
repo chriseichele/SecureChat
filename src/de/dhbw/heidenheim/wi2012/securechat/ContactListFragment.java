@@ -122,7 +122,8 @@ public class ContactListFragment extends ListFragment {
 
 		// Notify the active callbacks interface (the activity, if the
 		// fragment is attached to one) that an item has been selected.
-		mCallbacks.onItemSelected(((TextView)view).getText().toString());
+		String contact_id = ((TextView) view.findViewById(R.id.contact_id)).getText().toString();
+		mCallbacks.onItemSelected(contact_id);
 	}
 
 	@Override

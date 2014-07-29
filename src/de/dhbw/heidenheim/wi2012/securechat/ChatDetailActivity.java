@@ -39,15 +39,15 @@ public class ChatDetailActivity extends Activity {
 			// Create the detail fragment and add it to the activity
 			// using a fragment transaction.
 			Bundle arguments = new Bundle();
-			arguments.putString(ChatDetailFragment.CHAT_OPPONENT, getIntent()
-					.getStringExtra(ChatDetailFragment.CHAT_OPPONENT));
+			arguments.putString(ChatDetailFragment.CHAT_OPPONENT, 
+					getIntent().getStringExtra(ChatDetailFragment.CHAT_OPPONENT));
 			this.detailFragment = new ChatDetailFragment();
 			this.detailFragment.setArguments(arguments);
 			getFragmentManager().beginTransaction().add(R.id.chat_detail_container, this.detailFragment).commit();
-			
-			//Chatparter Name als Titel
-			this.setTitle(getIntent().getStringExtra(ChatDetailFragment.CHAT_OPPONENT));
 		}
+		
+		//Chatparter Name als Titel
+		this.setTitle(Contact.getContactName(getIntent().getStringExtra(ChatDetailFragment.CHAT_OPPONENT)));
 	}
     
     /** Called when the user clicks the Send button */

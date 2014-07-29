@@ -1,7 +1,6 @@
 package de.dhbw.heidenheim.wi2012.securechat;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 import android.os.Bundle;
 import android.app.Fragment;
@@ -22,12 +21,13 @@ public class ChatDetailFragment extends Fragment {
 	ArrayList<Message> messages;
 	ChatListAdapter adapter;
 	EditText textfield;
+	ChatHistory chatHistory;
 	
 	/**
 	 * The fragment argument representing the item ID that this fragment
 	 * represents.
 	 */
-	public static final String CHAT_OPPONENT = "Name of Chat Partner";
+	public static final String CHAT_OPPONENT = "ID of Chat Partner";
 
 	/**
 	 * Mandatory empty constructor for the fragment manager to instantiate the
@@ -52,18 +52,14 @@ public class ChatDetailFragment extends Fragment {
 		View rootView = inflater.inflate(R.layout.activity_chat,
 				container, false);
 		
-		//Textnachricht holen
+		//Eingabefeld fuer neue Textnachricht holen
 		textfield = (EditText) rootView.findViewById(R.id.edit_message);
+		
+		String chat_opponent = getActivity().getIntent().getStringExtra(CHAT_OPPONENT);
  	    
-		messages = new ArrayList<Message>();
-
-		messages.add(new Message("Hey", false, new Date(1406066828000L)));
-		messages.add(new Message("Hi!", true, new Date(1406146928000L)));
-		messages.add(new Message("Wie gehts??", false, new Date(1406156958000L)));
-		messages.add(new Message("Ganz gut ;)", true, new Date(1406207028000L)));
-		messages.add(new Message("arbeite gerade an einer sicheren Chat-App", true, new Date(1406267128000L)));
-		messages.add(new Message("Wow, cool!", false, new Date(1406267338000L)));
-
+		//Nachrichten holen
+		chatHistory = new ChatHistory(chat_opponent);
+		messages = chatHistory.getCurrentMessages();
 
 		adapter = new ChatListAdapter(getActivity(), messages);
 		chatList = (ListView) rootView.findViewById(R.id.chatList);
@@ -88,6 +84,7 @@ public class ChatDetailFragment extends Fragment {
 
 	private void addNewMessage(Message m)
 	{
+		chatHistory.add(m);
 		messages.add(m);
 		adapter.notifyDataSetChanged();
 		chatList.setSelection(messages.size()-1);

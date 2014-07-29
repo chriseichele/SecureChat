@@ -42,6 +42,7 @@ public class ContactListAdapter extends BaseAdapter{
 			holder = new ViewHolder();
 			convertView = LayoutInflater.from(mContext).inflate(R.layout.contact_row, parent, false);
 			holder.contact_name = (TextView) convertView.findViewById(R.id.contact_name);
+			holder.contact_id = (TextView) convertView.findViewById(R.id.contact_id);
 			convertView.setTag(holder);
 		} 
 		else 
@@ -50,12 +51,14 @@ public class ContactListAdapter extends BaseAdapter{
 		}
 
 		holder.contact_name.setText(contact.getName());
+		holder.contact_id.setText(contact.getID());
 
 		return convertView;
 	}
 	private static class ViewHolder
 	{
 		TextView contact_name;
+		TextView contact_id;
 	}
 
 	@Override

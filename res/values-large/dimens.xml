@@ -1,5 +1,6 @@
 <resources>
     
     <dimen name="textfield_margin">20dp</dimen>
+    <dimen name="contactline_margin">25dp</dimen>
 
 </resources>

@@ -1,13 +1,11 @@
 package de.dhbw.heidenheim.wi2012.securechat;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.app.ListFragment;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -72,25 +70,16 @@ public class ContactListFragment extends ListFragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		// Instanciating an array list with data
-        List<String> contactList = new ArrayList<String>();
-        contactList.add("Schnulf");
-        contactList.add("Dennis");
-        contactList.add("Martin");
-        contactList.add("Flo");
-        contactList.add("Vera");
-        contactList.add("Chris");
+		ArrayList<Contact> contactList = Contact.getContacts();
 
         // This is the array adapter, it takes the context of the activity as a 
         // first parameter, the type of list view as a second parameter and your 
         // array as a third parameter.
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
-        		getActivity(), 
-                android.R.layout.simple_list_item_activated_1,
-				android.R.id.text1,
+        ContactListAdapter ContactListAdapter = new ContactListAdapter(
+        		getActivity(),
                 contactList );
 
-        setListAdapter(arrayAdapter);
+        setListAdapter(ContactListAdapter);
 	}
 
 	@Override

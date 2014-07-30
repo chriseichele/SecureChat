@@ -68,8 +68,6 @@ public class ChatDetailFragment extends Fragment {
 		adapter = new ChatListAdapter(getActivity(), messages);
 		chatList = (ListView) rootView.findViewById(R.id.chatList);
 		chatList.setAdapter(adapter);
-		
-		addNewMessage(new Message("Und was kann die App bis jetzt schon alles?", false));
 
 		return rootView;
 	}
@@ -83,6 +81,9 @@ public class ChatDetailFragment extends Fragment {
 			textfield.setText("");
 			addNewMessage(new Message(newMessage, true));
 		}
+		
+		//TODO Dummy Antwort nach jeder neuen Nachricht
+		addNewMessage(new Message("Und was kann die App bis jetzt schon alles?", false));
     }
     
 

@@ -21,7 +21,6 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import org.xmlpull.v1.XmlSerializer;
@@ -59,17 +58,6 @@ public class ChatHistory {
 			    serializer.startDocument(null, Boolean.valueOf(true));
 			    serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 		        serializer.startTag(null, "root");
-		        /*serializer.startTag(null, "message");
-		        serializer.startTag(null, "sender");
-			    serializer.text("me");
-		        serializer.endTag(null, "sender");
-		        serializer.startTag(null, "content");
-		        serializer.text("test");
-		        serializer.endTag(null, "content");
-		        serializer.startTag(null, "timestamp");
-		        serializer.text("1111111111");
-		        serializer.endTag(null, "timestamp");
-		        serializer.endTag(null, "message");*/
 		        serializer.endTag(null, "root");
 			    serializer.endDocument();
 			    serializer.flush();
@@ -123,7 +111,7 @@ public class ChatHistory {
 			        boolean is_my_message = (attributes.item(1).getFirstChild().getNodeValue().equals("me"));
 			        String content = attributes.item(3).getFirstChild().getNodeValue();
 			        long timestamp = Long.parseLong(attributes.item(5).getFirstChild().getNodeValue(), 10);
-			        //neue Nachricht an Array ausgeben
+			        //Neue Nachricht an Array ausgeben
 			        messages.add(new Message(content, is_my_message, new Date(timestamp)));
 			    }
 		    }
@@ -131,16 +119,6 @@ public class ChatHistory {
 		} catch (IOException | SAXException | ParserConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-
-		// TODO Dummy Werte Eintragen
-		if (messages.isEmpty()) {
-			add(new Message("Hey", false, new Date(1406066828000L)));
-			add(new Message("Hi "+this.user_name, true, new Date(1406146928000L)));
-			add(new Message("Wie gehts??", false, new Date(1406156958000L)));
-			add(new Message("Ganz gut ;)", true, new Date(1406207028000L)));
-			add(new Message("arbeite gerade an einer sicheren Chat-App", true, new Date(1406267128000L)));
-			add(new Message("Wow, cool!", false, new Date(1406267338000L)));
 		}
 		
 		//Return Message ArrayList
@@ -205,36 +183,6 @@ public class ChatHistory {
             transformer.transform(source, result);
             fos.close();
 			
-/*
-		    FileOutputStream fos;
-		    fos = context.openFileOutput(this.filename, Context.MODE_APPEND);
-	    
-		    XmlSerializer serializer = Xml.newSerializer();
-		    
-			serializer.setOutput(fos, "UTF-8");
-
-	        serializer.startTag(null, "message");
-	        serializer.startTag(null, "sender");
-	        if (m.isMine()) {
-		        serializer.text("me");
-	        } else {
-		        serializer.text(this.user_id);
-	        }
-	        serializer.endTag(null, "sender");
-	        serializer.startTag(null, "content");
-	        serializer.text(m.getMessage());
-	        serializer.endTag(null, "content");
-	        serializer.startTag(null, "timestamp");
-	        serializer.text(m.getTimestamp()+"");
-	        serializer.endTag(null, "timestamp");
-	        serializer.endTag(null, "message");
-
-	        serializer.endTag(null, "root");
-		    serializer.endDocument();
-		    serializer.flush();
-		    fos.close();
-		    */
-
 		}
 		catch (TransformerException | IOException | SAXException | ParserConfigurationException e) {
 			// TODO Auto-generated catch block

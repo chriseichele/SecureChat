@@ -28,6 +28,7 @@ public class ChatDetailFragment extends Fragment {
 	 * represents.
 	 */
 	public static final String CHAT_OPPONENT = "ID of Chat Partner";
+	private String chat_opponent;
 
 	/**
 	 * Mandatory empty constructor for the fragment manager to instantiate the
@@ -43,6 +44,7 @@ public class ChatDetailFragment extends Fragment {
 		if (getArguments().containsKey(CHAT_OPPONENT)) {
 			// In a real-world scenario, use a Loader
 			// to load content from a content provider.
+			this.chat_opponent = getArguments().getString(CHAT_OPPONENT);
 		}
 	}
 
@@ -55,10 +57,12 @@ public class ChatDetailFragment extends Fragment {
 		//Eingabefeld fuer neue Textnachricht holen
 		textfield = (EditText) rootView.findViewById(R.id.edit_message);
 		
-		String chat_opponent = getActivity().getIntent().getStringExtra(CHAT_OPPONENT);
+		if(chat_opponent == null) {
+			this.chat_opponent = getActivity().getIntent().getStringExtra(CHAT_OPPONENT);
+		}
  	    
 		//Nachrichten holen
-		chatHistory = new ChatHistory(chat_opponent);
+		chatHistory = new ChatHistory(chat_opponent, getActivity().getApplicationContext());
 		messages = chatHistory.getCurrentMessages();
 
 		adapter = new ChatListAdapter(getActivity(), messages);
@@ -85,7 +89,6 @@ public class ChatDetailFragment extends Fragment {
 	private void addNewMessage(Message m)
 	{
 		chatHistory.add(m);
-		messages.add(m);
 		adapter.notifyDataSetChanged();
 		chatList.setSelection(messages.size()-1);
 	}

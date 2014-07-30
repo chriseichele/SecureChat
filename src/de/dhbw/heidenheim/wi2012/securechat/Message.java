@@ -44,6 +44,9 @@ public class Message {
 	public String getMessage() {
 		return message;
 	}
+	public long getTimestamp() {
+		return this.datetime.getTime();
+	}
 	public String getMessageTime() {
 		DateFormat dateFormat;
 		// Datum/Zeit nach lokalem Standard formatieren

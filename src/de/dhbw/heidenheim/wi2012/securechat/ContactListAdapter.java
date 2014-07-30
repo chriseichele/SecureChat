@@ -18,11 +18,13 @@ public class ContactListAdapter extends BaseAdapter{
 
 	private Context mContext;
 	private ArrayList<Contact> mContacts;
+	public static BaseAdapter cla;
 
 	public ContactListAdapter(Context context, ArrayList<Contact> contacts) {
 		super();
 		this.mContext = context;
 		this.mContacts = contacts;
+		cla = this;
 	}
 	@Override
 	public int getCount() {

@@ -1,11 +1,13 @@
 package de.dhbw.heidenheim.wi2012.securechat;
 
 import android.app.Activity;
+import android.app.FragmentManager;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 
 public class AddContactActivity extends Activity {
@@ -60,6 +62,8 @@ public class AddContactActivity extends Activity {
 		    	//Kontakt in Kontaktliste speichern
 		    	try {
 					c.addToContactList();
+					//Kontaktliste ueber aenderung benachrichtigen
+					ContactListAdapter.cla.notifyDataSetChanged();
 			    	//Nachricht Kontakt "Name" erfolgreich hinzugefuegt
 		    		error_message.setTextColor(getResources().getColor(R.color.android_green_dark));
 		    		error_message.setText(getString(R.string.message_contact_added, c.getName()));

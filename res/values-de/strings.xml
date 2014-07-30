@@ -35,6 +35,9 @@
     <string name="message_wrong_login">Falsche Benutzer ID oder Passwort!</string>
     <string name="message_empty_login">Benutzer ID oder Passwort sind leer!</string>
     <string name="message_empty_register">Benutzername oder Passwort sind leer!</string>
+    <string name="message_contact_added">Kontakt \""%1$s\"" erfolgreich hinzugefügt!</string>
+    <string name="message_contact_not_added">Fehler beim Hinzufügen des Kontaktes mit der ID \""%1$s\""!</string>
+    <string name="message_contact_already_in_list">Der Kontakt mit der ID \""%1$s\"" ist bereits in ihrer Kontaktliste!</string>
     
     <string name="password_strength_very_very_weak">Sehr sehr schwaches Passwort</string>
     <string name="password_strength_very_weak">Sehr schwaches Passwort</string>

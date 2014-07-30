@@ -5,13 +5,23 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.TextView;
 
 public class AddContactActivity extends Activity {
+
+	private EditText textfield;
+	private TextView error_message;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_add_contact);
+
+		//Eingabefeld fuer neue Textnachricht holen
+		textfield = (EditText) findViewById(R.id.insert_id);
+		//Textview fuer Fehlermeldungen holen
+		error_message = (TextView) findViewById(R.id.error_message);
 	}
 
 	@Override
@@ -34,6 +44,37 @@ public class AddContactActivity extends Activity {
 
     /** Called when the user clicks the AddContact button */
     public void addContact(View view) {
-    	//Kontakt hinzufuegen
+    	// Kontakt hinzufuegen
+    	
+    	// KontaktID aus Textfeld holen
+    	String newContact = textfield.getText().toString().trim(); 
+		if(newContact.length() > 0)
+		{
+			//Eingabefeld leeren
+			textfield.setText("");
+			try {
+			// Neuen Kontakt anlegen
+	    	Contact c = new Contact(newContact);
+	    	//App context in Kontakt speichern
+	    	Contact.setContext(getApplicationContext());
+		    	//Kontakt in Kontaktliste speichern
+		    	try {
+					c.addToContactList();
+			    	//Nachricht Kontakt "Name" erfolgreich hinzugefuegt
+		    		error_message.setTextColor(getResources().getColor(R.color.android_green_dark));
+		    		error_message.setText(getString(R.string.message_contact_added, c.getName()));
+				} catch (ContactExistException e) {
+		    		//Kontakt existiert bereits!
+		    		//Fehlermeldung zeigen
+		    		error_message.setTextColor(getResources().getColor(R.color.android_red_dark));
+		    		error_message.setText(getString(R.string.message_contact_already_in_list, newContact));
+				}
+			} catch (ContactNotExistException e) {
+	    		//Kontakt existiert nicht!
+	    		//Fehlermeldung zeigen
+	    		error_message.setTextColor(getResources().getColor(R.color.android_red_dark));
+	    		error_message.setText(getString(R.string.message_contact_not_added, newContact));
+	    	}
+		}
     }
 }

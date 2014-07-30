@@ -70,7 +70,7 @@ public class ContactListFragment extends ListFragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		ArrayList<Contact> contactList = Contact.getContacts();
+		ArrayList<Contact> contactList = Contact.getContacts(getActivity().getApplicationContext());
 
         // This is the array adapter, it takes the context of the activity as a 
         // first parameter, the type of list view as a second parameter and your 

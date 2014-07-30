@@ -31,14 +31,12 @@ import android.util.Xml;
 public class ChatHistory {
 
 	private String user_id;
-	private String user_name;
 	private ArrayList<Message> messages;
 	private Context context;
 	private String filename;
 	
 	public ChatHistory(String user_id, Context appContext) {
 		this.user_id = user_id;
-		this.user_name = Contact.getContactName(user_id);
 		this.context = appContext;
 		this.messages = new ArrayList<Message>();
 		this.filename = "chatHistory-"+user_id+".xml";
@@ -77,12 +75,9 @@ public class ChatHistory {
 		//Get Messages for current Chat from XML
 		
 		try {
-			
-			FileInputStream fis = null;
-		    InputStreamReader isr = null;
 	
-		    fis = context.openFileInput(this.filename);
-		    isr = new InputStreamReader(fis);
+			FileInputStream fis = context.openFileInput(this.filename);
+		    InputStreamReader isr = new InputStreamReader(fis);
 		    char[] inputBuffer = new char[fis.available()];
 		    isr.read(inputBuffer);
 		    String data = new String(inputBuffer);
@@ -99,8 +94,6 @@ public class ChatHistory {
 		    DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		    DocumentBuilder db = dbf.newDocumentBuilder();
 		    Document dom = db.parse(is);
-		    // normalize the document
-		    //dom.getDocumentElement().normalize();
 		    NodeList root_item = dom.getElementsByTagName("root");
 		    if (root_item.item(0).hasChildNodes()) {
 			    NodeList items = root_item.item(0).getChildNodes();

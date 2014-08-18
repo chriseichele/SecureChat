@@ -18,7 +18,7 @@
         	android:id="@+id/error_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/android_red_dark"
+            android:textColor="@color/android_green_dark"
             android:lines="3"
             android:gravity="center"
     		android:layout_marginBottom="20dp" />

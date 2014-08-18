@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Date;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -54,7 +53,7 @@ public class Contact {
 		getContactDetailsFromXML(id);
 	}
 	private void getContactDetailsFromServer(String id) throws ContactNotExistException {
-		// TODO Get Details from Server instead of Dummy Values
+		// TODO Get ContactDetails from Server instead of Dummy Values
 		// public key
 		// public name
 		
@@ -246,17 +245,6 @@ public class Contact {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		/*
-		try {
-        contactList.add(new Contact("1"));
-        contactList.add(new Contact("2"));
-        contactList.add(new Contact("3", "Flo"));
-        contactList.add(new Contact("4", "Martin"));
-        contactList.add(new Contact("5"));
-        contactList.add(new Contact("6", "Vera"));
-		} catch (ContactNotExistException e) {
-			//TODO
-		}*/
 	}
 	public static String getContactName(String id) {
 		//XML Kontaktliste bereits eingelesen?

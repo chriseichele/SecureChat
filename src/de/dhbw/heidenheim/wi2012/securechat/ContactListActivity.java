@@ -57,8 +57,6 @@ public class ContactListActivity extends Activity implements
 			((ContactListFragment) getFragmentManager().findFragmentById(
 					R.id.contact_list)).setActivateOnItemClick(true);
 		}
-
-		// TODO: If exposing deep links into your app, handle intents here.
 	}
 
 	/**

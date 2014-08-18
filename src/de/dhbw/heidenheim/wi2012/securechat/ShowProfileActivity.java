@@ -23,7 +23,16 @@ public class ShowProfileActivity extends Activity {
 			}
 		}
 		
-		((TextView) this.findViewById(R.id.show_id)).setText("ABCDE1234");
-		((TextView) this.findViewById(R.id.show_username)).setText("Mein Benutzername");
+		try {
+			//Userdaten aus XML Datei holen
+			User user = User.getUserFromFile(getApplicationContext());
+		
+			//Userdaten auf Profilseite anzeigen
+			((TextView) this.findViewById(R.id.show_id)).setText(user.getID());
+			((TextView) this.findViewById(R.id.show_username)).setText(user.getName());
+		} catch (ContactNotExistException e) {
+			//Sollte nicht eintreten!
+			((TextView) this.findViewById(R.id.error_message)).setText("Unerwarteter Fehler beim abrufen der Kontaktdaten!");
+		}
 	}
 }

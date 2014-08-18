@@ -25,6 +25,7 @@
     <string name="title_activity_show_profile">My profile</string>
     <string name="message_registered_success">You were registered successfully!
         									\nPlease remember your ID carefully!</string>
+    <string name="message_login_success">You were logged in successfully!</string>
     <string name="message_password_not_identical">The entered passwords are not identical!</string>
     <string name="message_wrong_login">Wrong user ID or password!</string>
     <string name="message_empty_login">Empty user ID or password!</string>

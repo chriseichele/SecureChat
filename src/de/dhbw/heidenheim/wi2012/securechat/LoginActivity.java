@@ -7,6 +7,7 @@ import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Context;
 import android.content.Intent;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.os.Bundle;
@@ -26,6 +27,9 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
 	 * {@link android.support.v13.app.FragmentStatePagerAdapter}.
 	 */
 	SectionsPagerAdapter mSectionsPagerAdapter;
+	
+	private String userfilename;
+	private Context context;
 
 	/**
 	 * The {@link ViewPager} that will host the section contents.
@@ -35,6 +39,23 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		this.context = getApplicationContext();
+		this.userfilename = "user.xml";
+		
+		//Pruefen ob bereits ein Benutzer angemeldet ist
+		if (checkLoggedIn()) {
+			//Login Ansicht ueberspringen und direkt Kontaktliste anzeigen
+
+	    	Intent intent = new Intent(this,ContactListActivity.class);
+	        startActivity(intent);
+	        //Activity beenden, um nicht mehr zurueckkehren zu koennen
+	        finish();
+	        
+		} else {
+		
+		//Login oder Register View anzeigen
+			
 		setContentView(R.layout.activity_login);
 
 		// Set up the action bar.
@@ -69,6 +90,8 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
 			actionBar.addTab(actionBar.newTab()
 					.setText(mSectionsPagerAdapter.getPageTitle(i))
 					.setTabListener(this));
+		}
+		
 		}
 	}
 
@@ -175,19 +198,31 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
     		//Leer? -> Fehlermeldung
     		mSectionsPagerAdapter.getLoginFragment().displayErrorMessage(getString(R.string.message_empty_login));
       	}
-		//Richtige Account Details?
     	else {
-    		boolean valid_user = user_id.equals("admin"); // TODO User mit Datenbank ueberpruefen
-    		if(!valid_user) { 
-	        	//Nein? -> Fehlermeldung
-				mSectionsPagerAdapter.getLoginFragment().displayErrorMessage(getString(R.string.message_wrong_login));
-	        } else {
-		        //Login
-		    	Intent intent = new Intent(this,ContactListActivity.class);
-		        startActivity(intent);
+    		//Richtige Account Details?
+    		
+    		//TODO Passwort hashen
+    		String password_hash = password;
+
+	        //Login
+        	try {
+				doLogin(user_id, password_hash);
+				
+		    	//Nachricht mit uebergeben
+		    	Bundle daten = new Bundle();
+		    	daten.putString("error_message", getString(R.string.message_login_success));
+		    	//Chatliste in Hintergrund oeffnen
+		    	Intent intent1 = new Intent(this,ContactListActivity.class);
+		        startActivity(intent1);
+		        //Profil anzeigen
+		    	Intent intent2 = new Intent(this,ShowProfileActivity.class);
+		    	intent2.putExtras(daten);
+		        startActivity(intent2);
 		        //Activity beenden, um nicht mehr zurueckkehren zu koennen
 		        finish();
-	        }
+        	} catch (ContactNotExistException e) {
+				mSectionsPagerAdapter.getLoginFragment().displayErrorMessage(getString(R.string.message_wrong_login));
+        	}
         }
     }
     
@@ -211,7 +246,11 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
         	//Nein? -> Fehlermeldung
 			mSectionsPagerAdapter.getRegisterFragment().displayErrorMessage(getString(R.string.message_password_not_identical));
         } else {
+        	//TODO Passwort hashen
+    		String password_hash = password1;
+    		
 			//Registrieren
+        	doRegister(user, password_hash);
 			
 	    	//Nachricht mit uebergeben
 	    	Bundle daten = new Bundle();
@@ -226,6 +265,55 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
 	        //Activity beenden, um nicht mehr zurueckkehren zu koennen
 	        finish();
         }
+    }
+    
+    private void doRegister(String username, String password_hash) {
+    	//User neu am Server registrieren und Daten holen
+    	User user = doRegisterOnServer(username, password_hash);
+    	//Userdaten lokal speichern
+    	user.saveToXML(getApplicationContext());
+    }
+    
+    private User doRegisterOnServer(String username, String password_hash) {
+    	//TODO return user ID from Server
+    	String id = "ASDF1234";
+    	//TODO return private Key from Server
+    	String private_key = "1234";
+    	
+    	return new User(id, username, private_key);
+    }
+    
+    private void doLogin(String userID, String password_hash) throws ContactNotExistException {
+    	//Userdaten vom Server holen
+    	User user = doLoginOnServer(userID, password_hash);
+    	//Userdaten lokal ablegen
+    	user.saveToXML(getApplicationContext());
+    }
+    
+    private User doLoginOnServer(String userID, String password_hash) throws ContactNotExistException {
+    	//TODO Contact mit Server ueberpruefen und Kontaktdaten holen
+    	String username = "Dummy";
+    	String private_key = "1234";
+    	//TODO Exception, wenn nicht existent
+    	
+    	if (userID.equals("admin") && password_hash.equals("password")) {
+    		//User Objekt anlegen und zurueckgeben
+        	return new User(userID, username, private_key);
+		} else {
+			throw new ContactNotExistException();
+		}
+    }
+    
+    private boolean checkLoggedIn() {
+    	//Ist ein Benutzer angemeldet?
+    	try {
+    		User.getUserFromFile(getApplicationContext());
+    		//Wenn noch kein Abbruch, dann erfolgreich
+    		return true;
+    	} catch (ContactNotExistException e) {
+    		//Ansonsten nicht angemeldet
+    		return false;
+    	}
     }
 
 }

@@ -22,6 +22,7 @@
     <string name="button_send">Senden</string>
     <string name="button_login">Login</string>
     <string name="button_register">Registrieren</string>
+    <string name="button_proceed">Weiter</string>
     
     <string name="title_activity_contact_list">Kontaktliste</string>
     <string name="title_activity_chat">Chat</string>

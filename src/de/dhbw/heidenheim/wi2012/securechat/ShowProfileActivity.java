@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,6 +27,10 @@ public class ShowProfileActivity extends Activity {
 				String error_message = daten.getString("error_message");
 				if(error_message != null) {
 					((TextView) this.findViewById(R.id.error_message)).setText(error_message);
+				}
+				if(daten.getBoolean("show_button_proceed")) {
+					//Weiter Button anzeigen
+					findViewById(R.id.button_proceed).setVisibility(View.VISIBLE);
 				}
 			}
 		}
@@ -95,5 +100,14 @@ public class ShowProfileActivity extends Activity {
 	            DeleteRecursive(child);
 
 	    fileOrDirectory.delete();
+	}
+
+    /** Called when the user clicks the Continue button */
+	public void continueToContactList(View view) {
+		//Kontaktliste aufrufen
+    	Intent intent = new Intent(this,ContactListActivity.class);
+        startActivity(intent);
+        //Ansicht mit Button schliessen
+        finish();
 	}
 }

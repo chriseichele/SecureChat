@@ -212,6 +212,7 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
 		    	Bundle daten = new Bundle();
 		    	daten.putString("error_message", getString(R.string.message_login_success));
 		    	daten.putBoolean("start_profile_view", true);
+		    	daten.putBoolean("show_button_proceed", true);
 		        //Chatliste anzeigen mit Befehl Profil zu zeigen
 		    	Intent intent = new Intent(this,ContactListActivity.class);
 		    	intent.putExtras(daten);
@@ -254,6 +255,7 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
 	    	Bundle daten = new Bundle();
 	    	daten.putString("error_message", getString(R.string.message_registered_success));
 	    	daten.putBoolean("start_profile_view", true);
+	    	daten.putBoolean("show_button_proceed", true);
 	        //Chatliste anzeigen mit Befehl Profil zu zeigen
 	    	Intent intent = new Intent(this,ShowProfileActivity.class);
 	    	intent.putExtras(daten);

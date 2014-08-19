@@ -58,6 +58,17 @@
     		android:background="@color/white"
     		android:textIsSelectable="true"
         	android:text="" />
+        
+        <Button
+            android:id="@+id/button_proceed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+	        android:onClick="continueToContactList"
+	        android:visibility="gone"
+            android:layout_marginBottom="25dp"
+            android:padding="10dp"
+	        android:textColor="@color/black"
+            android:text="@string/button_proceed" />
 
 	</LinearLayout>
 </ScrollView>

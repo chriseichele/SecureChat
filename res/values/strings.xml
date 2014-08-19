@@ -11,6 +11,8 @@
     <string name="button_login">Login</string>
     <string name="button_register">Register</string>
     <string name="button_addContact">Add contact</string>
+    <string name="button_proceed">Continue</string>
+    
     <string name="edit_message">Enter a message&#8230;</string>
     <string name="label_id">ID</string>
     <string name="label_username">Nickname</string>

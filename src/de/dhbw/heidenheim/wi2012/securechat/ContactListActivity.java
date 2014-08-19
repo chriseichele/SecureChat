@@ -60,13 +60,12 @@ public class ContactListActivity extends Activity implements
 					R.id.contact_list)).setActivateOnItemClick(true);
 		}
 		
+		//Versuche direkt zum Profil zu springen wenn erwuenscht
 		try {
-			if(getIntent().getExtras().getBoolean("show_profile_view") == true) {
+			if(getIntent().getExtras().getBoolean("start_profile_view") == true) {
 		        //Profil anzeigen
-		    	Bundle daten2 = new Bundle();
-		    	daten2.putString("error_message", getIntent().getExtras().getString("error_message"));
 		    	Intent intent2 = new Intent(this,ShowProfileActivity.class);
-		    	intent2.putExtras(daten2);
+		    	intent2.putExtras(getIntent().getExtras());
 	        	startActivityForResult(intent2, REQUEST_EXIT);
 			}
 		} catch (NullPointerException e) {

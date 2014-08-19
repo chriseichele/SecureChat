@@ -7,6 +7,7 @@
     
     <string name="action_addContact">Kontakt hinzufügen</string>
     <string name="action_showProfile">Profil anzeigen</string>
+    <string name="action_logout">Abmelden</string>
     
     <string name="edit_message">Nachricht eingeben&#8230;</string>
     <string name="insert_id">Kontakt ID eintragen&#8230;</string>
@@ -32,6 +33,8 @@
     <string name="message_registered_success">Sie wurden erfolgreich registriert!
         									\nBitte merken sie sich ihre ID!</string>
     <string name="message_login_success">Sie wurden erfolgreich eingeloggt!</string>
+    <string name="message_logout">Bitte merken sie sich ihre ID &amp; Passwort um sich wieder anmelden zu können!
+    						\n\nMöchten sie sich jetzt wirklich abmelden?</string>
     <string name="message_password_not_identical">Die eingegebenen Passwörter stimmen nicht überein!</string>
     <string name="message_wrong_login">Falsche Benutzer ID oder Passwort!</string>
     <string name="message_empty_login">Benutzer ID oder Passwort sind leer!</string>

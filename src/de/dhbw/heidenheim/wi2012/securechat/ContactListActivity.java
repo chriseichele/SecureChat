@@ -28,6 +28,8 @@ public class ContactListActivity extends Activity implements
 
     //Contact Name
 	public final static String CHAT_OPPONENT = "";
+
+	private static final int REQUEST_EXIT = 0;
 	
 	private ChatDetailFragment detailFragment;
 
@@ -56,6 +58,20 @@ public class ContactListActivity extends Activity implements
 			// 'activated' state when touched.
 			((ContactListFragment) getFragmentManager().findFragmentById(
 					R.id.contact_list)).setActivateOnItemClick(true);
+		}
+		
+		try {
+			if(getIntent().getExtras().getBoolean("show_profile_view") == true) {
+		        //Profil anzeigen
+		    	Bundle daten2 = new Bundle();
+		    	daten2.putString("error_message", getIntent().getExtras().getString("error_message"));
+		    	Intent intent2 = new Intent(this,ShowProfileActivity.class);
+		    	intent2.putExtras(daten2);
+	        	startActivityForResult(intent2, REQUEST_EXIT);
+			}
+		} catch (NullPointerException e) {
+			//No Extra Data
+			//Just do Nothing
 		}
 	}
 
@@ -102,7 +118,7 @@ public class ContactListActivity extends Activity implements
 	        case R.id.action_showProfile:
 	            //AddContact
 	        	intent = new Intent(this, ShowProfileActivity.class);
-	            startActivity(intent);
+	        	startActivityForResult(intent, REQUEST_EXIT);
 	            return true;
 	        case R.id.action_addContact:
 	            //AddContact
@@ -112,6 +128,16 @@ public class ContactListActivity extends Activity implements
             default:
                 return super.onOptionsItemSelected(item);
         }
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+	    super.onActivityResult(requestCode, resultCode, data);
+	    if(requestCode == REQUEST_EXIT)
+	    {
+	    	//Finishes Activity if Child is Finished
+	        finish();
+	    }
 	}
     
     /** Called when the user clicks the Send button */

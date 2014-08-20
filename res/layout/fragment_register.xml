@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="de.dhbw.heidenheim.wi2012.securechat.LoginActivity$PlaceholderFragment" >
+    tools:context="de.dhbw.heidenheim.wi2012.securechat.gui.LoginActivity$PlaceholderFragment" >
 
     <TextView
         android:id="@+id/section_label"

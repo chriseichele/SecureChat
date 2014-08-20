@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="de.dhbw.heidenheim.wi2012.securechat.ChatActivity" >
+    tools:context="de.dhbw.heidenheim.wi2012.securechat.gui.ChatActivity" >
         
    <ListView
         android:id="@+id/chatList"

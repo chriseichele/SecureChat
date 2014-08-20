@@ -4,7 +4,7 @@
     android:name="de.dhbw.heidenheim.wi2012.securechat.gui.ContactListFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="de.dhbw.heidenheim.wi2012.securechat.ContactListActivity"
+    tools:context="de.dhbw.heidenheim.wi2012.securechat.gui.ContactListActivity"
     tools:layout="@android:layout/list_content" />
 
 

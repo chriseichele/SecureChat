@@ -21,7 +21,7 @@
 
     <fragment
         android:id="@+id/contact_list"
-        android:name="de.dhbw.heidenheim.wi2012.securechat.gui.ContactListFragmentment"
+        android:name="de.dhbw.heidenheim.wi2012.securechat.gui.ContactListFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="2"

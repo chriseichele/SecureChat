@@ -3,5 +3,5 @@
     android:id="@+id/pager"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="de.dhbw.heidenheim.wi2012.securechat.LoginActivity" />
+    tools:context="de.dhbw.heidenheim.wi2012.securechat.gui.LoginActivity" />
 

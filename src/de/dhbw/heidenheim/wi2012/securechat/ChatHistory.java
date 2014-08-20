@@ -1,14 +1,22 @@
 package de.dhbw.heidenheim.wi2012.securechat;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
 
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
+import javax.crypto.NoSuchPaddingException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -34,6 +42,9 @@ public class ChatHistory {
 	private ArrayList<Message> messages;
 	private Context context;
 	private String filename;
+
+	private static Cipher cipher_enc;
+	private static Cipher cipher_dec;
 	
 	public ChatHistory(String user_id, Context appContext) {
 		this.user_id = user_id;
@@ -47,21 +58,31 @@ public class ChatHistory {
 			//Try File Creation
 			try {
 				
-			    FileOutputStream fos;
-			    fos = context.openFileOutput(this.filename, Context.MODE_PRIVATE);
+				//Encrypt with Cipher
+				if (cipher_enc == null) {
+					cipher_enc = Cipher.getInstance("AES");
+					cipher_enc.init(Cipher.ENCRYPT_MODE, ServerConnector.getFileEncryptionKey());
+				}
+				
+			    FileOutputStream fos = context.openFileOutput(this.filename, Context.MODE_PRIVATE);
+		        BufferedOutputStream bos = new BufferedOutputStream(fos);
+		        CipherOutputStream cos = new CipherOutputStream(bos, cipher_enc);
 		    
 			    XmlSerializer serializer = Xml.newSerializer();
 			    	
-				serializer.setOutput(fos, "UTF-8");
+				serializer.setOutput(cos, "UTF-8");
 			    serializer.startDocument(null, Boolean.valueOf(true));
 			    serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 		        serializer.startTag(null, "root");
 		        serializer.endTag(null, "root");
 			    serializer.endDocument();
 			    serializer.flush();
-			    fos.close();
+			    cos.close();
 			    
-			} catch (IOException e) {
+			} catch (IOException 
+					| InvalidKeyException 
+					| NoSuchAlgorithmException 
+					| NoSuchPaddingException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -75,9 +96,18 @@ public class ChatHistory {
 		//Get Messages for current Chat from XML
 		
 		try {
+			
+			//Decrypt with Cipher
+			if (cipher_dec == null) {
+				cipher_dec = Cipher.getInstance("AES");
+				cipher_dec.init(Cipher.DECRYPT_MODE, ServerConnector.getFileEncryptionKey());
+			}
 	
-			FileInputStream fis = context.openFileInput(this.filename);
-		    InputStreamReader isr = new InputStreamReader(fis);
+		    FileInputStream fis = context.openFileInput(this.filename);
+	        BufferedInputStream bis = new BufferedInputStream(fis);
+	        CipherInputStream cis = new CipherInputStream(bis, cipher_dec);
+	
+		    InputStreamReader isr = new InputStreamReader(cis);
 		    char[] inputBuffer = new char[fis.available()];
 		    isr.read(inputBuffer);
 		    String data = new String(inputBuffer);
@@ -109,7 +139,12 @@ public class ChatHistory {
 			    }
 		    }
 	    
-		} catch (IOException | SAXException | ParserConfigurationException e) {
+		} catch (IOException
+				| InvalidKeyException 
+				| NoSuchAlgorithmException 
+				| NoSuchPaddingException 
+				| SAXException 
+				| ParserConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -125,9 +160,23 @@ public class ChatHistory {
 
 		//Try File Output
 		try {
+			
+			//Decrypt with Cipher
+			if (cipher_dec == null) {
+				cipher_dec = Cipher.getInstance("AES");
+				cipher_dec.init(Cipher.DECRYPT_MODE, ServerConnector.getFileEncryptionKey());
+			}
+			//Encrypt with Cipher
+			if (cipher_enc == null) {
+				cipher_enc = Cipher.getInstance("AES");
+				cipher_enc.init(Cipher.ENCRYPT_MODE, ServerConnector.getFileEncryptionKey());
+			}
 	
 		    FileInputStream fis = context.openFileInput(this.filename);
-		    InputStreamReader isr = new InputStreamReader(fis);
+	        BufferedInputStream bis = new BufferedInputStream(fis);
+	        CipherInputStream cis = new CipherInputStream(bis, cipher_dec);
+	        
+		    InputStreamReader isr = new InputStreamReader(cis);
 		    char[] inputBuffer = new char[fis.available()];
 		    isr.read(inputBuffer);
 		    String data = new String(inputBuffer);
@@ -169,15 +218,25 @@ public class ChatHistory {
 
             Transformer transformer = TransformerFactory.newInstance().newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            
             // initialize StreamResult with File object to save to file
             FileOutputStream fos = context.openFileOutput(this.filename, Context.MODE_PRIVATE);
-            StreamResult result = new StreamResult(fos);
+	        BufferedOutputStream bos = new BufferedOutputStream(fos);
+	        CipherOutputStream cos = new CipherOutputStream(bos, cipher_enc);
+	        
+            StreamResult result = new StreamResult(cos);
             DOMSource source = new DOMSource(dom);
             transformer.transform(source, result);
-            fos.close();
+            cos.close();
 			
 		}
-		catch (TransformerException | IOException | SAXException | ParserConfigurationException e) {
+		catch (TransformerException 
+				| IOException
+				| InvalidKeyException 
+				| NoSuchAlgorithmException 
+				| NoSuchPaddingException  
+				| SAXException 
+				| ParserConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

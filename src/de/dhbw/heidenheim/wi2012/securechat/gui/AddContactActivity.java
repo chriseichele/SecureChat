@@ -1,5 +1,9 @@
-package de.dhbw.heidenheim.wi2012.securechat;
+package de.dhbw.heidenheim.wi2012.securechat.gui;
 
+import de.dhbw.heidenheim.wi2012.securechat.Contact;
+import de.dhbw.heidenheim.wi2012.securechat.R;
+import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactExistException;
+import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;

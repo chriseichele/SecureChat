@@ -1,7 +1,10 @@
-package de.dhbw.heidenheim.wi2012.securechat;
+package de.dhbw.heidenheim.wi2012.securechat.gui;
 
 import java.io.File;
 
+import de.dhbw.heidenheim.wi2012.securechat.R;
+import de.dhbw.heidenheim.wi2012.securechat.User;
+import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -11,7 +14,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class ShowProfileActivity extends Activity {
 

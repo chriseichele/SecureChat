@@ -1,4 +1,4 @@
-package de.dhbw.heidenheim.wi2012.securechat;
+package de.dhbw.heidenheim.wi2012.securechat.exceptions;
 
 public class ContactExistException extends Exception {
 

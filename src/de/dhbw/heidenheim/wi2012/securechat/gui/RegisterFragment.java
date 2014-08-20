@@ -1,5 +1,6 @@
-package de.dhbw.heidenheim.wi2012.securechat;
+package de.dhbw.heidenheim.wi2012.securechat.gui;
 
+import de.dhbw.heidenheim.wi2012.securechat.R;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.text.Editable;

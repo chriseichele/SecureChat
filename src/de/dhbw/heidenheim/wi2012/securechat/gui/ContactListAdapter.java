@@ -1,7 +1,9 @@
-package de.dhbw.heidenheim.wi2012.securechat;
+package de.dhbw.heidenheim.wi2012.securechat.gui;
 
 import java.util.ArrayList;
 
+import de.dhbw.heidenheim.wi2012.securechat.Contact;
+import de.dhbw.heidenheim.wi2012.securechat.R;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;

@@ -1,7 +1,10 @@
-package de.dhbw.heidenheim.wi2012.securechat;
+package de.dhbw.heidenheim.wi2012.securechat.gui;
 
 import java.util.Locale;
 
+import de.dhbw.heidenheim.wi2012.securechat.R;
+import de.dhbw.heidenheim.wi2012.securechat.User;
+import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
 import android.app.Activity;
 import android.app.ActionBar;
 import android.app.Fragment;
@@ -28,7 +31,6 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
 	 */
 	SectionsPagerAdapter mSectionsPagerAdapter;
 	
-	private String userfilename;
 	private Context context;
 
 	/**
@@ -41,7 +43,6 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
 		super.onCreate(savedInstanceState);
 		
 		this.context = getApplicationContext();
-		this.userfilename = "user.xml";
 		
 		//Pruefen ob bereits ein Benutzer angemeldet ist
 		if (checkLoggedIn()) {
@@ -269,7 +270,7 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
     	//User neu am Server registrieren und Daten holen
     	User user = doRegisterOnServer(username, password_hash);
     	//Userdaten lokal speichern
-    	user.saveToXML(getApplicationContext());
+    	user.saveToXML(this.context);
     }
     
     private User doRegisterOnServer(String username, String password_hash) {
@@ -285,7 +286,7 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
     	//Userdaten vom Server holen
     	User user = doLoginOnServer(userID, password_hash);
     	//Userdaten lokal ablegen
-    	user.saveToXML(getApplicationContext());
+    	user.saveToXML(this.context);
     }
     
     private User doLoginOnServer(String userID, String password_hash) throws ContactNotExistException {
@@ -305,7 +306,7 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
     private boolean checkLoggedIn() {
     	//Ist ein Benutzer angemeldet?
     	try {
-    		User.getUserFromFile(getApplicationContext());
+    		User.getUserFromFile(this.context);
     		//Wenn noch kein Abbruch, dann erfolgreich
     		return true;
     	} catch (ContactNotExistException e) {

@@ -6,7 +6,7 @@
     android:divider="?android:attr/dividerHorizontal"
     android:orientation="horizontal"
     android:showDividers="middle"
-    tools:context="de.dhbw.heidenheim.wi2012.securechat.ContactListActivity" >
+    tools:context="de.dhbw.heidenheim.wi2012.securechat.gui.ContactListActivity" >
 
     <!--
     This layout is a two-pane layout for the Contacts
@@ -21,7 +21,7 @@
 
     <fragment
         android:id="@+id/contact_list"
-        android:name="de.dhbw.heidenheim.wi2012.securechat.ContactListFragment"
+        android:name="de.dhbw.heidenheim.wi2012.securechat.gui.ContactListFragmentment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="2"

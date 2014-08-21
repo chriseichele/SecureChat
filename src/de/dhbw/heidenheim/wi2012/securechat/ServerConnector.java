@@ -13,6 +13,19 @@ public class ServerConnector {
 		// TODO Auto-generated constructor stub
 	}
 	
+	public void dummy_connect() {
+		//TODO It's just a Dummy
+		/*
+		
+		WebResource service = Client.create()
+									.resource( "wwi12-01.dhbw-heidenheim.de/SecureChat/webresources" );
+		System.out.println( service.path( "entities." )
+								   .accept( MediaType.TEXT_PLAIN)
+								   .get( String.class ) ); 
+		
+		*/
+	}
+	
 	public static Key getFileEncryptionKey() {
 		
 		//TODO Get Key from Server instead of generating locally. This also solves current Problem with new Key on every new startup

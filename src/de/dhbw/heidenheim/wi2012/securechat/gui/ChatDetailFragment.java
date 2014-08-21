@@ -73,7 +73,7 @@ public class ChatDetailFragment extends Fragment {
 		chatList.setAdapter(adapter);
 		
 		//Zum unteren Ende der Anzeige Springen
-		chatList.setSelection(adapter.getCount() - 1);  
+		scrollChatViewToBottom();
 
 		return rootView;
 	}
@@ -98,5 +98,15 @@ public class ChatDetailFragment extends Fragment {
 		chatHistory.add(m);
 		adapter.notifyDataSetChanged();
 		chatList.setSelection(messages.size()-1);
+	}
+	
+	private void scrollChatViewToBottom() {
+		//Zum unteren Ende der Anzeige scrollen
+		chatList.postDelayed(new Runnable() {
+	        @Override
+	        public void run() {
+	        	chatList.smoothScrollToPosition(chatList.getCount());
+	        }
+	    }, 100);
 	}
 }

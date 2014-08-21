@@ -51,20 +51,15 @@ public class Contact {
 	private static ArrayList<Contact> contactList = new ArrayList<Contact>();
 
 	public Contact(String id, String name) throws ContactNotExistException {
-		this.name = name;
 		this.id = id;
-		getContactDetails(id);
+		this.name = name;
+		getContactDetailsFromServer(id);
 	}
 	public Contact(String id) throws ContactNotExistException {
 		this.id = id;
-		getContactDetails(id);
+		getContactDetailsFromServer(id);
 	}
 
-	public void getContactDetails(String id) throws ContactNotExistException {
-		//fehlende Kontact Details zur ID aus XML oder vom Server holen
-		getContactDetailsFromServer(id);
-		getContactDetailsFromXML(id);
-	}
 	private void getContactDetailsFromServer(String id) throws ContactNotExistException {
 		// TODO Get ContactDetails from Server instead of Dummy Values
 		// public key
@@ -96,9 +91,6 @@ public class Contact {
 			throw new ContactNotExistException();
 		}
 	}
-	private void getContactDetailsFromXML(String id) {
-		
-	}
 	
 	public static void setContext(Context c) {
 		context = c;
@@ -116,13 +108,9 @@ public class Contact {
 	
 	public void addToContactList() throws ContactExistException {
 		contactList.add(this);
-		saveContactDetails();
+		saveContactDetailsToXML();
 	}
 	
-	private void saveContactDetails() throws ContactExistException {
-		saveContactDetailsToXML();
-		saveContactDetailsToServer();
-	}
 	private void saveContactDetailsToXML() throws ContactExistException {
 		//Variablen initialisieren
 		
@@ -245,9 +233,6 @@ public class Contact {
 			}
 		}
 	}
-	private void saveContactDetailsToServer() {
-		
-	}
 	
 	public static ArrayList<Contact> getContacts(Context context) {
 		//Sicherstellen dass AppContext fuer Dateispeicherort gesetzt ist
@@ -295,7 +280,8 @@ public class Contact {
 		    NodeList contact_nodes = root.getChildNodes();
 		    for (int i=1;i<(contact_nodes.getLength()-1);i=i+2) {
 		        //Neue Nachricht an Array ausgeben
-		        contactList.add(new Contact(((Element) contact_nodes.item(i)).getAttribute("id")));
+		        contactList.add(new Contact(((Element) contact_nodes.item(i)).getAttribute("id"),
+		        							((Element) contact_nodes.item(i)).getAttribute("name")));
 		    }
 	    
 		} catch (IOException

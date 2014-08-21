@@ -15,7 +15,8 @@
        	android:background="@color/background"
         android:cacheColorHint="@color/background"
         android:divider="@color/background"
-        android:listSelector="@color/background" >
+        android:listSelector="@color/background"
+        android:transcriptMode="alwaysScroll" >
         	
     </ListView>
 

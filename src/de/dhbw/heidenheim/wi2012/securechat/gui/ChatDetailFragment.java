@@ -71,6 +71,9 @@ public class ChatDetailFragment extends Fragment {
 		adapter = new ChatListAdapter(getActivity(), messages);
 		chatList = (ListView) rootView.findViewById(R.id.chatList);
 		chatList.setAdapter(adapter);
+		
+		//Zum unteren Ende der Anzeige Springen
+		chatList.setSelection(adapter.getCount() - 1);  
 
 		return rootView;
 	}

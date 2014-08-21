@@ -153,6 +153,18 @@ public class ChatHistory {
 		return messages;
 	}
 	
+	public Long getLatestMessageTimestamp() {
+		if(messages == null) {
+			messages = getCurrentMessages();
+		}
+		if(messages != null) {
+			return messages.get(messages.size()).getTimestamp();
+		} else {
+			//Keine Nachricht, Timstamp auf sehr alt
+			return 0L;
+		}
+	}
+	
 	public void add(Message m) {
 		//Add Message to Current List
 		messages.add(m);

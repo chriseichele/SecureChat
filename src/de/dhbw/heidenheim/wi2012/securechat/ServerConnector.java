@@ -1,10 +1,14 @@
 package de.dhbw.heidenheim.wi2012.securechat;
 
+import java.io.IOException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
-import com.sun.jersey.api.client.*;
-import javax.ws.rs.core.MediaType;
 
+import android.util.Log;
+
+import com.sun.jersey.api.client.*;
+
+import javax.ws.rs.core.MediaType;
 import javax.crypto.KeyGenerator;
 
 public class ServerConnector {
@@ -19,11 +23,22 @@ public class ServerConnector {
 		
 		//TODO It's just a Dummy
 		
+		try {
+			
+		Log.d("SecureChat", "Connection test starting...");
+		
 		WebResource service = Client.create()
-									.resource( "wwi12-01.dhbw-heidenheim.de/SecureChat/webresources" );
-		System.out.println( service.path( "entities." )
-								   .accept( MediaType.APPLICATION_JSON)
-								   .get( String.class ) ); 
+								.resource("http://wwi12-01.dhbw-heidenheim.de/SecureChat/webresources");
+		Log.d("SecureChat", service.path("entities.user")
+								.path("2")
+								.accept(MediaType.APPLICATION_XML)
+								.get(String.class));
+
+		Log.d("SecureChat", "Connection test finished.");
+		
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		}
 		
 	}
 	

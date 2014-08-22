@@ -1,9 +1,10 @@
 package de.dhbw.heidenheim.wi2012.securechat;
 
-import java.io.IOException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.ExecutionException;
 
+import android.os.AsyncTask;
 import android.util.Log;
 
 import com.sun.jersey.api.client.*;
@@ -18,21 +19,44 @@ public class ServerConnector {
 	public ServerConnector() {
 		// TODO Auto-generated constructor stub
 	}
+
+	private class RetrieveXMLTask extends AsyncTask<String, Void, String> {
+	    private Exception exception;
+	    protected String doInBackground(String... urls) {
+	        try {
+	
+	    		WebResource service = Client.create().resource(urls[0]);
+	    		//return service.path("").accept(MediaType.APPLICATION_XML).get(String.class);
+	    		return (service.path("entities.user").path("2").accept(MediaType.APPLICATION_XML).get(String.class));
+	            
+	        } catch (Exception e) {
+	            this.exception = e;
+	            return null;
+	        }
+	    }
+	    protected void onPostExecute(String xml) {
+	        // TODO: check this.exception 
+	        // TODO: do something with the feed
+	    	
+
+			Log.d("SecureChat", "URL Call finished.");
+			
+	    	if (this.exception == null) {
+	    		//Daten irgendwo hin Schreiben, sodass sie vom UI Task weiter verarbeitet werden koennen
+	    	} else {
+	    		//Exception behandeln...
+	    	}
+	    }
+	}
 	
 	public void dummy_connect() {
-		
 		//TODO It's just a Dummy
 		
 		try {
 			
 		Log.d("SecureChat", "Connection test starting...");
-		
-		WebResource service = Client.create()
-								.resource("http://wwi12-01.dhbw-heidenheim.de/SecureChat/webresources");
-		Log.d("SecureChat", service.path("entities.user")
-								.path("2")
-								.accept(MediaType.APPLICATION_XML)
-								.get(String.class));
+
+		new RetrieveXMLTask().execute("http://wwi12-01.dhbw-heidenheim.de/SecureChat/webresources");
 
 		Log.d("SecureChat", "Connection test finished.");
 		
@@ -47,7 +71,7 @@ public class ServerConnector {
 		//Testverindung aufbauen
 		new ServerConnector().dummy_connect();
 		
-		//TODO Get Key from Server instead of generating locally. This also solves current Problem with new Key on every new startup
+		//TODO Get Key out of PIN for Local Encryption
 		if(key == null) {
 			KeyGenerator keygen;
 			try {

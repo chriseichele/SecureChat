@@ -2,6 +2,7 @@ package de.dhbw.heidenheim.wi2012.securechat;
 
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
 import android.os.AsyncTask;
@@ -64,6 +65,12 @@ public class ServerConnector {
 			e.printStackTrace();
 		}
 		
+	}
+	
+	public ArrayList<Message> getNewMessages(Long timestampLastMessage, String userID) {
+		//TODO retrieve Messages newer as timestamp for current user id from server
+		//TODO parse Messages as objects
+		return new ArrayList<Message>();
 	}
 	
 	public static Key getFileEncryptionKey() {

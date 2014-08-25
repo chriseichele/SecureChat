@@ -15,35 +15,30 @@ public class Message {
 	/**
 	 * The content of the message
 	 */
-	String message;
+	private String message;
 	/**
 	 * The timestamp of the message
 	 */
-	Date datetime;
+	private Date datetime;
 	/**
 	 * boolean to determine, who is sender of this message
 	 */
-	boolean isMine;
-	String sender;
+	private boolean isMine;
+	private String sender;
+	private String reciever;
 	
 	/**
 	 * Constructor to make a Message object
 	 */
-	public Message(String message, boolean isMine, Date datetime) {
+	public Message(String message, boolean isMine, String sender_id, String reciever_id, Date datetime) {
+		this.sender = sender_id;
+		this.reciever = reciever_id;
 		this.message = message;
 		this.isMine = isMine;
 		this.datetime = datetime;
 	}
-	public Message(String message, boolean isMine) {
-		this(message, isMine, Calendar.getInstance().getTime());
-	}
-	public Message(String message, String sender_id, Date datetime) {
-		this(message, false, datetime);
-		this.sender = sender_id;
-	}
-	public Message(String message, String sender_id) {
-		this(message, false);
-		this.sender = sender_id;
+	public Message(String message, boolean isMine, String sender_id, String reciever_id) {
+		this(message, isMine, sender_id, reciever_id, Calendar.getInstance().getTime());
 	}
 	public String getMessage() {
 		return message;
@@ -67,11 +62,11 @@ public class Message {
 	public boolean isMine() {
 		return isMine;
 	}
-	public void setSender(String s) {
-		this.sender = s;
-	}
 	public String getSender() {
 		return this.sender;
+	}
+	public String getReciever() {
+		return this.reciever;
 	}
 	
 	private boolean isToday(Date datetime) {

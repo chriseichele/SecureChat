@@ -1,6 +1,9 @@
 package de.dhbw.heidenheim.wi2012.securechat.gui;
 
-import de.dhbw.heidenheim.wi2012.securechat.R;
+import java.util.ArrayList;
+
+import de.dhbw.heidenheim.wi2012.securechat.*;
+import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -27,11 +30,11 @@ import android.app.Activity;
 public class ContactListActivity extends Activity implements
 		ContactListFragment.Callbacks {
 
-    //Contact Name
+	// Contact Name
 	public final static String CHAT_OPPONENT = "";
 
 	private static final int REQUEST_EXIT = 0;
-	
+
 	private ChatDetailFragment detailFragment;
 
 	/**
@@ -40,38 +43,83 @@ public class ContactListActivity extends Activity implements
 	 */
 	private boolean mTwoPane;
 
+	private MessageUpdater messageUpdater;
+
+	private String currentUserID;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_contact_list);
 
-		if (findViewById(R.id.contact_detail_container) != null) {
-			// The detail container view will be present only in the
-			// large-screen layouts (res/values-large and
-			// res/values-sw600dp). If this view is present, then the
-			// activity should be in two-pane mode.
-			mTwoPane = true;
-			
-			//App name als Titel zeigen
-			this.setTitle(getResources().getString(R.string.app_name));
-
-			// In two-pane mode, list items should be given the
-			// 'activated' state when touched.
-			((ContactListFragment) getFragmentManager().findFragmentById(
-					R.id.contact_list)).setActivateOnItemClick(true);
-		}
-		
-		//Versuche direkt zum Profil zu springen wenn erwuenscht
+		// getCurrentUserID
 		try {
-			if(getIntent().getExtras().getBoolean("start_profile_view") == true) {
-		        //Profil anzeigen
-		    	Intent intent2 = new Intent(this,ShowProfileActivity.class);
-		    	intent2.putExtras(getIntent().getExtras());
-	        	startActivityForResult(intent2, REQUEST_EXIT);
+			currentUserID = Self.getUserFromFile(getApplicationContext()).getID();
+
+			// Starte Service um neue Nachrichten zu holen
+			messageUpdater = new MessageUpdater(new Runnable() {
+				@Override
+				public void run() {
+					//Definiere Run() Methode des Message Updaters
+
+					Long last_sync = ChatHistory.getLatestSynchronizeTimestamp(getApplicationContext());
+					
+					ArrayList<Message> messages = new ServerConnector().getNewMessages(
+							last_sync,
+							currentUserID);
+
+					// Nachrichten verarbeiten
+					for(int i=0;i<messages.size();i++) {
+						// durchgehen und je nach Sender in passende Chat History schreiben
+						Message m = messages.get(i);
+						ChatHistory ch = new ChatHistory(m.getSender(), getApplicationContext());
+						ch.add(m);
+						//Nachricht neuer? -> Timestamp aktualisieren
+						if (m.getTimestamp() > last_sync) {
+							last_sync = m.getTimestamp();
+						}
+					}
+					// LatestSyncTimestamp auf Wert von letzter Nachricht setzen
+					ChatHistory.setLatestSynchronizeTimestamp(getApplicationContext(), last_sync);
+				}
+			});
+
+			if (findViewById(R.id.contact_detail_container) != null) {
+				// The detail container view will be present only in the
+				// large-screen layouts (res/values-large and
+				// res/values-sw600dp). If this view is present, then the
+				// activity should be in two-pane mode.
+				mTwoPane = true;
+
+				// App name als Titel zeigen
+				this.setTitle(getResources().getString(R.string.app_name));
+
+				// In two-pane mode, list items should be given the
+				// 'activated' state when touched.
+				((ContactListFragment) getFragmentManager().findFragmentById(
+						R.id.contact_list)).setActivateOnItemClick(true);
 			}
-		} catch (NullPointerException e) {
-			//No Extra Data
-			//Just do Nothing
+
+			// Versuche direkt zum Profil zu springen wenn erwuenscht
+			try {
+				if (getIntent().getExtras().getBoolean("start_profile_view") == true) {
+					// Profil anzeigen
+					Intent intent2 = new Intent(this, ShowProfileActivity.class);
+					intent2.putExtras(getIntent().getExtras());
+					startActivityForResult(intent2, REQUEST_EXIT);
+				}
+			} catch (NullPointerException e) {
+				// No Extra Data
+				// Just do Nothing
+			}
+
+		} catch (ContactNotExistException e) {
+			// Fall Sollte eigentlich nicht auftreten
+			// In Kontaktliste Ansicht, aber kein User eingeloggt
+			// Zurueck zur Login Seite
+			Intent intent = new Intent(this, LoginActivity.class);
+			startActivity(intent);
+			finish();
 		}
 	}
 
@@ -89,8 +137,10 @@ public class ContactListActivity extends Activity implements
 			arguments.putString(ChatDetailFragment.CHAT_OPPONENT, id);
 			this.detailFragment = new ChatDetailFragment();
 			this.detailFragment.setArguments(arguments);
-			getFragmentManager().beginTransaction()
-					.replace(R.id.contact_detail_container, this.detailFragment).commit();
+			getFragmentManager()
+					.beginTransaction()
+					.replace(R.id.contact_detail_container, this.detailFragment)
+					.commit();
 
 		} else {
 			// In single-pane mode, simply start the detail activity
@@ -100,7 +150,7 @@ public class ContactListActivity extends Activity implements
 			startActivity(detailIntent);
 		}
 	}
-	
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -114,36 +164,35 @@ public class ContactListActivity extends Activity implements
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
 		Intent intent;
-        switch (item.getItemId()) {
-	        case R.id.action_showProfile:
-	            //AddContact
-	        	intent = new Intent(this, ShowProfileActivity.class);
-	        	startActivityForResult(intent, REQUEST_EXIT);
-	            return true;
-	        case R.id.action_addContact:
-	            //AddContact
-	        	intent = new Intent(this, AddContactActivity.class);
-	            startActivity(intent);
-	            return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
+		switch (item.getItemId()) {
+		case R.id.action_showProfile:
+			// AddContact
+			intent = new Intent(this, ShowProfileActivity.class);
+			startActivityForResult(intent, REQUEST_EXIT);
+			return true;
+		case R.id.action_addContact:
+			// AddContact
+			intent = new Intent(this, AddContactActivity.class);
+			startActivity(intent);
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
-	
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-	    super.onActivityResult(requestCode, resultCode, data);
-	    if(requestCode == REQUEST_EXIT)
-	    {
-	    	//Finishes Activity if Child is Finished
-	        finish();
-	    }
+		super.onActivityResult(requestCode, resultCode, data);
+		if (requestCode == REQUEST_EXIT) {
+			// Finishes Activity if Child is Finished
+			finish();
+		}
 	}
-    
-    /** Called when the user clicks the Send button */
-    public void sendMessage(View view) {
+
+	/** Called when the user clicks the Send button */
+	public void sendMessage(View view) {
 		if (mTwoPane) {
 			this.detailFragment.sendMessage(view);
 		}
-    }
+	}
 }

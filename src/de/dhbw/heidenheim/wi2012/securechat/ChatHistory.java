@@ -40,15 +40,18 @@ public class ChatHistory {
 
 	private String user_id;
 	private ArrayList<Message> messages;
-	private Context context;
 	private String filename;
+	
+	private static final String filename_last_sync = "sync.xml";
+
+	private static Context context;
 
 	private static Cipher cipher_enc;
 	private static Cipher cipher_dec;
 	
 	public ChatHistory(String user_id, Context appContext) {
+		context = appContext;
 		this.user_id = user_id;
-		this.context = appContext;
 		this.messages = new ArrayList<Message>();
 		this.filename = "chatHistory-"+user_id+".xml";
 		
@@ -158,7 +161,16 @@ public class ChatHistory {
 			messages = getCurrentMessages();
 		}
 		if(messages != null) {
-			return messages.get(messages.size()).getTimestamp();
+			Message m;
+			int i = 0;
+			Long timestamp = 0L;
+			//Timestamp der letzten empfangenen Nachricht holen
+			do {
+				m = messages.get(messages.size()-i);
+				timestamp = m.getTimestamp();
+				i++;
+			} while (m.isMine() && messages.size() >= i );
+			return timestamp;
 		} else {
 			//Keine Nachricht, Timstamp auf sehr alt
 			return 0L;
@@ -166,6 +178,8 @@ public class ChatHistory {
 	}
 	
 	public void add(Message m) {
+		//TODO Add Message to Server, if successful, add locally
+		
 		//Add Message to Current List
 		messages.add(m);
 		//Add Message to XML
@@ -253,5 +267,95 @@ public class ChatHistory {
 			e.printStackTrace();
 		}
 		
+	}
+	
+	public static Long getLatestSynchronizeTimestamp(Context c) {
+		context = c;
+		Long return_value = 0L;
+		
+		//Read Timestamp from File
+		try {
+			
+			//Decrypt with Cipher
+			if (cipher_dec == null) {
+				cipher_dec = Cipher.getInstance("AES");
+				cipher_dec.init(Cipher.DECRYPT_MODE, ServerConnector.getFileEncryptionKey());
+			}
+	
+		    FileInputStream fis = context.openFileInput(filename_last_sync);
+	        BufferedInputStream bis = new BufferedInputStream(fis);
+	        CipherInputStream cis = new CipherInputStream(bis, cipher_dec);
+	        
+		    InputStreamReader isr = new InputStreamReader(cis);
+		    char[] inputBuffer = new char[fis.available()];
+		    isr.read(inputBuffer);
+		    String data = new String(inputBuffer);
+		    isr.close();
+		    fis.close();
+	
+		    /*
+		     * converting the String data to XML format
+		     * so that the DOM parser understand it as an XML input.
+		     */
+		    InputStream is = new ByteArrayInputStream(data.getBytes("UTF-8"));
+
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		    DocumentBuilder db = dbf.newDocumentBuilder();
+		    Document dom = db.parse(is);
+		    Element root = dom.getDocumentElement();
+		    
+            //Timestamp lesen und in Returnvariable schreiben
+		    return_value = Long.parseLong(root.getAttribute("timestamp"));
+			
+		}
+		catch (IOException
+				| InvalidKeyException 
+				| NoSuchAlgorithmException 
+				| NoSuchPaddingException  
+				| SAXException 
+				| ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return return_value;
+	}
+	public static void setLatestSynchronizeTimestamp(Context c, Long timestamp) {
+		context = c;
+		//Write Timestamp into File
+		
+		//Try File Output
+				try {
+					
+					//Encrypt with Cipher
+					if (cipher_enc == null) {
+						cipher_enc = Cipher.getInstance("AES");
+						cipher_enc.init(Cipher.ENCRYPT_MODE, ServerConnector.getFileEncryptionKey());
+					}
+					
+					FileOutputStream fos = context.openFileOutput(filename_last_sync, Context.MODE_PRIVATE);
+			        BufferedOutputStream bos = new BufferedOutputStream(fos);
+			        CipherOutputStream cos = new CipherOutputStream(bos, cipher_enc);
+			    
+				    XmlSerializer serializer = Xml.newSerializer();
+				    	
+					serializer.setOutput(cos, "UTF-8");
+				    serializer.startDocument(null, Boolean.valueOf(true));
+				    serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
+			        serializer.startTag(null, "sync");
+			        serializer.attribute(null, "timestamp", timestamp+"");
+			        serializer.endTag(null, "sync");
+				    serializer.endDocument();
+				    serializer.flush();
+				    cos.close();
+				    
+				} catch (IOException
+						| InvalidKeyException 
+						| NoSuchAlgorithmException 
+						| NoSuchPaddingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+					
 	}
 }

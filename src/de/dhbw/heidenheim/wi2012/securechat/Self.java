@@ -28,7 +28,7 @@ import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
 import android.content.Context;
 import android.util.Xml;
 
-public class User {
+public class Self {
 	
 	private String id;
 	private String name;
@@ -40,7 +40,7 @@ public class User {
 	private static Cipher cipher_enc;
 	private static Cipher cipher_dec;
 
-	public User(String id, String name, String private_key) {
+	public Self(String id, String name, String private_key) {
 		this.id = id;
 		this.name = name;
 		this.private_key = private_key;
@@ -98,7 +98,7 @@ public class User {
 		}
 	}
 	
-	public static User getUserFromFile(Context c) throws ContactNotExistException {
+	public static Self getUserFromFile(Context c) throws ContactNotExistException {
 		//AppContext zwischenspeichern
 		context = c;
 		//Versuche Userdatei zu lesen
@@ -140,7 +140,7 @@ public class User {
 				    String private_key = root.getAttribute("private_key");
 				    
 					//User Objekt anlegen und zurueckgeben
-					return new User(id, username, private_key);
+					return new Self(id, username, private_key);
 			    
 				} catch (IOException
 						| InvalidKeyException 

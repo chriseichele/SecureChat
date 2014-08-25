@@ -3,7 +3,7 @@ package de.dhbw.heidenheim.wi2012.securechat.gui;
 import java.util.Locale;
 
 import de.dhbw.heidenheim.wi2012.securechat.R;
-import de.dhbw.heidenheim.wi2012.securechat.User;
+import de.dhbw.heidenheim.wi2012.securechat.Self;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
 import android.app.Activity;
 import android.app.ActionBar;
@@ -268,28 +268,28 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
     
     private void doRegister(String username, String password_hash) {
     	//User neu am Server registrieren und Daten holen
-    	User user = doRegisterOnServer(username, password_hash);
+    	Self user = doRegisterOnServer(username, password_hash);
     	//Userdaten lokal speichern
     	user.saveToXML(this.context);
     }
     
-    private User doRegisterOnServer(String username, String password_hash) {
+    private Self doRegisterOnServer(String username, String password_hash) {
     	//TODO return user ID from Server
     	String id = "ASDF1234";
     	//TODO return private Key from Server
     	String private_key = "1234";
     	
-    	return new User(id, username, private_key);
+    	return new Self(id, username, private_key);
     }
     
     private void doLogin(String userID, String password_hash) throws ContactNotExistException {
     	//Userdaten vom Server holen
-    	User user = doLoginOnServer(userID, password_hash);
+    	Self user = doLoginOnServer(userID, password_hash);
     	//Userdaten lokal ablegen
     	user.saveToXML(this.context);
     }
     
-    private User doLoginOnServer(String userID, String password_hash) throws ContactNotExistException {
+    private Self doLoginOnServer(String userID, String password_hash) throws ContactNotExistException {
     	//TODO Contact mit Server ueberpruefen und Kontaktdaten holen
     	String username = "Dummy";
     	String private_key = "1234";
@@ -297,7 +297,7 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
     	
     	if (userID.equals("admin") && password_hash.equals("password")) {
     		//User Objekt anlegen und zurueckgeben
-        	return new User(userID, username, private_key);
+        	return new Self(userID, username, private_key);
 		} else {
 			throw new ContactNotExistException();
 		}
@@ -306,7 +306,7 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
     private boolean checkLoggedIn() {
     	//Ist ein Benutzer angemeldet?
     	try {
-    		User.getUserFromFile(this.context);
+    		Self.getUserFromFile(this.context);
     		//Wenn noch kein Abbruch, dann erfolgreich
     		return true;
     	} catch (ContactNotExistException e) {

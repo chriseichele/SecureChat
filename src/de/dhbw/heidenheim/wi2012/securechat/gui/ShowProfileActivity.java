@@ -3,7 +3,7 @@ package de.dhbw.heidenheim.wi2012.securechat.gui;
 import java.io.File;
 
 import de.dhbw.heidenheim.wi2012.securechat.R;
-import de.dhbw.heidenheim.wi2012.securechat.User;
+import de.dhbw.heidenheim.wi2012.securechat.Self;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -39,7 +39,7 @@ public class ShowProfileActivity extends Activity {
 		
 		try {
 			//Userdaten aus XML Datei holen
-			User user = User.getUserFromFile(getApplicationContext());
+			Self user = Self.getUserFromFile(getApplicationContext());
 		
 			//Userdaten auf Profilseite anzeigen
 			((TextView) this.findViewById(R.id.show_id)).setText(user.getID());

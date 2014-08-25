@@ -24,22 +24,26 @@ public class Message {
 	 * boolean to determine, who is sender of this message
 	 */
 	boolean isMine;
+	String sender;
 	
 	/**
 	 * Constructor to make a Message object
 	 */
 	public Message(String message, boolean isMine, Date datetime) {
-		super();
 		this.message = message;
 		this.isMine = isMine;
 		this.datetime = datetime;
 	}
 	public Message(String message, boolean isMine) {
-		super();
-		this.message = message;
-		this.isMine = isMine;
-		Calendar cal = Calendar.getInstance();
-		datetime = cal.getTime();
+		this(message, isMine, Calendar.getInstance().getTime());
+	}
+	public Message(String message, String sender_id, Date datetime) {
+		this(message, false, datetime);
+		this.sender = sender_id;
+	}
+	public Message(String message, String sender_id) {
+		this(message, false);
+		this.sender = sender_id;
 	}
 	public String getMessage() {
 		return message;
@@ -60,14 +64,14 @@ public class Message {
 		//return Datum/Zeit der Nachricht formatiert als String
 		return dateFormat.format(this.datetime);
 	}
-	public void setMessage(String message) {
-		this.message = message;
-	}
 	public boolean isMine() {
 		return isMine;
 	}
-	public void setMine(boolean isMine) {
-		this.isMine = isMine;
+	public void setSender(String s) {
+		this.sender = s;
+	}
+	public String getSender() {
+		return this.sender;
 	}
 	
 	private boolean isToday(Date datetime) {

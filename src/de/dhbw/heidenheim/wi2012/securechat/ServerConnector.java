@@ -3,7 +3,6 @@ package de.dhbw.heidenheim.wi2012.securechat;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
 
 import android.os.AsyncTask;
 import android.util.Log;
@@ -13,12 +12,30 @@ import com.sun.jersey.api.client.*;
 import javax.ws.rs.core.MediaType;
 import javax.crypto.KeyGenerator;
 
+import entities.*;
+
 public class ServerConnector {
 	
 	private static Key key;
 
 	public ServerConnector() {
 		// TODO Auto-generated constructor stub
+	}
+	
+	public void testConnect (){
+		 User user = new User();
+	        //user.setPasswordHash("PASSWORT-HASH5");
+	        //user.setPrivateKey("PRIVATE_KEY");
+	        user.setId("80"); // muss gesetzt sein, da PK.
+	 
+	        WebResource service = Client.create().resource("http://wwi12-01.dhbw-heidenheim.de/SecureChat/webresources");
+	 
+	        user = service.path("entities.user").path("2").accept(MediaType.APPLICATION_XML).get(User.class);
+	        Log.d("userdata", "id: " + user.getId() + " pw: " + user.getPasswordHash() + " key: " + user.getPrivateKey());
+	        user.setPasswordHash("TEST");
+	        Log.d("userdata",service.path("entities.user").path("2").type(MediaType.APPLICATION_XML).put(String.class, user));
+	        Log.d("userdata","id: " + user.getId() + " pw: " + user.getPasswordHash() + " key: " + user.getPrivateKey());
+		
 	}
 
 	private class RetrieveXMLTask extends AsyncTask<String, Void, String> {

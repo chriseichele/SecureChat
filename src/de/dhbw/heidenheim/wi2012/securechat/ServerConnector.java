@@ -13,6 +13,11 @@ import javax.ws.rs.core.MediaType;
 import javax.crypto.KeyGenerator;
 
 import entities.*;
+//entities.Userloginserver
+//entities.Usermessageserver
+//entities.Message
+//entities.MessagePK
+//entities.Keystore
 
 public class ServerConnector {
 	
@@ -21,16 +26,16 @@ public class ServerConnector {
 	public ServerConnector() {
 		// TODO Auto-generated constructor stub
 	}
-	
+
 	public void testConnect (){
-		 User user = new User();
+		 Userloginserver user = new Userloginserver();
 	        //user.setPasswordHash("PASSWORT-HASH5");
 	        //user.setPrivateKey("PRIVATE_KEY");
-	        user.setId("80"); // muss gesetzt sein, da PK.
+	        user.setId(80); // muss gesetzt sein, da PK.
 	 
 	        WebResource service = Client.create().resource("http://wwi12-01.dhbw-heidenheim.de/SecureChat/webresources");
 	 
-	        user = service.path("entities.user").path("2").accept(MediaType.APPLICATION_XML).get(User.class);
+	        user = service.path("entities.user").path("2").accept(MediaType.APPLICATION_XML).get(Userloginserver.class);
 	        Log.d("userdata", "id: " + user.getId() + " pw: " + user.getPasswordHash() + " key: " + user.getPrivateKey());
 	        user.setPasswordHash("TEST");
 	        Log.d("userdata",service.path("entities.user").path("2").type(MediaType.APPLICATION_XML).put(String.class, user));
@@ -83,7 +88,7 @@ public class ServerConnector {
 		}
 		
 	}
-	
+
 	public ArrayList<Message> getNewMessages(Long timestampLastMessage, String userID) {
 		//TODO retrieve Messages newer as timestamp for current user id from server
 		//TODO parse Messages as objects
@@ -93,7 +98,7 @@ public class ServerConnector {
 	public static Key getFileEncryptionKey() {
 		
 		//Testverindung aufbauen
-		new ServerConnector().dummy_connect();
+		//new ServerConnector().dummy_connect();
 		
 		//TODO Get Key out of PIN for Local Encryption
 		if(key == null) {

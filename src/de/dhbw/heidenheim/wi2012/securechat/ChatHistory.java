@@ -313,9 +313,11 @@ public class ChatHistory {
 
 			byte[] encodedKey = Base64.decode(pks, Base64.DEFAULT);
 			Key key = new SecretKeySpec(encodedKey,0,encodedKey.length, "AES"); 
-			
+
+			String inhalt = m.getMessage();
 			//TODO Encrypt Message Content with public Key
 			//TODO Sign Message Content with own private Key
+			m.setMessage(inhalt);
 
 		} catch(ContactNotExistException e) {
 			//Should not happen
@@ -338,8 +340,10 @@ public class ChatHistory {
 			byte[] encodedKey = Base64.decode(pks, Base64.DEFAULT);
 			Key key = new SecretKeySpec(encodedKey,0,encodedKey.length, "AES"); 
 
+			String inhalt = m.getMessage();
 			//TODO Check Signed Content
 			//TODO Decrypt Message Content with public Key
+			m.setMessage(inhalt);
 
 		} catch(ContactNotExistException e) {
 			//Should not happen

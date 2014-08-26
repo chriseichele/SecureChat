@@ -43,6 +43,9 @@ public class Message {
 	public String getMessage() {
 		return message;
 	}
+	public void setMessage(String s) {
+		this.message = s;
+	}
 	public long getTimestamp() {
 		return this.datetime.getTime();
 	}

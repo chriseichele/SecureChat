@@ -2,8 +2,10 @@ package de.dhbw.heidenheim.wi2012.securechat.gui;
 
 import java.io.File;
 
+import de.dhbw.heidenheim.wi2012.securechat.GlobalHelper;
 import de.dhbw.heidenheim.wi2012.securechat.R;
 import de.dhbw.heidenheim.wi2012.securechat.Self;
+import de.dhbw.heidenheim.wi2012.securechat.exceptions.ConnectionFailedException;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -46,7 +48,11 @@ public class ShowProfileActivity extends Activity {
 			((TextView) this.findViewById(R.id.show_username)).setText(user.getName());
 		} catch (ContactNotExistException e) {
 			//Sollte nicht eintreten!
-			((TextView) this.findViewById(R.id.error_message)).setText("Unerwarteter Fehler beim abrufen der Kontaktdaten!");
+			GlobalHelper.displayToast_ContactNotExist(getApplicationContext());
+			finish();
+		} catch (ConnectionFailedException e) {
+			GlobalHelper.displayToast_ConnectionFailed(getApplicationContext());
+			finish();
 		}
 	}
 	

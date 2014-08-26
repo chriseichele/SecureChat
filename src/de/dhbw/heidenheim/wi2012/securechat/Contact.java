@@ -32,6 +32,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import org.xmlpull.v1.XmlSerializer;
 
+import de.dhbw.heidenheim.wi2012.securechat.exceptions.ConnectionFailedException;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactExistException;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
 import android.content.Context;
@@ -148,7 +149,8 @@ public class Contact {
 			} catch (IOException
 					| InvalidKeyException 
 					| NoSuchAlgorithmException 
-					| NoSuchPaddingException e) {
+					| NoSuchPaddingException
+					| ConnectionFailedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -227,7 +229,8 @@ public class Contact {
 					| NoSuchPaddingException 
 					| IOException 
 					| SAXException 
-					| ParserConfigurationException e) {
+					| ParserConfigurationException
+					| ConnectionFailedException  e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -290,7 +293,8 @@ public class Contact {
 				| NoSuchPaddingException 
 				| SAXException 
 				| ParserConfigurationException 
-				| ContactNotExistException e) {
+				| ContactNotExistException
+				| ConnectionFailedException  e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

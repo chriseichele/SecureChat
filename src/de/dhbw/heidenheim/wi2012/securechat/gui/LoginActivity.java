@@ -2,8 +2,10 @@ package de.dhbw.heidenheim.wi2012.securechat.gui;
 
 import java.util.Locale;
 
+import de.dhbw.heidenheim.wi2012.securechat.GlobalHelper;
 import de.dhbw.heidenheim.wi2012.securechat.R;
 import de.dhbw.heidenheim.wi2012.securechat.Self;
+import de.dhbw.heidenheim.wi2012.securechat.exceptions.ConnectionFailedException;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
 import android.app.Activity;
 import android.app.ActionBar;
@@ -19,6 +21,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class LoginActivity extends Activity implements ActionBar.TabListener {
 
@@ -44,16 +47,20 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
 		
 		this.context = getApplicationContext();
 		
-		//Pruefen ob bereits ein Benutzer angemeldet ist
-		if (checkLoggedIn()) {
-			//Login Ansicht ueberspringen und direkt Kontaktliste anzeigen
-
-	    	Intent intent = new Intent(this,ContactListActivity.class);
-	        startActivity(intent);
-	        //Activity beenden, um nicht mehr zurueckkehren zu koennen
-	        finish();
-	        
-		} else {
+		try {
+			//Pruefen ob bereits ein Benutzer angemeldet ist
+			if (checkLoggedIn()) {
+				//Login Ansicht ueberspringen und direkt Kontaktliste anzeigen
+	
+		    	Intent intent = new Intent(this,ContactListActivity.class);
+		        startActivity(intent);
+		        //Activity beenden, um nicht mehr zurueckkehren zu koennen
+		        finish();
+		        
+			}
+		} catch (ConnectionFailedException e) {
+			GlobalHelper.displayToast_ConnectionFailed(context);
+		}
 		
 		//Login oder Register View anzeigen
 			
@@ -93,7 +100,6 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
 					.setTabListener(this));
 		}
 		
-		}
 	}
 
 	@Override
@@ -222,6 +228,8 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
 		        finish();
         	} catch (ContactNotExistException e) {
 				mSectionsPagerAdapter.getLoginFragment().displayErrorMessage(getString(R.string.message_wrong_login));
+        	} catch (ConnectionFailedException e) {
+        		GlobalHelper.displayToast_ConnectionFailed(getApplicationContext());
         	}
         }
     }
@@ -249,31 +257,36 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
         	//TODO Passwort hashen
     		String password_hash = password1;
     		
-			//Registrieren
-        	doRegister(user, password_hash);
-			
-	    	//Nachricht mit uebergeben
-	    	Bundle daten = new Bundle();
-	    	daten.putString("error_message", getString(R.string.message_registered_success));
-	    	daten.putBoolean("start_profile_view", true);
-	    	daten.putBoolean("show_button_proceed", true);
-	        //Chatliste anzeigen mit Befehl Profil zu zeigen
-	    	Intent intent = new Intent(this,ShowProfileActivity.class);
-	    	intent.putExtras(daten);
-	        startActivity(intent);
-	        //Activity beenden, um nicht mehr zurueckkehren zu koennen
-	        finish();
+    		try {
+				//Registrieren
+	        	doRegister(user, password_hash);
+				
+		    	//Nachricht mit uebergeben
+		    	Bundle daten = new Bundle();
+		    	daten.putString("error_message", getString(R.string.message_registered_success));
+		    	daten.putBoolean("start_profile_view", true);
+		    	daten.putBoolean("show_button_proceed", true);
+		        //Chatliste anzeigen mit Befehl Profil zu zeigen
+		    	Intent intent = new Intent(this,ShowProfileActivity.class);
+		    	intent.putExtras(daten);
+		        startActivity(intent);
+		        //Activity beenden, um nicht mehr zurueckkehren zu koennen
+		        finish();
+		        
+    		} catch (ConnectionFailedException e) {
+        		GlobalHelper.displayToast_ConnectionFailed(getApplicationContext());
+    		}
         }
     }
     
-    private void doRegister(String username, String password_hash) {
+    private void doRegister(String username, String password_hash) throws ConnectionFailedException {
     	//User neu am Server registrieren und Daten holen
     	Self user = doRegisterOnServer(username, password_hash);
     	//Userdaten lokal speichern
     	user.saveToXML(this.context);
     }
     
-    private Self doRegisterOnServer(String username, String password_hash) {
+    private Self doRegisterOnServer(String username, String password_hash) throws ConnectionFailedException {
     	//TODO return user ID from Server
     	String id = "ASDF1234";
     	//TODO return private Key from Server
@@ -282,14 +295,14 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
     	return new Self(id, username, private_key);
     }
     
-    private void doLogin(String userID, String password_hash) throws ContactNotExistException {
+    private void doLogin(String userID, String password_hash) throws ContactNotExistException, ConnectionFailedException {
     	//Userdaten vom Server holen
     	Self user = doLoginOnServer(userID, password_hash);
     	//Userdaten lokal ablegen
     	user.saveToXML(this.context);
     }
     
-    private Self doLoginOnServer(String userID, String password_hash) throws ContactNotExistException {
+    private Self doLoginOnServer(String userID, String password_hash) throws ContactNotExistException, ConnectionFailedException {
     	//TODO Contact mit Server ueberpruefen und Kontaktdaten holen
     	String username = "Dummy";
     	String private_key = "1234";
@@ -303,7 +316,7 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
 		}
     }
     
-    private boolean checkLoggedIn() {
+    private boolean checkLoggedIn() throws ConnectionFailedException {
     	//Ist ein Benutzer angemeldet?
     	try {
     		Self.getUserFromFile(this.context);

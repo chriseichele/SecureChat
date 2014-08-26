@@ -31,6 +31,10 @@
     <string name="title_section2">Registrieren</string>
     <string name="title_activity_show_profile">Mein Profil</string>
     
+    <string name="message_connection_failed">Der Server konnte nicht erreicht werden. 
+        					\nBitte überprüfen sie ihre Internetverbindung und versuchen sie es erneut!</string>
+    <string name="message_contact_not_exist">Fehler beim Abrufen der Kontaktdaten!</string>
+    
     <string name="message_registered_success">Sie wurden erfolgreich registriert!
         									\nBitte merken sie sich ihre ID!</string>
     <string name="message_login_success">Sie wurden erfolgreich eingeloggt!</string>

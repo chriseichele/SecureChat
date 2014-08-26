@@ -24,6 +24,7 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 import org.xmlpull.v1.XmlSerializer;
 
+import de.dhbw.heidenheim.wi2012.securechat.exceptions.ConnectionFailedException;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
 import android.content.Context;
 import android.util.Xml;
@@ -92,13 +93,14 @@ public class Self {
 		} catch (IOException
 				| InvalidKeyException 
 				| NoSuchAlgorithmException 
-				| NoSuchPaddingException e) {
+				| NoSuchPaddingException
+				| ConnectionFailedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
-	public static Self getUserFromFile(Context c) throws ContactNotExistException {
+	public static Self getUserFromFile(Context c) throws ContactNotExistException, ConnectionFailedException {
 		//AppContext zwischenspeichern
 		context = c;
 		//Versuche Userdatei zu lesen

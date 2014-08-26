@@ -3,9 +3,11 @@ package de.dhbw.heidenheim.wi2012.securechat.gui;
 import java.util.ArrayList;
 
 import de.dhbw.heidenheim.wi2012.securechat.ChatHistory;
+import de.dhbw.heidenheim.wi2012.securechat.GlobalHelper;
 import de.dhbw.heidenheim.wi2012.securechat.Message;
 import de.dhbw.heidenheim.wi2012.securechat.R;
 import de.dhbw.heidenheim.wi2012.securechat.Self;
+import de.dhbw.heidenheim.wi2012.securechat.exceptions.ConnectionFailedException;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -89,6 +91,12 @@ public class ChatDetailFragment extends Fragment {
 		} catch (ContactNotExistException e) {
 			// Fall Sollte eigentlich nicht auftreten
 			// In Kontaktliste Ansicht, aber kein User eingeloggt
+			// Zurueck zur Login Seite
+			Intent intent = new Intent(getActivity(), LoginActivity.class);
+			startActivity(intent);
+			getActivity().finish();
+		} catch (ConnectionFailedException e) {
+			GlobalHelper.displayToast_ConnectionFailed(getActivity().getApplicationContext());
 			// Zurueck zur Login Seite
 			Intent intent = new Intent(getActivity(), LoginActivity.class);
 			startActivity(intent);

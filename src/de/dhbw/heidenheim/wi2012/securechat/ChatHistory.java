@@ -35,6 +35,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import org.xmlpull.v1.XmlSerializer;
 
+import de.dhbw.heidenheim.wi2012.securechat.exceptions.ConnectionFailedException;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.EncryptionErrorException;
 import android.content.Context;
@@ -90,7 +91,8 @@ public class ChatHistory {
 			} catch (IOException 
 					| InvalidKeyException 
 					| NoSuchAlgorithmException 
-					| NoSuchPaddingException e) {
+					| NoSuchPaddingException
+					| ConnectionFailedException  e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -154,7 +156,8 @@ public class ChatHistory {
 				| NoSuchAlgorithmException 
 				| NoSuchPaddingException 
 				| SAXException 
-				| ParserConfigurationException e) {
+				| ParserConfigurationException
+				| ConnectionFailedException  e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -294,7 +297,8 @@ public class ChatHistory {
 				| NoSuchAlgorithmException 
 				| NoSuchPaddingException  
 				| SAXException 
-				| ParserConfigurationException e) {
+				| ParserConfigurationException
+				| ConnectionFailedException  e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -319,7 +323,8 @@ public class ChatHistory {
 			//TODO Sign Message Content with own private Key
 			m.setMessage(inhalt);
 
-		} catch(ContactNotExistException e) {
+		} catch(ContactNotExistException
+			   | ConnectionFailedException  e) {
 			//Should not happen
 			throw new EncryptionErrorException("Cannot retrieve private Key!");
 		}
@@ -345,7 +350,8 @@ public class ChatHistory {
 			//TODO Decrypt Message Content with public Key
 			m.setMessage(inhalt);
 
-		} catch(ContactNotExistException e) {
+		} catch(ContactNotExistException
+				| ConnectionFailedException e) {
 			//Should not happen
 			throw new EncryptionErrorException("Cannot retrieve private Key!");
 		}
@@ -353,7 +359,7 @@ public class ChatHistory {
 		return m;
 	}
 	
-	private String getPrivateKeyString() throws ContactNotExistException {
+	private String getPrivateKeyString() throws ContactNotExistException, ConnectionFailedException {
 		if (privateKeyString == null) {
 			privateKeyString = Self.getUserFromFile(context).getPrivateKey();
 		}
@@ -404,7 +410,8 @@ public class ChatHistory {
 				| NoSuchAlgorithmException 
 				| NoSuchPaddingException  
 				| SAXException 
-				| ParserConfigurationException e) {
+				| ParserConfigurationException
+				| ConnectionFailedException  e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -443,7 +450,8 @@ public class ChatHistory {
 		} catch (IOException
 				| InvalidKeyException 
 				| NoSuchAlgorithmException 
-				| NoSuchPaddingException e) {
+				| NoSuchPaddingException
+				| ConnectionFailedException  e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

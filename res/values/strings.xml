@@ -26,6 +26,10 @@
     <string name="title_section1">Login</string>
     <string name="title_section2">Register</string>
     <string name="title_activity_show_profile">My profile</string>
+    
+    <string name="message_contact_not_exist">Error while fetching Contact Data!</string>
+    <string name="message_connection_failed">Server is currently not available. 
+        					\nPlease check your internet connection and try again!</string>
     <string name="message_registered_success">You were registered successfully!
         									\nPlease remember your ID carefully!</string>
     <string name="message_login_success">You were logged in successfully!</string>

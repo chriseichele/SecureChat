@@ -3,6 +3,7 @@ package de.dhbw.heidenheim.wi2012.securechat.gui;
 import java.util.ArrayList;
 
 import de.dhbw.heidenheim.wi2012.securechat.*;
+import de.dhbw.heidenheim.wi2012.securechat.exceptions.ConnectionFailedException;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
 import android.content.Intent;
 import android.os.Bundle;
@@ -120,6 +121,8 @@ public class ContactListActivity extends Activity implements
 			Intent intent = new Intent(this, LoginActivity.class);
 			startActivity(intent);
 			finish();
+		} catch (ConnectionFailedException e) {
+			GlobalHelper.displayToast_ConnectionFailed(getApplicationContext());
 		}
 	}
 

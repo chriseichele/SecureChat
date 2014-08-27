@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import de.dhbw.heidenheim.wi2012.securechat.*;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ConnectionFailedException;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
+import de.dhbw.heidenheim.wi2012.securechat.exceptions.EncryptionErrorException;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -65,23 +66,31 @@ public class ContactListActivity extends Activity implements
 
 					Long last_sync = ChatHistory.getLatestSynchronizeTimestamp(getApplicationContext());
 					
-					ArrayList<Message> messages = new ServerConnector().getNewMessages(
-							last_sync,
-							currentUserID);
-
-					// Nachrichten verarbeiten
-					for(int i=0;i<messages.size();i++) {
-						// durchgehen und je nach Sender in passende Chat History schreiben
-						Message m = messages.get(i);
-						ChatHistory ch = new ChatHistory(m.getSender(), getApplicationContext());
-						ch.add(m);
-						//Nachricht neuer? -> Timestamp aktualisieren
-						if (m.getTimestamp() > last_sync) {
-							last_sync = m.getTimestamp();
+					try {
+						ArrayList<Message> messages = new ServerConnector(3).getNewMessages(
+																				last_sync,
+																				currentUserID);
+	
+						// Nachrichten verarbeiten
+						for(int i=0;i<messages.size();i++) {
+							// durchgehen und je nach Sender in passende Chat History schreiben
+							Message m = messages.get(i);
+							ChatHistory ch = new ChatHistory(m.getSender(), getApplicationContext());
+							ch.retrieveMessage(m);
+							//Nachricht neuer? -> Timestamp aktualisieren
+							if (m.getTimestamp() > last_sync) {
+								last_sync = m.getTimestamp();
+							}
 						}
+						// LatestSyncTimestamp auf Wert von letzter Nachricht setzen
+						ChatHistory.setLatestSynchronizeTimestamp(getApplicationContext(), last_sync);
+					} catch(ConnectionFailedException e) {
+			    		//Toast Message mit Fehlermeldung zeigen
+			    		GlobalHelper.displayToast_ConnectionFailed(getApplicationContext());
+					} catch (EncryptionErrorException e) {
+			    		//Toast Message mit Fehlermeldung zeigen
+			    		GlobalHelper.displayToast_EncryptionError(getApplicationContext());
 					}
-					// LatestSyncTimestamp auf Wert von letzter Nachricht setzen
-					ChatHistory.setLatestSynchronizeTimestamp(getApplicationContext(), last_sync);
 				}
 			});
 

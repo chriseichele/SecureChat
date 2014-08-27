@@ -3,7 +3,9 @@ package de.dhbw.heidenheim.wi2012.securechat.gui;
 import java.util.ArrayList;
 
 import de.dhbw.heidenheim.wi2012.securechat.Contact;
+import de.dhbw.heidenheim.wi2012.securechat.GlobalHelper;
 import de.dhbw.heidenheim.wi2012.securechat.R;
+import de.dhbw.heidenheim.wi2012.securechat.exceptions.ConnectionFailedException;
 import android.app.Activity;
 import android.os.Bundle;
 import android.app.ListFragment;
@@ -72,16 +74,21 @@ public class ContactListFragment extends ListFragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		ArrayList<Contact> contactList = Contact.getContacts(getActivity().getApplicationContext());
-
-        // This is the array adapter, it takes the context of the activity as a 
-        // first parameter, the type of list view as a second parameter and your 
-        // array as a third parameter.
-        ContactListAdapter ContactListAdapter = new ContactListAdapter(
-        		getActivity(),
-                contactList );
-
-        setListAdapter(ContactListAdapter);
+		try {
+			ArrayList<Contact> contactList = Contact.getContacts(getActivity().getApplicationContext());
+	
+	        // This is the array adapter, it takes the context of the activity as a 
+	        // first parameter, the type of list view as a second parameter and your 
+	        // array as a third parameter.
+	        ContactListAdapter ContactListAdapter = new ContactListAdapter(
+	        		getActivity(),
+	                contactList );
+	
+	        setListAdapter(ContactListAdapter);
+		} catch (ConnectionFailedException e) {
+    		//Toast Message mit Fehlermeldung zeigen
+    		GlobalHelper.displayToast_ConnectionFailed(getActivity().getApplicationContext());
+    	}
 	}
 
 	@Override

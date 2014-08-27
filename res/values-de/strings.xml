@@ -34,6 +34,7 @@
     <string name="message_connection_failed">Der Server konnte nicht erreicht werden. 
         					\nBitte überprüfen sie ihre Internetverbindung und versuchen sie es erneut!</string>
     <string name="message_contact_not_exist">Fehler beim Abrufen der Kontaktdaten!</string>
+    <string name="message_encryption_error">Fehler beim Verschlüsseln der Daten!</string>
     
     <string name="message_registered_success">Sie wurden erfolgreich registriert!
         									\nBitte merken sie sich ihre ID!</string>
@@ -44,7 +45,7 @@
     <string name="message_wrong_login">Falsche Benutzer ID oder Passwort!</string>
     <string name="message_empty_login">Benutzer ID oder Passwort sind leer!</string>
     <string name="message_empty_register">Benutzername oder Passwort sind leer!</string>
-    <string name="message_contact_added">Kontakt \""%1$s\"" erfolgreich hinzugefügt!</string>
+    <string name="message_contact_added">Der Kontakt \""%1$s\"" mit der ID \""%2$s\"" wurde erfolgreich hinzugefügt!</string>
     <string name="message_contact_not_added">Fehler beim Hinzufügen des Kontaktes mit der ID \""%1$s\""!</string>
     <string name="message_contact_already_in_list">Der Kontakt mit der ID \""%1$s\"" ist bereits in ihrer Kontaktliste!</string>
     

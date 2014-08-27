@@ -27,7 +27,8 @@
     <string name="title_section2">Register</string>
     <string name="title_activity_show_profile">My profile</string>
     
-    <string name="message_contact_not_exist">Error while fetching Contact Data!</string>
+    <string name="message_contact_not_exist">Error while fetching contact data!</string>
+    <string name="message_encryption_error">Error during data encryption!</string>
     <string name="message_connection_failed">Server is currently not available. 
         					\nPlease check your internet connection and try again!</string>
     <string name="message_registered_success">You were registered successfully!
@@ -39,7 +40,7 @@
     <string name="message_wrong_login">Wrong user ID or password!</string>
     <string name="message_empty_login">Empty user ID or password!</string>
     <string name="message_empty_register">Empty user or password!</string>
-    <string name="message_contact_added">Contact &quot;%1$s&quot; was added successfully!</string>
+    <string name="message_contact_added">The Contact \""%1$s\"" with ID \""%2$s\"" was added successfully!</string>
     <string name="message_contact_not_added">Error in adding contact with ID \""%1$s\""!</string>
     <string name="message_contact_already_in_list">The contact with ID \""%1$s\"" is already in your contactlist!</string>
     

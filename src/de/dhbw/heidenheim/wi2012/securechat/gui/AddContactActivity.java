@@ -1,7 +1,9 @@
 package de.dhbw.heidenheim.wi2012.securechat.gui;
 
 import de.dhbw.heidenheim.wi2012.securechat.Contact;
+import de.dhbw.heidenheim.wi2012.securechat.GlobalHelper;
 import de.dhbw.heidenheim.wi2012.securechat.R;
+import de.dhbw.heidenheim.wi2012.securechat.exceptions.ConnectionFailedException;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactExistException;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
 import android.app.Activity;
@@ -68,7 +70,7 @@ public class AddContactActivity extends Activity {
 					ContactListAdapter.cla.notifyDataSetChanged();
 			    	//Nachricht Kontakt "Name" erfolgreich hinzugefuegt
 		    		error_message.setTextColor(getResources().getColor(R.color.android_green_dark));
-		    		error_message.setText(getString(R.string.message_contact_added, c.getName()));
+		    		error_message.setText(getString(R.string.message_contact_added, c.getName(), c.getID()));
 				} catch (ContactExistException e) {
 		    		//Kontakt existiert bereits!
 		    		//Fehlermeldung zeigen
@@ -80,6 +82,9 @@ public class AddContactActivity extends Activity {
 	    		//Fehlermeldung zeigen
 	    		error_message.setTextColor(getResources().getColor(R.color.android_red_dark));
 	    		error_message.setText(getString(R.string.message_contact_not_added, newContact));
+	    	} catch (ConnectionFailedException e) {
+	    		//Toast Message mit Fehlermeldung zeigen
+	    		GlobalHelper.displayToast_ConnectionFailed(getApplicationContext());
 	    	}
 		}
     }

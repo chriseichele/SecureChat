@@ -105,7 +105,7 @@ public class ServerConnector {
 	    }
 	}
 	
-	public String getXML(String url) throws ConnectionFailedException {
+	private String getXML(String url) throws ConnectionFailedException {
 		
 		try {
 	
@@ -148,13 +148,13 @@ public class ServerConnector {
 		return key;
 	}
 
-	public ArrayList<Message> getNewMessages(Long timestampLastMessage, String userID) {
+	public ArrayList<Message> getNewMessages(Long timestampLastMessage, String userID) throws ConnectionFailedException {
 		//TODO retrieve Messages newer as timestamp for current user id from server
 		//TODO parse Messages as objects
 		return new ArrayList<Message>();
 	}
 	
-	public static Key getFileEncryptionKey() throws ConnectionFailedException {
+	public Key getFileEncryptionKey() throws ConnectionFailedException {
 		
 		//TODO Get Key for Local Encryption from Server
 		if(key == null) {

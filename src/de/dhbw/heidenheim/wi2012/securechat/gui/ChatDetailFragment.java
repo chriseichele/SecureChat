@@ -9,6 +9,7 @@ import de.dhbw.heidenheim.wi2012.securechat.R;
 import de.dhbw.heidenheim.wi2012.securechat.Self;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ConnectionFailedException;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
+import de.dhbw.heidenheim.wi2012.securechat.exceptions.EncryptionErrorException;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.content.Intent;
@@ -116,15 +117,25 @@ public class ChatDetailFragment extends Fragment {
 		}
 
 		// TODO Dummy Antwort nach jeder neuen Nachricht entfernen
+		try {
 		chatHistory.add(new Message("Und was kann die App bis jetzt schon alles?", false, chat_opponent_id, my_user_id));
 		adapter.notifyDataSetChanged();
 		chatList.setSelection(messages.size() - 1);
+		} catch (Exception e) {}
 	}
 
 	private void sendNewMessage(Message m) {
-		chatHistory.send(m);
-		adapter.notifyDataSetChanged();
-		chatList.setSelection(messages.size() - 1);
+		try {
+			chatHistory.send(m);
+			adapter.notifyDataSetChanged();
+			chatList.setSelection(messages.size() - 1);
+		} catch (ConnectionFailedException e) {
+    		//Toast Message mit Fehlermeldung zeigen
+    		GlobalHelper.displayToast_ConnectionFailed(getActivity().getApplicationContext());
+    	} catch (EncryptionErrorException e) {
+    		//Toast Message mit Fehlermeldung zeigen
+    		GlobalHelper.displayToast_EncryptionError(getActivity().getApplicationContext());
+    	}
 	}
 
 	private void scrollChatViewToBottom() {

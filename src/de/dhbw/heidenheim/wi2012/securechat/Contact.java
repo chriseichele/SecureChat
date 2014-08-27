@@ -51,17 +51,17 @@ public class Contact {
 	
 	private static ArrayList<Contact> contactList = new ArrayList<Contact>();
 
-	public Contact(String id, String name) throws ContactNotExistException {
+	public Contact(String id, String name) throws ContactNotExistException, ConnectionFailedException {
 		this.id = id;
 		this.name = name;
 		getContactDetailsFromServer(id);
 	}
-	public Contact(String id) throws ContactNotExistException {
+	public Contact(String id) throws ContactNotExistException, ConnectionFailedException {
 		this.id = id;
 		getContactDetailsFromServer(id);
 	}
 
-	private void getContactDetailsFromServer(String id) throws ContactNotExistException {
+	private void getContactDetailsFromServer(String id) throws ContactNotExistException, ConnectionFailedException {
 		// TODO Get ContactDetails from Server instead of Dummy Values
 		// public key
 		// public name
@@ -124,7 +124,7 @@ public class Contact {
 				//Encrypt with Cipher
 				if (cipher_enc == null) {
 					cipher_enc = Cipher.getInstance("AES");
-					cipher_enc.init(Cipher.ENCRYPT_MODE, ServerConnector.getFileEncryptionKey());
+					cipher_enc.init(Cipher.ENCRYPT_MODE, new ServerConnector().getFileEncryptionKey());
 				}
 				
 			    FileOutputStream fos = context.openFileOutput(filename, Context.MODE_PRIVATE);
@@ -167,12 +167,12 @@ public class Contact {
 				//Encrypt with Cipher
 				if (cipher_enc == null) {
 					cipher_enc = Cipher.getInstance("AES");
-					cipher_enc.init(Cipher.ENCRYPT_MODE, ServerConnector.getFileEncryptionKey());
+					cipher_enc.init(Cipher.ENCRYPT_MODE, new ServerConnector().getFileEncryptionKey());
 				}
 				//Decrypt with Cipher
 				if (cipher_dec == null) {
 					cipher_dec = Cipher.getInstance("AES");
-					cipher_dec.init(Cipher.DECRYPT_MODE, ServerConnector.getFileEncryptionKey());
+					cipher_dec.init(Cipher.DECRYPT_MODE, new ServerConnector().getFileEncryptionKey());
 				}
 		
 			    FileInputStream fis = context.openFileInput(filename);
@@ -237,15 +237,15 @@ public class Contact {
 		}
 	}
 	
-	public static ArrayList<Contact> getContacts(Context context) {
+	public static ArrayList<Contact> getContacts(Context context) throws ConnectionFailedException {
 		//Sicherstellen dass AppContext fuer Dateispeicherort gesetzt ist
 		setContext(context);
-		// ContactListe aus XML oder vom Server holen
+		// ContactListe aus XML holen
         readContacts();
 		
 		return contactList;
 	}
-	private static void readContacts() {
+	private static void readContacts() throws ConnectionFailedException {
 		//Kontaktliste initialisieren
 		contactList.clear();
 		//read contacts from XML Contact List
@@ -254,7 +254,7 @@ public class Contact {
 			//Decrypt with Cipher
 			if (cipher_dec == null) {
 				cipher_dec = Cipher.getInstance("AES");
-				cipher_dec.init(Cipher.DECRYPT_MODE, ServerConnector.getFileEncryptionKey());
+				cipher_dec.init(Cipher.DECRYPT_MODE, new ServerConnector().getFileEncryptionKey());
 			}
 	
 		    FileInputStream fis = context.openFileInput(filename);
@@ -282,7 +282,7 @@ public class Contact {
 		    
 		    NodeList contact_nodes = root.getChildNodes();
 		    for (int i=1;i<(contact_nodes.getLength()-1);i=i+2) {
-		        //Neue Nachricht an Array ausgeben
+		        //Neuen Kontakt an Array geben
 		        contactList.add(new Contact(((Element) contact_nodes.item(i)).getAttribute("id"),
 		        							((Element) contact_nodes.item(i)).getAttribute("name")));
 		    }
@@ -299,7 +299,7 @@ public class Contact {
 			e.printStackTrace();
 		}
 	}
-	public static String getContactName(String id) {
+	public static String getContactName(String id) throws ConnectionFailedException {
 		//XML Kontaktliste bereits eingelesen?
 		if(contactList.isEmpty()) {
 			//Kontakte einlesen

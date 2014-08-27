@@ -1,7 +1,9 @@
 package de.dhbw.heidenheim.wi2012.securechat.gui;
 
 import de.dhbw.heidenheim.wi2012.securechat.Contact;
+import de.dhbw.heidenheim.wi2012.securechat.GlobalHelper;
 import de.dhbw.heidenheim.wi2012.securechat.R;
+import de.dhbw.heidenheim.wi2012.securechat.exceptions.ConnectionFailedException;
 import android.content.Intent;
 import android.os.Bundle;
 import android.app.Activity;
@@ -49,7 +51,14 @@ public class ChatDetailActivity extends Activity {
 		}
 		
 		//Chatparter Name als Titel
-		this.setTitle(Contact.getContactName(getIntent().getStringExtra(ChatDetailFragment.CHAT_OPPONENT)));
+		try {
+			this.setTitle(Contact.getContactName(getIntent().getStringExtra(ChatDetailFragment.CHAT_OPPONENT)));
+		} catch (ConnectionFailedException e) {
+    		//Toast Message mit Fehlermeldung zeigen
+    		GlobalHelper.displayToast_ConnectionFailed(getApplicationContext());
+    		//Als Fallback ID in Titel schreiben, damit er nicht leer bleibt
+			this.setTitle(getIntent().getStringExtra(ChatDetailFragment.CHAT_OPPONENT));
+    	}
 	}
     
     /** Called when the user clicks the Send button */

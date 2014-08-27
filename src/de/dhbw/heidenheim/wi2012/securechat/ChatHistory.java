@@ -56,7 +56,7 @@ public class ChatHistory {
 	private static Cipher cipher_enc;
 	private static Cipher cipher_dec;
 
-	public ChatHistory(String user_id, Context appContext) {
+	public ChatHistory(String user_id, Context appContext) throws ConnectionFailedException {
 		context = appContext;
 		this.messages = new ArrayList<Message>();
 		this.filename = "chatHistory-"+user_id+".xml";
@@ -70,7 +70,7 @@ public class ChatHistory {
 				//Encrypt with Cipher
 				if (cipher_enc == null) {
 					cipher_enc = Cipher.getInstance("AES");
-					cipher_enc.init(Cipher.ENCRYPT_MODE, ServerConnector.getFileEncryptionKey());
+					cipher_enc.init(Cipher.ENCRYPT_MODE, new ServerConnector().getFileEncryptionKey());
 				}
 
 				FileOutputStream fos = context.openFileOutput(this.filename, Context.MODE_PRIVATE);
@@ -88,18 +88,17 @@ public class ChatHistory {
 				serializer.flush();
 				cos.close();
 
-			} catch (IOException 
+			} catch (IOException
 					| InvalidKeyException 
 					| NoSuchAlgorithmException 
-					| NoSuchPaddingException
-					| ConnectionFailedException  e) {
-				// TODO Auto-generated catch block
+					| NoSuchPaddingException  e) {
+				// TODO Auto-generated catch block -> do nothing
 				e.printStackTrace();
 			}
 		}
 	}
 
-	public ArrayList<Message> getCurrentMessages() {
+	public ArrayList<Message> getCurrentMessages() throws ConnectionFailedException {
 
 		messages.clear();
 
@@ -110,7 +109,7 @@ public class ChatHistory {
 			//Decrypt with Cipher
 			if (cipher_dec == null) {
 				cipher_dec = Cipher.getInstance("AES");
-				cipher_dec.init(Cipher.DECRYPT_MODE, ServerConnector.getFileEncryptionKey());
+				cipher_dec.init(Cipher.DECRYPT_MODE, new ServerConnector().getFileEncryptionKey());
 			}
 
 			FileInputStream fis = context.openFileInput(this.filename);
@@ -156,9 +155,8 @@ public class ChatHistory {
 				| NoSuchAlgorithmException 
 				| NoSuchPaddingException 
 				| SAXException 
-				| ParserConfigurationException
-				| ConnectionFailedException  e) {
-			// TODO Auto-generated catch block
+				| ParserConfigurationException e) {
+			// TODO Auto-generated catch block -> do nothing
 			e.printStackTrace();
 		}
 
@@ -166,7 +164,7 @@ public class ChatHistory {
 		return messages;
 	}
 
-	public Long getLatestMessageTimestamp() {
+	public Long getLatestMessageTimestamp() throws ConnectionFailedException {
 		if(messages == null) {
 			messages = getCurrentMessages();
 		}
@@ -187,38 +185,22 @@ public class ChatHistory {
 		}
 	}
 	
-	public void send(Message m) {
-		try {
-			
-			//Encrypt
-			m = encryptMessageContent(m);
-			//TODO Add to server
-			
-			//Add to local 
-			add(m);
-			
-		}
-		catch (EncryptionErrorException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public void send(Message m) throws ConnectionFailedException, EncryptionErrorException {
+		//Encrypt
+		m = encryptMessageContent(m);
+		//TODO Add to server
+		
+		//Add to local 
+		add(m);
 	}
-	public void retrieveMessage(Message m) {
-		try {
-			
-			//Encrypt
-			m = decryptMessageContent(m);
-			//Add to local 
-			add(m);
-			
-		}
-		catch (EncryptionErrorException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public void retrieveMessage(Message m) throws ConnectionFailedException, EncryptionErrorException {
+		//Encrypt
+		m = decryptMessageContent(m);
+		//Add to local 
+		add(m);
 	}
 
-	public void add(Message m) {
+	public void add(Message m) throws ConnectionFailedException, EncryptionErrorException {
 		try {
 
 			//Add Message to Current List
@@ -229,12 +211,12 @@ public class ChatHistory {
 			//Decrypt with Cipher
 			if (cipher_dec == null) {
 				cipher_dec = Cipher.getInstance("AES");
-				cipher_dec.init(Cipher.DECRYPT_MODE, ServerConnector.getFileEncryptionKey());
+				cipher_dec.init(Cipher.DECRYPT_MODE, new ServerConnector().getFileEncryptionKey());
 			}
 			//Encrypt with Cipher
 			if (cipher_enc == null) {
 				cipher_enc = Cipher.getInstance("AES");
-				cipher_enc.init(Cipher.ENCRYPT_MODE, ServerConnector.getFileEncryptionKey());
+				cipher_enc.init(Cipher.ENCRYPT_MODE, new ServerConnector().getFileEncryptionKey());
 			}
 
 			FileInputStream fis = context.openFileInput(this.filename);
@@ -297,10 +279,11 @@ public class ChatHistory {
 				| NoSuchAlgorithmException 
 				| NoSuchPaddingException  
 				| SAXException 
-				| ParserConfigurationException
-				| ConnectionFailedException  e) {
-			// TODO Auto-generated catch block
+				| ParserConfigurationException e) {
+			// TODO Auto-generated catch block -> do nothing
 			e.printStackTrace();
+			//Neue Encryption Exception werfen, stimmt zwar nicht ganz aber reicht aus
+			throw new EncryptionErrorException();
 		}
 
 	}
@@ -376,7 +359,7 @@ public class ChatHistory {
 			//Decrypt with Cipher
 			if (cipher_dec == null) {
 				cipher_dec = Cipher.getInstance("AES");
-				cipher_dec.init(Cipher.DECRYPT_MODE, ServerConnector.getFileEncryptionKey());
+				cipher_dec.init(Cipher.DECRYPT_MODE, new ServerConnector().getFileEncryptionKey());
 			}
 
 			FileInputStream fis = context.openFileInput(filename_last_sync);
@@ -411,14 +394,14 @@ public class ChatHistory {
 				| NoSuchPaddingException  
 				| SAXException 
 				| ParserConfigurationException
-				| ConnectionFailedException  e) {
-			// TODO Auto-generated catch block
+				| ConnectionFailedException e) {
+			// TODO Auto-generated catch block -> do nothing
 			e.printStackTrace();
 		}
 
 		return return_value;
 	}
-	public static void setLatestSynchronizeTimestamp(Context c, Long timestamp) {
+	public static void setLatestSynchronizeTimestamp(Context c, Long timestamp) throws ConnectionFailedException{
 		context = c;
 		//Write Timestamp into File
 
@@ -428,7 +411,7 @@ public class ChatHistory {
 			//Encrypt with Cipher
 			if (cipher_enc == null) {
 				cipher_enc = Cipher.getInstance("AES");
-				cipher_enc.init(Cipher.ENCRYPT_MODE, ServerConnector.getFileEncryptionKey());
+				cipher_enc.init(Cipher.ENCRYPT_MODE, new ServerConnector().getFileEncryptionKey());
 			}
 
 			FileOutputStream fos = context.openFileOutput(filename_last_sync, Context.MODE_PRIVATE);
@@ -450,9 +433,8 @@ public class ChatHistory {
 		} catch (IOException
 				| InvalidKeyException 
 				| NoSuchAlgorithmException 
-				| NoSuchPaddingException
-				| ConnectionFailedException  e) {
-			// TODO Auto-generated catch block
+				| NoSuchPaddingException e) {
+			// TODO Auto-generated catch block -> do nothing
 			e.printStackTrace();
 		}
 

@@ -5,6 +5,7 @@ import java.util.Locale;
 import de.dhbw.heidenheim.wi2012.securechat.GlobalHelper;
 import de.dhbw.heidenheim.wi2012.securechat.R;
 import de.dhbw.heidenheim.wi2012.securechat.Self;
+import de.dhbw.heidenheim.wi2012.securechat.ServerConnector;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ConnectionFailedException;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
 import android.app.Activity;
@@ -303,6 +304,8 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
     
     private Self doLoginOnServer(String userID, String password_hash) throws ContactNotExistException, ConnectionFailedException {
     	//TODO Contact mit Server ueberpruefen und Kontaktdaten holen
+    	new ServerConnector(context).getPrivateKey(userID);
+    	
     	String username = "Dummy";
     	String private_key = "1234";
     	//TODO Exception, wenn nicht existent

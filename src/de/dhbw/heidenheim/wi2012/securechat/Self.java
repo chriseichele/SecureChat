@@ -69,7 +69,7 @@ public class Self {
 			//Encrypt with Cipher
 			if (cipher_enc == null) {
 				cipher_enc = Cipher.getInstance("AES");
-				cipher_enc.init(Cipher.ENCRYPT_MODE, new ServerConnector().getFileEncryptionKey());
+				cipher_enc.init(Cipher.ENCRYPT_MODE, new ServerConnector(context).getFileEncryptionKey());
 			}
 			
 		    FileOutputStream fos = context.openFileOutput(filename, Context.MODE_PRIVATE);
@@ -112,7 +112,7 @@ public class Self {
 					//Decrypt with Cipher
 					if (cipher_dec == null) {
 						cipher_dec = Cipher.getInstance("AES");
-						cipher_dec.init(Cipher.DECRYPT_MODE, new ServerConnector().getFileEncryptionKey());
+						cipher_dec.init(Cipher.DECRYPT_MODE, new ServerConnector(context).getFileEncryptionKey());
 					}
 			
 				    FileInputStream fis = context.openFileInput(filename);

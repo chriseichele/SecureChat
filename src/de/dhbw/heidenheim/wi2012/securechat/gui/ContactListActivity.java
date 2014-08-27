@@ -67,7 +67,7 @@ public class ContactListActivity extends Activity implements
 					Long last_sync = ChatHistory.getLatestSynchronizeTimestamp(getApplicationContext());
 					
 					try {
-						ArrayList<Message> messages = new ServerConnector(3).getNewMessages(
+						ArrayList<Message> messages = new ServerConnector(getApplicationContext(),3).getNewMessages(
 																				last_sync,
 																				currentUserID);
 	

@@ -70,7 +70,7 @@ public class ChatHistory {
 				//Encrypt with Cipher
 				if (cipher_enc == null) {
 					cipher_enc = Cipher.getInstance("AES");
-					cipher_enc.init(Cipher.ENCRYPT_MODE, new ServerConnector().getFileEncryptionKey());
+					cipher_enc.init(Cipher.ENCRYPT_MODE, new ServerConnector(context).getFileEncryptionKey());
 				}
 
 				FileOutputStream fos = context.openFileOutput(this.filename, Context.MODE_PRIVATE);
@@ -109,7 +109,7 @@ public class ChatHistory {
 			//Decrypt with Cipher
 			if (cipher_dec == null) {
 				cipher_dec = Cipher.getInstance("AES");
-				cipher_dec.init(Cipher.DECRYPT_MODE, new ServerConnector().getFileEncryptionKey());
+				cipher_dec.init(Cipher.DECRYPT_MODE, new ServerConnector(context).getFileEncryptionKey());
 			}
 
 			FileInputStream fis = context.openFileInput(this.filename);
@@ -211,12 +211,12 @@ public class ChatHistory {
 			//Decrypt with Cipher
 			if (cipher_dec == null) {
 				cipher_dec = Cipher.getInstance("AES");
-				cipher_dec.init(Cipher.DECRYPT_MODE, new ServerConnector().getFileEncryptionKey());
+				cipher_dec.init(Cipher.DECRYPT_MODE, new ServerConnector(context).getFileEncryptionKey());
 			}
 			//Encrypt with Cipher
 			if (cipher_enc == null) {
 				cipher_enc = Cipher.getInstance("AES");
-				cipher_enc.init(Cipher.ENCRYPT_MODE, new ServerConnector().getFileEncryptionKey());
+				cipher_enc.init(Cipher.ENCRYPT_MODE, new ServerConnector(context).getFileEncryptionKey());
 			}
 
 			FileInputStream fis = context.openFileInput(this.filename);
@@ -291,7 +291,7 @@ public class ChatHistory {
 	private Message encryptMessageContent(Message m) throws EncryptionErrorException {
 		//TODO get public Encryption Key for Reciever from Server
 
-		ServerConnector connect = new ServerConnector();
+		ServerConnector connect = new ServerConnector(context);
 		//Key public_key = connect.getPublicKey(m.getSender());
 
 		try {
@@ -318,7 +318,7 @@ public class ChatHistory {
 	private Message decryptMessageContent(Message m) throws EncryptionErrorException {
 		//TODO get public Encryption Key for Reciever from Server
 
-		ServerConnector connect = new ServerConnector();
+		ServerConnector connect = new ServerConnector(context);
 		//Key public_key = connect.getPublicKey(m.getSender());
 
 		try {
@@ -359,7 +359,7 @@ public class ChatHistory {
 			//Decrypt with Cipher
 			if (cipher_dec == null) {
 				cipher_dec = Cipher.getInstance("AES");
-				cipher_dec.init(Cipher.DECRYPT_MODE, new ServerConnector().getFileEncryptionKey());
+				cipher_dec.init(Cipher.DECRYPT_MODE, new ServerConnector(context).getFileEncryptionKey());
 			}
 
 			FileInputStream fis = context.openFileInput(filename_last_sync);
@@ -411,7 +411,7 @@ public class ChatHistory {
 			//Encrypt with Cipher
 			if (cipher_enc == null) {
 				cipher_enc = Cipher.getInstance("AES");
-				cipher_enc.init(Cipher.ENCRYPT_MODE, new ServerConnector().getFileEncryptionKey());
+				cipher_enc.init(Cipher.ENCRYPT_MODE, new ServerConnector(context).getFileEncryptionKey());
 			}
 
 			FileOutputStream fos = context.openFileOutput(filename_last_sync, Context.MODE_PRIVATE);

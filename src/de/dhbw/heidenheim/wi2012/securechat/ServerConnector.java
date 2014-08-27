@@ -1,19 +1,23 @@
 package de.dhbw.heidenheim.wi2012.securechat;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
+import java.security.cert.CertificateFactory;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
@@ -23,7 +27,11 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManagerFactory;
 
+import org.apache.http.conn.scheme.SchemeRegistry;
+
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Base64;
 import android.util.Log;
@@ -32,18 +40,22 @@ import de.dhbw.heidenheim.wi2012.securechat.exceptions.ConnectionFailedException
 public class ServerConnector {
 	
 	private static Key key;
+	private Context context;
 	private int connection_trys;
+	private String protokoll;
 	private String login_server_directory;
 	private String message_server_directory;
 
-	public ServerConnector(int max_connection_trys) {
+	public ServerConnector(Context context,int max_connection_trys) {
+		this.context = context;
 		this.connection_trys = max_connection_trys;
 		//Selber Server, da nur einer von der DHBW zur Verfuegung gestellt wurde
-		this.login_server_directory = "http://wwi12-01.dhbw-heidenheim.de/SecureChat/webresources/";
-		this.message_server_directory = "http://wwi12-01.dhbw-heidenheim.de/SecureChat/webresources/";
+		this.protokoll = "https://";
+		this.login_server_directory = "wwi12-01.dhbw-heidenheim.de/SecureChat/webresources/";
+		this.message_server_directory = "wwi12-01.dhbw-heidenheim.de/SecureChat/webresources/";
 	}
-	public ServerConnector() {
-		this(2); //Default max_connection_trys
+	public ServerConnector(Context context) {
+		this(context, 2); //Default max_connection_trys
 	}
 
 	/* Verbindungsaufbau Vorlage bei REST von Flo - hat leider nicht funktioniert
@@ -67,6 +79,90 @@ public class ServerConnector {
 	//Assynchroner Task um XML Datei von URL zu holen
 	private class RetrieveXMLTask extends AsyncTask<String, Void, String> {
 	    private Exception exception;
+	    
+	    protected String doInBackground(String... urls) {
+	    	try {
+	    		/*
+	    		// Load CAs from an InputStream
+	    		// (could be from a resource or ByteArrayInputStream or ...)
+	    		CertificateFactory cf = CertificateFactory.getInstance("X.509");
+	    		// From https://www.washington.edu/itconnect/security/ca/load-der.crt
+	    		InputStream caInput = new BufferedInputStream(context.getResources().openRawResource(R.raw.cacerts));
+	    		Certificate ca;
+	    		try {
+	    		    ca = cf.generateCertificate(caInput);
+	    		    Log.d("CA","ca=" + ((X509Certificate) ca).getSubjectDN());
+	    		} finally {
+	    		    caInput.close();
+	    		}
+
+	    		// Create a KeyStore containing our trusted CAs
+	    		String keyStoreType = KeyStore.getDefaultType();
+	    		KeyStore keyStore = KeyStore.getInstance(keyStoreType);
+	    		keyStore.load(null, null);
+	    		keyStore.setCertificateEntry("ca", ca);
+	    		*/
+	    		/*
+	    		KeyStore keyStore = KeyStore.getInstance("PKCS12");
+	    		InputStream is = context.getResources().openRawResource(R.raw.cacerts);
+	    		BufferedInputStream bis = new BufferedInputStream(is);
+	    		String password = "Collyn24";
+	    		keyStore.load(bis, password.toCharArray()); // password is the PKCS#12 password. If there is no password, just pass null
+	    		*/
+	    		KeyStore keyStore = KeyStore.getInstance("BKS");
+	    		InputStream is = context.getResources().openRawResource(R.raw.client_keystore);
+	    		BufferedInputStream bis = new BufferedInputStream(is);
+	    		char[] pw = "Collyn24".toCharArray();
+	    		keyStore.load(bis, pw);
+	    		Key key = keyStore.getKey("client", pw);
+	    		is.close();
+
+	    		// Create a TrustManager that trusts the CAs in our KeyStore
+	    		String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+	    		TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
+	    		tmf.init(keyStore);
+
+	    		// Create an SSLContext that uses our TrustManager
+	    		SSLContext context = SSLContext.getInstance("TLS");
+	    		context.init(null, tmf.getTrustManagers(), null);
+
+	    		// Tell the URLConnection to use a SocketFactory from our SSLContext
+	    		URL url = new URL(urls[0]);
+	    		HttpsURLConnection urlConnection =
+	    		    (HttpsURLConnection)url.openConnection();
+	    		urlConnection.setSSLSocketFactory(context.getSocketFactory());
+	    		urlConnection.setRequestMethod("GET");
+	    		urlConnection.setRequestProperty("Accept", "application/xml");
+	    		
+	    		// Check for errors
+		          int responseCode = urlConnection.getResponseCode(); //TODO Bis jetzt noch keine Antwort
+		          InputStream inputStream;
+		          if (responseCode == HttpURLConnection.HTTP_OK) {
+		            inputStream = urlConnection.getInputStream();
+		          } else {
+		            inputStream = urlConnection.getErrorStream();
+		          }
+
+		          // Process the response
+		          BufferedReader reader;
+		          String line = null;
+		          String output = "";
+		          reader = new BufferedReader( new InputStreamReader( inputStream ) );
+		          while( ( line = reader.readLine() ) != null )
+		          {
+		        	  output += line;
+		          }
+
+		          inputStream.close();
+
+		          //HTTP Body = XML zurueck geben
+		          return output;
+	    		
+	    	} catch (Exception e) {
+	            this.exception = e;
+	            return null;
+	    	}
+	    }
 	    
 	    protected String doInBackground2(String... urls) {
 	    	// Use the public key from the AIDAP server as the trust store for this client.
@@ -145,7 +241,7 @@ public class ServerConnector {
 	        }
 	    }
 	    
-	    protected String doInBackground(String... urls) {
+	    protected String doInBackground1(String... urls) {
 	        try {
 	        	
 	        	URL url = new URL(urls[0]);
@@ -223,7 +319,7 @@ public class ServerConnector {
 	
 	public Key getPrivateKey(String user_id) throws ConnectionFailedException {
 		//Get XML from server
-		String xml = getXML(this.login_server_directory + "entities.userloginserver/" + user_id);
+		String xml = getXML(this.protokoll + this.login_server_directory + "entities.userloginserver/" + user_id);
 		
 		//TODO parse XML
 		//TODO get key String out of XML

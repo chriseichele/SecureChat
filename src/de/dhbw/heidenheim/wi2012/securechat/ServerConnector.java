@@ -82,60 +82,45 @@ public class ServerConnector {
 	    
 	    protected String doInBackground(String... urls) {
 	    	try {
-	    		/*
-	    		// Load CAs from an InputStream
-	    		// (could be from a resource or ByteArrayInputStream or ...)
-	    		CertificateFactory cf = CertificateFactory.getInstance("X.509");
-	    		// From https://www.washington.edu/itconnect/security/ca/load-der.crt
-	    		InputStream caInput = new BufferedInputStream(context.getResources().openRawResource(R.raw.cacerts));
-	    		Certificate ca;
-	    		try {
-	    		    ca = cf.generateCertificate(caInput);
-	    		    Log.d("CA","ca=" + ((X509Certificate) ca).getSubjectDN());
-	    		} finally {
-	    		    caInput.close();
-	    		}
-
-	    		// Create a KeyStore containing our trusted CAs
-	    		String keyStoreType = KeyStore.getDefaultType();
-	    		KeyStore keyStore = KeyStore.getInstance(keyStoreType);
-	    		keyStore.load(null, null);
-	    		keyStore.setCertificateEntry("ca", ca);
-	    		*/
-	    		/*
-	    		KeyStore keyStore = KeyStore.getInstance("PKCS12");
-	    		InputStream is = context.getResources().openRawResource(R.raw.cacerts);
-	    		BufferedInputStream bis = new BufferedInputStream(is);
-	    		String password = "Collyn24";
-	    		keyStore.load(bis, password.toCharArray()); // password is the PKCS#12 password. If there is no password, just pass null
-	    		*/
-	    		KeyStore keyStore = KeyStore.getInstance("BKS");
+	    		
+	    		char[] pw = "Collyn24".toCharArray();
+	    		
+	    		KeyStore keyStore_trust = KeyStore.getInstance("BKS");
 	    		InputStream is = context.getResources().openRawResource(R.raw.client_keystore);
 	    		BufferedInputStream bis = new BufferedInputStream(is);
-	    		char[] pw = "Collyn24".toCharArray();
-	    		keyStore.load(bis, pw);
-	    		Key key = keyStore.getKey("client", pw);
-	    		is.close();
+	    		keyStore_trust.load(bis, pw);
+	    		Key key = keyStore_trust.getKey("client", pw);
+	    		bis.close();
 
 	    		// Create a TrustManager that trusts the CAs in our KeyStore
 	    		String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
 	    		TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
-	    		tmf.init(keyStore);
+	    		tmf.init(keyStore_trust);
+
+	    		//Create Key Manager Factory for Client Key
+		        KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+		        KeyStore keyStore_key = KeyStore.getInstance("PKCS12");
+		    	is = context.getResources().openRawResource(R.raw.client);
+		    	bis = new BufferedInputStream(is);
+		        keyStore_key.load(bis, pw);
+		        bis.close();
+		        kmf.init(keyStore_key, pw);
 
 	    		// Create an SSLContext that uses our TrustManager
-	    		SSLContext context = SSLContext.getInstance("TLS");
-	    		context.init(null, tmf.getTrustManagers(), null);
+	    		SSLContext ssl = SSLContext.getInstance("TLS");
+	    		//ssl.init(null, tmf.getTrustManagers(), null);
+		        //ssl.init(kmf.getKeyManagers(), null, new SecureRandom());
+		        ssl.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom());
 
 	    		// Tell the URLConnection to use a SocketFactory from our SSLContext
 	    		URL url = new URL(urls[0]);
-	    		HttpsURLConnection urlConnection =
-	    		    (HttpsURLConnection)url.openConnection();
-	    		urlConnection.setSSLSocketFactory(context.getSocketFactory());
+	    		HttpsURLConnection urlConnection = (HttpsURLConnection)url.openConnection();
+	    		urlConnection.setSSLSocketFactory(ssl.getSocketFactory());
 	    		urlConnection.setRequestMethod("GET");
 	    		urlConnection.setRequestProperty("Accept", "application/xml");
 	    		
 	    		// Check for errors
-		          int responseCode = urlConnection.getResponseCode(); //TODO Bis jetzt noch keine Antwort
+		          int responseCode = urlConnection.getResponseCode(); //TODO UnknownHostException
 		          InputStream inputStream;
 		          if (responseCode == HttpURLConnection.HTTP_OK) {
 		            inputStream = urlConnection.getInputStream();
@@ -164,85 +149,11 @@ public class ServerConnector {
 	    	}
 	    }
 	    
-	    protected String doInBackground2(String... urls) {
-	    	// Use the public key from the AIDAP server as the trust store for this client.
-	        //   (note: created this keystore using InstallCerts.java from sun.com)
-	        Properties systemProps = System.getProperties();
-	        systemProps.put( "javax.net.ssl.trustStore", "/d1/cvs_all/jssecacerts");
-	        System.setProperties(systemProps);
-
+	    /*
+	    protected String doInBackground_http(String... urls) {
 	        try {
-	          // Open a secure connection.
-	          URL url = new URL(urls[0]);
-	          //String requestParams = "uid=adds&password=aAsS22.q&active=y&type=F";
-	          HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
-
-	          // Set up the connection properties
-	          con.setRequestProperty( "Connection", "close" );
-	          con.setDoInput(true);
-	          con.setDoOutput(true);
-	          con.setUseCaches(false);
-	          con.setConnectTimeout( 30000 );
-	          con.setReadTimeout( 30000 );
-	          con.setRequestMethod( "GET" );
-	    	  con.setRequestProperty("Accept", "application/xml");
-	          //con.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded" );
-	          //con.setRequestProperty( "Content-Length", Integer.toString(requestParams.length()) );
-
-	          // Set up the user authentication portion of the handshake with the private
-	          // key provided by NAIMES Tech Support.
-	          //   Based on an example posted by Torsten Curdt on his blog:
-	          //     http://vafer.org/blog/20061010073725 (as of Nov, 2009)
-	          File pKeyFile = new File("/d1/cvs_all/aidapuser_1f5d_2011_03_1192.pfx");
-	          String pKeyPassword = "UB#20abba";
-	          KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
-	          KeyStore keyStore = KeyStore.getInstance("PKCS12");
-	          InputStream keyInput = new FileInputStream(pKeyFile);
-	          keyStore.load(keyInput, pKeyPassword.toCharArray());
-	          keyInput.close();
-	          keyManagerFactory.init(keyStore, pKeyPassword.toCharArray());
-	          SSLContext context = SSLContext.getInstance("TLS");
-	          context.init(keyManagerFactory.getKeyManagers(), null, new SecureRandom());
-	          SSLSocketFactory sockFact = context.getSocketFactory();
-	          con.setSSLSocketFactory( sockFact );
-
-	          // Send the request
-	          //OutputStream outputStream = con.getOutputStream();
-	          //outputStream.write( requestParams.getBytes("UTF-8") );
-	          //outputStream.close();
-
-	          // Check for errors
-	          int responseCode = con.getResponseCode();
-	          InputStream inputStream;
-	          if (responseCode == HttpURLConnection.HTTP_OK) {
-	            inputStream = con.getInputStream();
-	          } else {
-	            inputStream = con.getErrorStream();
-	          }
-
-	          // Process the response
-	          BufferedReader reader;
-	          String line = null;
-	          String output = "";
-	          reader = new BufferedReader( new InputStreamReader( inputStream ) );
-	          while( ( line = reader.readLine() ) != null )
-	          {
-	        	  output += line;
-	          }
-
-	          inputStream.close();
-
-	          //HTTP Body = XML zurueck geben
-	          return output;
-	          
-	        } catch (Exception e) { 
-	            this.exception = e;
-	            return null;
-	        }
-	    }
-	    
-	    protected String doInBackground1(String... urls) {
-	        try {
+	        	
+	        	//Hat funktioniert, jedoch lässt der server keine HTTP Verbindungen mehr zu
 	        	
 	        	URL url = new URL(urls[0]);
 	    		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -273,6 +184,8 @@ public class ServerConnector {
 	            return null;
 	        }
 	    }
+	    */
+	    
 	    protected void onPostExecute(String s) {
 	        // TODO: check this.exception 
 	        // TODO: do something with the feed

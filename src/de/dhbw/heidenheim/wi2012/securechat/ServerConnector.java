@@ -85,32 +85,31 @@ public class ServerConnector {
 	    		
 	    		char[] pw = "Collyn24".toCharArray();
 	    		
-	    		KeyStore keyStore_trust = KeyStore.getInstance("BKS");
-	    		InputStream is = context.getResources().openRawResource(R.raw.client_keystore);
+	    		//Truststore
+	    		KeyStore trustStore = KeyStore.getInstance("BKS");
+	    		InputStream is = context.getResources().openRawResource(R.raw.truststore);
 	    		BufferedInputStream bis = new BufferedInputStream(is);
-	    		keyStore_trust.load(bis, pw);
-	    		Key key = keyStore_trust.getKey("client", pw);
+	    		trustStore.load(bis, pw);
 	    		bis.close();
 
-	    		// Create a TrustManager that trusts the CAs in our KeyStore
-	    		String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
-	    		TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
-	    		tmf.init(keyStore_trust);
-
-	    		//Create Key Manager Factory for Client Key
-		        KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-		        KeyStore keyStore_key = KeyStore.getInstance("PKCS12");
-		    	is = context.getResources().openRawResource(R.raw.client);
+	    		TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+	    		tmf.init(trustStore);
+		        
+		        //Keystore
+	    		KeyStore keyStore = KeyStore.getInstance("BKS");
+		    	is = context.getResources().openRawResource(R.raw.keystore);
 		    	bis = new BufferedInputStream(is);
-		        keyStore_key.load(bis, pw);
+		        keyStore.load(bis, pw);
 		        bis.close();
-		        kmf.init(keyStore_key, pw);
+
+		        KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+		        kmf.init(keyStore, pw);
 
 	    		// Create an SSLContext that uses our TrustManager
 	    		SSLContext ssl = SSLContext.getInstance("TLS");
-	    		//ssl.init(null, tmf.getTrustManagers(), null);
-		        //ssl.init(kmf.getKeyManagers(), null, new SecureRandom());
-		        ssl.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom());
+	    		ssl.init(null, tmf.getTrustManagers(), null); //nur Server Authentifizierung
+		        //ssl.init(kmf.getKeyManagers(), null, null); //nur Client Authentifizierung
+		        //ssl.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
 
 	    		// Tell the URLConnection to use a SocketFactory from our SSLContext
 	    		URL url = new URL(urls[0]);
@@ -120,7 +119,7 @@ public class ServerConnector {
 	    		urlConnection.setRequestProperty("Accept", "application/xml");
 	    		
 	    		// Check for errors
-		          int responseCode = urlConnection.getResponseCode(); //TODO UnknownHostException
+		          int responseCode = urlConnection.getResponseCode();
 		          InputStream inputStream;
 		          if (responseCode == HttpURLConnection.HTTP_OK) {
 		            inputStream = urlConnection.getInputStream();

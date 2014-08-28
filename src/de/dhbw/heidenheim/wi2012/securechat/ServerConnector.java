@@ -43,7 +43,7 @@ public class ServerConnector {
 			this.connection_trys = max_connection_trys;
 		}
 		
-		this.protokoll = "http://";
+		this.protokoll = "https://";
 		//Selber Server, da nur einer von der DHBW zur Verfuegung gestellt wurde
 		this.login_server_directory = "wwi12-01.dhbw-heidenheim.de/SecureChat/webresources/";
 		this.message_server_directory = "wwi12-01.dhbw-heidenheim.de/SecureChat/webresources/";
@@ -54,45 +54,15 @@ public class ServerConnector {
 
 	//Assynchroner Task um XML Datei von URL zu holen
 	private class RetrieveXMLTask extends AsyncTask<String, Void, String> {
+		
 		private Exception exception;
 
-	    protected String doInBackground(String... urls) { //TODO HTTP Version -> mit TLS ersetzten
-	        try {
-	        	
-	        	URL url = new URL(urls[0]);
-	    		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-	    		conn.setRequestMethod("GET");
-	    		conn.setRequestProperty("Accept", "application/xml");
-	     
-	    		if (conn.getResponseCode() != 200) {
-	    			throw new RuntimeException("Failed : HTTP error code : "
-	    					+ conn.getResponseCode());
-	    		}
-	     
-	    		BufferedReader br = new BufferedReader(new InputStreamReader(
-	    			(conn.getInputStream())));
-
-	    		String line;
-	    		String output = "";
-	    		while ((line = br.readLine()) != null) {
-	    			output += line;
-	    		}
-	     
-	    		conn.disconnect();
-	     
-	        	//HTTP Body = XML zurueck geben
-	    		return output;
-	        	
-	        } catch (Exception e) {
-	            this.exception = e;
-	            return null;
-	        }
-	    }
-		
-		protected String doInBackground_ssl(String... urls) {
+		protected String doInBackground(String... urls) {
 			try {
+				
+				urls[0] = "https://wwi12-01.dhbw-heidenheim.de/SecureChat/webresources/entities.message"; //TODO currently working URL -> remove this line later
 
-				char[] pw = "Collyn24".toCharArray();
+				char[] pw = "changeit".toCharArray();
 
 				//Truststore
 				KeyStore trustStore = KeyStore.getInstance("BKS");
@@ -116,8 +86,6 @@ public class ServerConnector {
 
 				// Create an SSLContext that uses our TrustManager
 				SSLContext ssl = SSLContext.getInstance("TLS");
-				//ssl.init(null, tmf.getTrustManagers(), null); //nur Server Authentifizierung
-				//ssl.init(kmf.getKeyManagers(), null, null); //nur Client Authentifizierung
 				ssl.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
 
 				// Tell the URLConnection to use a SocketFactory from our SSLContext
@@ -241,6 +209,7 @@ public class ServerConnector {
 		//TODO get username form server
 		String username = "Dummy";
 
+		//Return User Object with new fetched private Key of User
 		return new Self(user_id, username, getPrivateKey(user_id));
 	}
 	
@@ -248,7 +217,8 @@ public class ServerConnector {
 		//TODO register User at Server
 		//TODO get new User ID
 		String user_id = "admin";
-		
+
+		//Return User Object with new fetched private Key of User
 		return new Self(user_id, username, getPrivateKey(user_id));
 	}
 

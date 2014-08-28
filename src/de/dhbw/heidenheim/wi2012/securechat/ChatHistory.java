@@ -47,7 +47,7 @@ public class ChatHistory {
 	private ArrayList<Message> messages;
 	private String filename;
 	
-	private static String privateKeyString;
+	private static Key privateKey;
 
 	private static final String filename_last_sync = "sync.xml";
 
@@ -296,10 +296,7 @@ public class ChatHistory {
 
 		try {
 
-			String pks = getPrivateKeyString();
-
-			byte[] encodedKey = Base64.decode(pks, Base64.DEFAULT);
-			Key key = new SecretKeySpec(encodedKey,0,encodedKey.length, "AES"); 
+			Key key = getPrivateKey();
 
 			String inhalt = m.getMessage();
 			//TODO Encrypt Message Content with public Key
@@ -323,10 +320,7 @@ public class ChatHistory {
 
 		try {
 
-			String pks = getPrivateKeyString();
-
-			byte[] encodedKey = Base64.decode(pks, Base64.DEFAULT);
-			Key key = new SecretKeySpec(encodedKey,0,encodedKey.length, "AES"); 
+			Key key = getPrivateKey();
 
 			String inhalt = m.getMessage();
 			//TODO Check Signed Content
@@ -342,11 +336,11 @@ public class ChatHistory {
 		return m;
 	}
 	
-	private String getPrivateKeyString() throws ContactNotExistException, ConnectionFailedException {
-		if (privateKeyString == null) {
-			privateKeyString = Self.getUserFromFile(context).getPrivateKey();
+	private Key getPrivateKey() throws ContactNotExistException, ConnectionFailedException {
+		if (privateKey == null) {
+			privateKey = Self.getUserFromFile(context).getPrivateKey();
 		}
-		return privateKeyString;
+		return privateKey;
 	}
 
 	public static Long getLatestSynchronizeTimestamp(Context c) {

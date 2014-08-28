@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.InvalidKeyException;
+import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.Cipher;
@@ -33,7 +34,7 @@ public class Self {
 	
 	private String id;
 	private String name;
-	private String private_key;
+	private Key private_key;
 	
 	private static Context context;
 	private static String filename = "user.xml";
@@ -41,7 +42,7 @@ public class Self {
 	private static Cipher cipher_enc;
 	private static Cipher cipher_dec;
 
-	public Self(String id, String name, String private_key) {
+	public Self(String id, String name, Key private_key) {
 		this.id = id;
 		this.name = name;
 		this.private_key = private_key;
@@ -55,7 +56,7 @@ public class Self {
 		return this.name;
 	}
 	
-	public String getPrivateKey() {
+	public Key getPrivateKey() {
 		return this.private_key;
 	}
 	
@@ -84,7 +85,7 @@ public class Self {
 	        serializer.startTag(null, "user");
 	        serializer.attribute(null, "id", this.id);
 	        serializer.attribute(null, "name", this.name);
-	        serializer.attribute(null, "private_key", this.private_key);
+	        serializer.attribute(null, "private_key", this.private_key.toString());
 	        serializer.endTag(null, "user");
 		    serializer.endDocument();
 		    serializer.flush();
@@ -139,7 +140,9 @@ public class Self {
 				    
 				    String id = root.getAttribute("id");
 				    String username = root.getAttribute("name");
-				    String private_key = root.getAttribute("private_key");
+				    String private_key_string = root.getAttribute("private_key");
+				    
+				    Key private_key = GlobalHelper.getRSAKey(private_key_string);
 				    
 					//User Objekt anlegen und zurueckgeben
 					return new Self(id, username, private_key);

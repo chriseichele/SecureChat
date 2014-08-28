@@ -51,10 +51,10 @@ public class Contact {
 	
 	private static ArrayList<Contact> contactList = new ArrayList<Contact>();
 
-	public Contact(String id, String name) throws ContactNotExistException, ConnectionFailedException {
+	public Contact(String id, String name) {
 		this.id = id;
 		this.name = name;
-		getContactDetailsFromServer(id);
+		//getContactDetailsFromServer(id);
 	}
 	public Contact(String id) throws ContactNotExistException, ConnectionFailedException {
 		this.id = id;
@@ -62,9 +62,11 @@ public class Contact {
 	}
 
 	private void getContactDetailsFromServer(String id) throws ContactNotExistException, ConnectionFailedException {
-		// TODO Get ContactDetails from Server instead of Dummy Values
+		// TODO Get ContactDetails from Server
 		// public key
 		// public name
+		
+		//TODO Write Contact Details in Object Variables
 		
 		if (id.equals("0")) {
 			this.name = "Testkontakt";
@@ -248,7 +250,7 @@ public class Contact {
 	private static void readContacts() throws ConnectionFailedException {
 		//Kontaktliste initialisieren
 		contactList.clear();
-		//read contacts from XML Contact List
+		//read contacts new from XML Contact List
 		try {
 			
 			//Decrypt with Cipher
@@ -293,7 +295,6 @@ public class Contact {
 				| NoSuchPaddingException 
 				| SAXException 
 				| ParserConfigurationException 
-				| ContactNotExistException
 				| ConnectionFailedException  e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

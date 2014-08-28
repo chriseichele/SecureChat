@@ -1,5 +1,6 @@
 package de.dhbw.heidenheim.wi2012.securechat.gui;
 
+import java.security.Key;
 import java.util.Locale;
 
 import de.dhbw.heidenheim.wi2012.securechat.GlobalHelper;
@@ -281,41 +282,16 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
     
     private void doRegister(String username, String password_hash) throws ConnectionFailedException {
     	//User neu am Server registrieren und Daten holen
-    	Self user = doRegisterOnServer(username, password_hash);
+    	Self user = new ServerConnector(this.context).registerUser(username, password_hash);
     	//Userdaten lokal speichern
     	user.saveToXML(this.context);
     }
     
-    private Self doRegisterOnServer(String username, String password_hash) throws ConnectionFailedException {
-    	//TODO return user ID from Server
-    	String id = "ASDF1234";
-    	//TODO return private Key from Server
-    	String private_key = "1234";
-    	
-    	return new Self(id, username, private_key);
-    }
-    
     private void doLogin(String userID, String password_hash) throws ContactNotExistException, ConnectionFailedException {
     	//Userdaten vom Server holen
-    	Self user = doLoginOnServer(userID, password_hash);
+    	Self user = new ServerConnector(this.context).loginUser(userID, password_hash);
     	//Userdaten lokal ablegen
     	user.saveToXML(this.context);
-    }
-    
-    private Self doLoginOnServer(String userID, String password_hash) throws ContactNotExistException, ConnectionFailedException {
-    	//TODO Contact mit Server ueberpruefen und Kontaktdaten holen
-    	new ServerConnector(context).getPrivateKey(userID);
-    	
-    	String username = "Dummy";
-    	String private_key = "1234";
-    	//TODO Exception, wenn nicht existent
-    	
-    	if (userID.equals("admin") && password_hash.equals("password")) {
-    		//User Objekt anlegen und zurueckgeben
-        	return new Self(userID, username, private_key);
-		} else {
-			throw new ContactNotExistException();
-		}
     }
     
     private boolean checkLoggedIn() throws ConnectionFailedException {

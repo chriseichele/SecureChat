@@ -1,6 +1,11 @@
 package de.dhbw.heidenheim.wi2012.securechat;
 
+import java.security.Key;
+
+import javax.crypto.spec.SecretKeySpec;
+
 import android.content.Context;
+import android.util.Base64;
 import android.widget.Toast;
 
 public class GlobalHelper {
@@ -19,5 +24,9 @@ public class GlobalHelper {
 		displayToast(c, c.getString(R.string.message_contact_not_exist));
 	}
 	
+	public static Key getRSAKey(String pks) {
+		byte[] encodedKey = Base64.decode(pks, Base64.DEFAULT);
+		return new SecretKeySpec(encodedKey,0,encodedKey.length, "RSA"); 
+	}
 
 }

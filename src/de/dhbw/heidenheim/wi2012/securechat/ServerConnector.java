@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
 import javax.crypto.KeyGenerator;
-import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -21,8 +20,6 @@ import javax.net.ssl.TrustManagerFactory;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Base64;
-import android.util.Log;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ConnectionFailedException;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
 
@@ -132,18 +129,19 @@ public class ServerConnector {
 		}
 
 		protected void onPostExecute(String s) {
-			// TODO: check this.exception 
-			// TODO: do something with the feed
+			// check this.exception 
+			// do something with the feed
 
-			Log.d("SecureChat", "URL Call finished.");
 
 			// -> durch Aufruf von .get() synchron geschaltet
 			// asynchrone verarbeitung nicht notwendig.
 
 			if (this.exception == null) {
-				//Daten irgendwo hin Schreiben, sodass sie vom UI Task weiter verarbeitet werden koennen
+				// Log.d("SecureChat", "URL Call finished successfully.");
+				// Daten irgendwo hin schreiben, sodass sie vom UI Task weiter verarbeitet werden koennen
 			} else {
-				//Exception behandeln...
+				// Log.d("SecureChat", "URL Call finished with Exception.");
+				// Exception behandeln...
 			}
 		}
 		
@@ -236,10 +234,41 @@ public class ServerConnector {
 		return key;
 	}
 
-	public Contact getContact(String contact_id) throws ConnectionFailedException {
-		//TODO Get Contact from Server
+	public Contact getContact(String contactID) throws ConnectionFailedException, ContactNotExistException {
+		//TODO Get Contact Details from Server (Name & public Key)
 		//TODO Parse As Object
-		return null;
+
+		
+		//TODO Remove Dummy Code
+		String name;
+		if (contactID.equals("0")) {
+			name = "Testkontakt";
+		}
+		else if (contactID.equals("1")) {
+			name = "Chris";
+		}
+		else if (contactID.equals("2")) {
+			name = "Dennis";
+		}
+		else if (contactID.equals("3")) {
+			name = "Flo";
+		}
+		else if (contactID.equals("4")) {
+			name = "Martin";
+		}
+		else if (contactID.equals("5")) {
+			name = "Schnulf";
+		}
+		else if (contactID.equals("6")) {
+			name = "Vera";
+		}
+		else {
+			//Kontakt nicht gefunden
+			throw new ContactNotExistException();
+		}
+		
+		//Contact Objekt mit Daten zurueck geben
+		return new Contact(contactID, name, GlobalHelper.getRSAKey("TESTKEY"));
 	}
 
 	public ArrayList<Message> getNewMessages(Long timestampLastMessage, String userID) throws ConnectionFailedException {

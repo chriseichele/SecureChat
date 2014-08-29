@@ -18,7 +18,6 @@ import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.SecretKeySpec;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -39,7 +38,6 @@ import de.dhbw.heidenheim.wi2012.securechat.exceptions.ConnectionFailedException
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.EncryptionErrorException;
 import android.content.Context;
-import android.util.Base64;
 import android.util.Xml;
 
 public class ChatHistory {
@@ -47,7 +45,8 @@ public class ChatHistory {
 	private ArrayList<Message> messages;
 	private String filename;
 	
-	private static Key privateKey;
+	private static Key own_privateKey;
+	private Key sender_publicKey;
 
 	private static final String filename_last_sync = "sync.xml";
 
@@ -58,6 +57,7 @@ public class ChatHistory {
 
 	public ChatHistory(String user_id, Context appContext) throws ConnectionFailedException {
 		context = appContext;
+		this.sender_publicKey = null; //erst mal leer lassen, und bei bedarf holen
 		this.messages = new ArrayList<Message>();
 		this.filename = "chatHistory-"+user_id+".xml";
 
@@ -200,7 +200,7 @@ public class ChatHistory {
 		add(m);
 	}
 
-	public void add(Message m) throws ConnectionFailedException, EncryptionErrorException {
+	public synchronized void add(Message m) throws ConnectionFailedException, EncryptionErrorException {
 		try {
 
 			//Add Message to Current List
@@ -245,7 +245,7 @@ public class ChatHistory {
 
 			Element connection = dom.createElement("connection");
 			connection.setAttribute("mine", m.isMine()+"");
-			connection.setAttribute("sender", m.getSender()+"");
+			connection.setAttribute("sender", m.getSenderID()+"");
 			connection.setAttribute("reciever", m.getReciever()+"");
 			message_node.appendChild(connection);
 
@@ -291,22 +291,21 @@ public class ChatHistory {
 	private Message encryptMessageContent(Message m) throws EncryptionErrorException {
 		//TODO get public Encryption Key for Reciever from Server
 
-		ServerConnector connect = new ServerConnector(context);
-		//Key public_key = connect.getPublicKey(m.getSender());
+		String inhalt = m.getMessage();
 
 		try {
 
-			Key key = getPrivateKey();
-
-			String inhalt = m.getMessage();
+			Key privateKey = getPrivateKey();
+			Key publicKey = getPublicKey(m.getSenderID());
+			
 			//TODO Encrypt Message Content with public Key
 			//TODO Sign Message Content with own private Key
+			
 			m.setMessage(inhalt);
 
 		} catch(ContactNotExistException
 			   | ConnectionFailedException  e) {
-			//Should not happen
-			throw new EncryptionErrorException("Cannot retrieve private Key!");
+			throw new EncryptionErrorException("Cannot retrieve Key!");
 		}
 
 		return m;
@@ -315,32 +314,38 @@ public class ChatHistory {
 	private Message decryptMessageContent(Message m) throws EncryptionErrorException {
 		//TODO get public Encryption Key for Reciever from Server
 
-		ServerConnector connect = new ServerConnector(context);
-		//Key public_key = connect.getPublicKey(m.getSender());
+		String inhalt = m.getMessage();
 
 		try {
 
-			Key key = getPrivateKey();
+			Key privateKey = getPrivateKey();
+			Key publicKey = getPublicKey(m.getSenderID());
 
-			String inhalt = m.getMessage();
 			//TODO Check Signed Content
 			//TODO Decrypt Message Content with public Key
+			
 			m.setMessage(inhalt);
 
 		} catch(ContactNotExistException
 				| ConnectionFailedException e) {
-			//Should not happen
-			throw new EncryptionErrorException("Cannot retrieve private Key!");
+			throw new EncryptionErrorException("Cannot retrieve Key!");
 		}
 
 		return m;
 	}
 	
 	private Key getPrivateKey() throws ContactNotExistException, ConnectionFailedException {
-		if (privateKey == null) {
-			privateKey = Self.getUserFromFile(context).getPrivateKey();
+		if (own_privateKey == null) {
+			own_privateKey = Self.getUserFromFile(context).getPrivateKey();
 		}
-		return privateKey;
+		return own_privateKey;
+	}
+	
+	private Key getPublicKey(String senderID)  throws ConnectionFailedException, ContactNotExistException {
+		if (this.sender_publicKey == null) {
+			this.sender_publicKey = new ServerConnector(context).getContact(senderID).getPublicKey();
+		}
+		return this.sender_publicKey;
 	}
 
 	public static Long getLatestSynchronizeTimestamp(Context c) {

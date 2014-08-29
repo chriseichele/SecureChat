@@ -9,6 +9,7 @@ import de.dhbw.heidenheim.wi2012.securechat.exceptions.ConnectionFailedException
 import android.app.Activity;
 import android.os.Bundle;
 import android.app.ListFragment;
+import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -128,7 +129,6 @@ public class ContactListFragment extends ListFragment {
 	public void onListItemClick(ListView listView, View view, int position,
 			long id) {
 		super.onListItemClick(listView, view, position, id);
-
 		// Notify the active callbacks interface (the activity, if the
 		// fragment is attached to one) that an item has been selected.
 		String contact_id = ((TextView) view.findViewById(R.id.contact_id)).getText().toString();

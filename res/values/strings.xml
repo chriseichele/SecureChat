@@ -27,6 +27,8 @@
     <string name="title_section2">Register</string>
     <string name="title_activity_show_profile">My profile</string>
     
+    <string name="message_newMessage">%1$s new message</string>
+    <string name="message_newMessages">%1$s new messages</string>
     <string name="message_contact_not_exist">Error while fetching contact data!</string>
     <string name="message_encryption_error">Error during data encryption!</string>
     <string name="message_connection_failed">Server is currently not available. 

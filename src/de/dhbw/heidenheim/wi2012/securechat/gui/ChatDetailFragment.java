@@ -13,6 +13,7 @@ import de.dhbw.heidenheim.wi2012.securechat.exceptions.EncryptionErrorException;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.content.Intent;
+import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -109,6 +110,9 @@ public class ChatDetailFragment extends Fragment {
 
 	/** Called when the user clicks the Send button */
 	public void sendMessage(View view) {
+		//Do Haptic Feedback
+		view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+		
 		// Do something in response to button
 		String newMessage = textfield.getText().toString().trim();
 		if (newMessage.length() > 0) {
@@ -118,17 +122,15 @@ public class ChatDetailFragment extends Fragment {
 
 		// TODO Dummy Antwort nach jeder neuen Nachricht entfernen
 		try {
-		chatHistory.add(new Message("Und was kann die App bis jetzt schon alles?", false, chat_opponent_id, my_user_id));
-		adapter.notifyDataSetChanged();
-		chatList.setSelection(messages.size() - 1);
+			chatHistory.add(new Message("Und was kann die App bis jetzt schon alles?", false, chat_opponent_id, my_user_id));
+			scrollToNewMessage();
 		} catch (Exception e) {}
 	}
 
 	private void sendNewMessage(Message m) {
 		try {
 			chatHistory.send(m);
-			adapter.notifyDataSetChanged();
-			chatList.setSelection(messages.size() - 1);
+			scrollToNewMessage();
 		} catch (ConnectionFailedException e) {
     		//Toast Message mit Fehlermeldung zeigen
     		GlobalHelper.displayToast_ConnectionFailed(getActivity().getApplicationContext());
@@ -146,5 +148,11 @@ public class ChatDetailFragment extends Fragment {
 				chatList.smoothScrollToPosition(chatList.getCount());
 			}
 		}, 100);
+		//chatList.setSelection(messages.size() - 1);
+	}
+	
+	public void scrollToNewMessage() {
+		adapter.notifyDataSetChanged();
+		scrollChatViewToBottom();
 	}
 }

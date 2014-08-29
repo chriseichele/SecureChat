@@ -65,7 +65,7 @@ public class Message {
 	public boolean isMine() {
 		return isMine;
 	}
-	public String getSender() {
+	public String getSenderID() {
 		return this.sender;
 	}
 	public String getReciever() {

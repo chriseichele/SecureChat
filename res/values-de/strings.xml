@@ -31,6 +31,8 @@
     <string name="title_section2">Registrieren</string>
     <string name="title_activity_show_profile">Mein Profil</string>
     
+    <string name="message_newMessage">%1$s neue Nachricht</string>
+    <string name="message_newMessages">%1$s neue Nachrichten</string>
     <string name="message_connection_failed">Der Server konnte nicht erreicht werden. 
         					\nBitte überprüfen sie ihre Internetverbindung und versuchen sie es erneut!</string>
     <string name="message_contact_not_exist">Fehler beim Abrufen der Kontaktdaten!</string>

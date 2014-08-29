@@ -1,6 +1,8 @@
 package de.dhbw.heidenheim.wi2012.securechat.gui;
 
-import java.security.Key;
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
 
 import de.dhbw.heidenheim.wi2012.securechat.GlobalHelper;
@@ -19,6 +21,7 @@ import android.content.Intent;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.view.HapticFeedbackConstants;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -34,7 +37,7 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
 	 * {@link android.support.v13.app.FragmentStatePagerAdapter}.
 	 */
 	SectionsPagerAdapter mSectionsPagerAdapter;
-	
+
 	private Context context;
 
 	/**
@@ -45,26 +48,26 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		this.context = getApplicationContext();
-		
+
 		try {
 			//Pruefen ob bereits ein Benutzer angemeldet ist
 			if (checkLoggedIn()) {
 				//Login Ansicht ueberspringen und direkt Kontaktliste anzeigen
-	
-		    	Intent intent = new Intent(this,ContactListActivity.class);
-		        startActivity(intent);
-		        //Activity beenden, um nicht mehr zurueckkehren zu koennen
-		        finish();
-		        
+
+				Intent intent = new Intent(this,ContactListActivity.class);
+				startActivity(intent);
+				//Activity beenden, um nicht mehr zurueckkehren zu koennen
+				finish();
+
 			}
 		} catch (ConnectionFailedException e) {
 			GlobalHelper.displayToast_ConnectionFailed(context);
 		}
-		
+
 		//Login oder Register View anzeigen
-			
+
 		setContentView(R.layout.activity_login);
 
 		// Set up the action bar.
@@ -83,12 +86,12 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
 		// tab. We can also use ActionBar.Tab#select() to do this if we have
 		// a reference to the Tab.
 		mViewPager
-				.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-					@Override
-					public void onPageSelected(int position) {
-						actionBar.setSelectedNavigationItem(position);
-					}
-				});
+		.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+			@Override
+			public void onPageSelected(int position) {
+				actionBar.setSelectedNavigationItem(position);
+			}
+		});
 
 		// For each of the sections in the app, add a tab to the action bar.
 		for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
@@ -100,7 +103,7 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
 					.setText(mSectionsPagerAdapter.getPageTitle(i))
 					.setTabListener(this));
 		}
-		
+
 	}
 
 	@Override
@@ -115,9 +118,9 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
 		// Handle action bar item clicks here. The action bar will
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
-		
+
 		//int id = item.getItemId();
-		
+
 		return super.onOptionsItemSelected(item);
 	}
 
@@ -191,119 +194,131 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
 			return null;
 		}
 	}
-    
-    /** Called when the user clicks the Login button */
-    public void userLogin(View view) {
-    	//Eingaben Testen und Login
+
+	/** Called when the user clicks the Login button */
+	public void userLogin(View view) {
+		//Eingaben Testen und Login
 
 		//Benutzername
-    	String user_id = (((EditText) this.findViewById(R.id.login_insert_id)).getText().toString());
-    	//Passwort
-    	String password = (((EditText) this.findViewById(R.id.login_insert_password)).getText().toString());
-    	
-    	//Eingaben leer?
-    	if (user_id.trim().equals("") || password.trim().equals("")) {
-    		//Leer? -> Fehlermeldung
-    		mSectionsPagerAdapter.getLoginFragment().displayErrorMessage(getString(R.string.message_empty_login));
-      	}
-    	else {
-    		//Richtige Account Details?
-    		
-    		//TODO Passwort hashen
-    		String password_hash = password;
+		String user_id = (((EditText) this.findViewById(R.id.login_insert_id)).getText().toString());
+		//Passwort
+		String password = (((EditText) this.findViewById(R.id.login_insert_password)).getText().toString());
 
-	        //Login
-        	try {
+		//Eingaben leer?
+		if (user_id.trim().equals("") || password.trim().equals("")) {
+			//Leer? -> Fehlermeldung
+			mSectionsPagerAdapter.getLoginFragment().displayErrorMessage(getString(R.string.message_empty_login));
+		}
+		else {
+			//Richtige Account Details?
+
+			try {
+				//Passwort hashen & AppName als Salt verwenden
+				String password_hash = GlobalHelper.hash(password, "SecureChat");
+
+				//Login
 				doLogin(user_id, password_hash);
-				
-		    	//Nachricht mit uebergeben
-		    	Bundle daten = new Bundle();
-		    	daten.putString("error_message", getString(R.string.message_login_success));
-		    	daten.putBoolean("start_profile_view", true);
-		    	daten.putBoolean("show_button_proceed", true);
-		        //Chatliste anzeigen mit Befehl Profil zu zeigen
-		    	Intent intent = new Intent(this,ContactListActivity.class);
-		    	intent.putExtras(daten);
-		        startActivity(intent);
-		        //Activity beenden, um nicht mehr zurueckkehren zu koennen
-		        finish();
-        	} catch (ContactNotExistException e) {
+
+				//Nachricht mit uebergeben
+				Bundle daten = new Bundle();
+				daten.putString("error_message", getString(R.string.message_login_success));
+				daten.putBoolean("start_profile_view", true);
+				daten.putBoolean("show_button_proceed", true);
+				//Chatliste anzeigen mit Befehl Profil zu zeigen
+				Intent intent = new Intent(this,ContactListActivity.class);
+				intent.putExtras(daten);
+				startActivity(intent);
+				//Activity beenden, um nicht mehr zurueckkehren zu koennen
+				finish();
+			} catch (ContactNotExistException e) {
 				mSectionsPagerAdapter.getLoginFragment().displayErrorMessage(getString(R.string.message_wrong_login));
-        	} catch (ConnectionFailedException e) {
-        		GlobalHelper.displayToast_ConnectionFailed(getApplicationContext());
-        	}
-        }
-    }
-    
-    /** Called when the user clicks the Register button */
-    public void userRegister(View view) {
-    	//Eingaben testen und Registrieren
+			} catch (ConnectionFailedException e) {
+				GlobalHelper.displayToast_ConnectionFailed(getApplicationContext());
+			} catch (UnsupportedEncodingException 
+					| NoSuchAlgorithmException 
+					| InvalidKeyException e) {
+				GlobalHelper.displayToast_EncryptionError(getApplicationContext());
+			}
+		}
+	}
+
+	/** Called when the user clicks the Register button */
+	public void userRegister(View view) {
+		//Eingaben testen und Registrieren
 
 		//Benutzername
-    	String user = (((EditText) this.findViewById(R.id.register_insert_username)).getText().toString());
-    	//Passwort
-    	String password1 = (((EditText) this.findViewById(R.id.register_insert_password1)).getText().toString());
+		String user = (((EditText) this.findViewById(R.id.register_insert_username)).getText().toString());
+		//Passwort
+		String password1 = (((EditText) this.findViewById(R.id.register_insert_password1)).getText().toString());
 		String password2 = ((EditText) this.findViewById(R.id.register_insert_password2)).getText().toString();
-		
+
 		//Eingaben leer?
 		if (user.trim().equals("") || password1.trim().equals("") || password2.trim().equals("")) {
 			//Leer? -> Fehlermeldung
 			mSectionsPagerAdapter.getRegisterFragment().displayErrorMessage(getString(R.string.message_empty_register));
-    	}
-        //Gewaehltes Passwort identitsch?
+		}
+		//Gewaehltes Passwort identitsch?
 		else if(!password1.equals(password2)) {
-        	//Nein? -> Fehlermeldung
+			//Nein? -> Fehlermeldung
 			mSectionsPagerAdapter.getRegisterFragment().displayErrorMessage(getString(R.string.message_password_not_identical));
-        } else {
-        	//TODO Passwort hashen
-    		String password_hash = password1;
-    		
-    		try {
+		} else {
+			try {
+				//Passwort hashen & AppName als Salt verwenden
+				String password_hash = GlobalHelper.hash(password1, "SecureChat");
+
 				//Registrieren
-	        	doRegister(user, password_hash);
-				
-		    	//Nachricht mit uebergeben
-		    	Bundle daten = new Bundle();
-		    	daten.putString("error_message", getString(R.string.message_registered_success));
-		    	daten.putBoolean("start_profile_view", true);
-		    	daten.putBoolean("show_button_proceed", true);
-		        //Chatliste anzeigen mit Befehl Profil zu zeigen
-		    	Intent intent = new Intent(this,ShowProfileActivity.class);
-		    	intent.putExtras(daten);
-		        startActivity(intent);
-		        //Activity beenden, um nicht mehr zurueckkehren zu koennen
-		        finish();
-		        
-    		} catch (ConnectionFailedException e) {
-        		GlobalHelper.displayToast_ConnectionFailed(getApplicationContext());
-    		}
-        }
-    }
-    
-    private void doRegister(String username, String password_hash) throws ConnectionFailedException {
-    	//User neu am Server registrieren und Daten holen
-    	Self user = new ServerConnector(this.context).registerUser(username, password_hash);
-    	//Userdaten lokal speichern
-    	user.saveToXML(this.context);
-    }
-    
-    private void doLogin(String userID, String password_hash) throws ContactNotExistException, ConnectionFailedException {
-    	//Userdaten vom Server holen
-    	Self user = new ServerConnector(this.context).loginUser(userID, password_hash);
-    	//Userdaten lokal ablegen
-    	user.saveToXML(this.context);
-    }
-    
-    private boolean checkLoggedIn() throws ConnectionFailedException {
-    	//Ist ein Benutzer angemeldet?
-    	try {
-    		Self.getUserFromFile(this.context);
-    		//Wenn noch kein Abbruch, dann erfolgreich
-    		return true;
-    	} catch (ContactNotExistException e) {
-    		//Ansonsten nicht angemeldet
-    		return false;
-    	}
-    }
+				doRegister(user, password_hash);
+
+				//Nachricht mit uebergeben
+				Bundle daten = new Bundle();
+				daten.putString("error_message", getString(R.string.message_registered_success));
+				daten.putBoolean("start_profile_view", true);
+				daten.putBoolean("show_button_proceed", true);
+				//Chatliste anzeigen mit Befehl Profil zu zeigen
+				Intent intent = new Intent(this,ShowProfileActivity.class);
+				intent.putExtras(daten);
+				startActivity(intent);
+				//Activity beenden, um nicht mehr zurueckkehren zu koennen
+				finish();
+
+			} catch (ConnectionFailedException e) {
+				GlobalHelper.displayToast_ConnectionFailed(getApplicationContext());
+			} catch (UnsupportedEncodingException 
+					| NoSuchAlgorithmException 
+					| InvalidKeyException e) {
+				GlobalHelper.displayToast_EncryptionError(getApplicationContext());
+			}
+		}
+	}
+
+	private void doRegister(String username, String password_hash) throws ConnectionFailedException {
+    	//Lokale Dateien zur Sicherheit zuerst loeschen
+    	GlobalHelper.DeleteRecursive(getApplicationContext().getFilesDir());
+		//User neu am Server registrieren und Daten holen
+		Self user = new ServerConnector(this.context).registerUser(username, password_hash);
+		//Userdaten lokal speichern
+		user.saveToXML(this.context);
+	}
+
+	private void doLogin(String userID, String password_hash) throws ContactNotExistException, ConnectionFailedException {
+		//Lokale Dateien zur Sicherheit zuerst loeschen
+    	GlobalHelper.DeleteRecursive(getApplicationContext().getFilesDir());
+		//Userdaten vom Server holen
+		Self user = new ServerConnector(this.context).loginUser(userID, password_hash);
+		//Userdaten lokal ablegen
+		user.saveToXML(this.context);
+	}
+
+	private boolean checkLoggedIn() throws ConnectionFailedException {
+		//Ist ein Benutzer angemeldet?
+		try {
+			Self.getUserFromFile(this.context);
+			//Wenn noch kein Abbruch, dann erfolgreich
+			return true;
+		} catch (ContactNotExistException e) {
+			//Ansonsten nicht angemeldet
+			return false;
+		}
+	}
 
 }

@@ -4,6 +4,7 @@ import de.dhbw.heidenheim.wi2012.securechat.Contact;
 import de.dhbw.heidenheim.wi2012.securechat.GlobalHelper;
 import de.dhbw.heidenheim.wi2012.securechat.R;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ConnectionFailedException;
+import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
 import android.content.Intent;
 import android.os.Bundle;
 import android.app.Activity;
@@ -26,9 +27,6 @@ public class ChatDetailActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_chat_detail);
-
-		// Show the Up button in the action bar.
-		getActionBar().setDisplayHomeAsUpEnabled(true);
 
 		// savedInstanceState is non-null when there is fragment state
 		// saved from previous configurations of this activity
@@ -56,6 +54,11 @@ public class ChatDetailActivity extends Activity {
 		} catch (ConnectionFailedException e) {
     		//Toast Message mit Fehlermeldung zeigen
     		GlobalHelper.displayToast_ConnectionFailed(getApplicationContext());
+    		//Als Fallback ID in Titel schreiben, damit er nicht leer bleibt
+			this.setTitle(getIntent().getStringExtra(ChatDetailFragment.CHAT_OPPONENT));
+    	} catch (ContactNotExistException e) {
+    		//Should not happen
+    		
     		//Als Fallback ID in Titel schreiben, damit er nicht leer bleibt
 			this.setTitle(getIntent().getStringExtra(ChatDetailFragment.CHAT_OPPONENT));
     	}

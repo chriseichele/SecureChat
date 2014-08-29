@@ -8,6 +8,7 @@ import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactExistException;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.HapticFeedbackConstants;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -50,7 +51,7 @@ public class AddContactActivity extends Activity {
 
     /** Called when the user clicks the AddContact button */
     public void addContact(View view) {
-    	// Kontakt hinzufuegen
+		// Kontakt hinzufuegen
     	
     	// KontaktID aus Textfeld holen
     	String newContact = textfield.getText().toString().trim(); 

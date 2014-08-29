@@ -1,7 +1,5 @@
 package de.dhbw.heidenheim.wi2012.securechat.gui;
 
-import java.io.File;
-
 import de.dhbw.heidenheim.wi2012.securechat.GlobalHelper;
 import de.dhbw.heidenheim.wi2012.securechat.R;
 import de.dhbw.heidenheim.wi2012.securechat.Self;
@@ -12,6 +10,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.HapticFeedbackConstants;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -94,20 +93,12 @@ public class ShowProfileActivity extends Activity {
 	
 	private void DoLogout() {
     	//Dateien Loeschen
-    	DeleteRecursive(getApplicationContext().getFilesDir());
+    	GlobalHelper.DeleteRecursive(getApplicationContext().getFilesDir());
     	//Exit to start activity
     	Intent intent = new Intent(this,LoginActivity.class);
         startActivity(intent);
         //Activity beenden, um nicht mehr zurueckkehren zu koennen
         finish();
-	}
-	
-	private void DeleteRecursive(File fileOrDirectory) {
-	    if (fileOrDirectory.isDirectory())
-	        for (File child : fileOrDirectory.listFiles())
-	            DeleteRecursive(child);
-
-	    fileOrDirectory.delete();
 	}
 
     /** Called when the user clicks the Continue button */

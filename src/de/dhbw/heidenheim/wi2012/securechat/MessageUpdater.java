@@ -6,14 +6,14 @@ import android.os.Looper;
  * A class used to perform periodical updates,
  * specified inside a runnable object. An update interval
  * may be specified (otherwise, the class will perform the 
- * update every 5 seconds).
+ * update every 10 seconds).
  */
 public class MessageUpdater {
         // Create a Handler that uses the Main Looper to run in
         private Handler mHandler = new Handler(Looper.getMainLooper());
 
         private Runnable mStatusChecker;
-        private int UPDATE_INTERVAL = 5000;
+        private int UPDATE_INTERVAL = 10000;
 
         /**
          * Creates an MessageUpdater object, that can be used to

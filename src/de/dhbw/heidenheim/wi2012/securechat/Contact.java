@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.InvalidKeyException;
+import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
@@ -42,7 +43,7 @@ public class Contact {
 	
 	private String name;
 	private String id;
-	private String public_key;
+	private Key public_key;
 	private static Context context;
 	private static String filename = "contactlist.xml";
 
@@ -51,10 +52,10 @@ public class Contact {
 	
 	private static ArrayList<Contact> contactList = new ArrayList<Contact>();
 
-	public Contact(String id, String name) {
+	public Contact(String id, String name, Key public_key) {
 		this.id = id;
 		this.name = name;
-		//getContactDetailsFromServer(id);
+		this.public_key = public_key;
 	}
 	public Contact(String id) throws ContactNotExistException, ConnectionFailedException {
 		this.id = id;
@@ -62,37 +63,14 @@ public class Contact {
 	}
 
 	private void getContactDetailsFromServer(String id) throws ContactNotExistException, ConnectionFailedException {
-		// TODO Get ContactDetails from Server
-		// public key
+		// Get ContactDetails from Server
+		Contact c = new ServerConnector(context).getContact(id);
+		
+		// Write Contact Details in Object Variables
 		// public name
-		
-		//TODO Write Contact Details in Object Variables
-		
-		if (id.equals("0")) {
-			this.name = "Testkontakt";
-		}
-		else if (id.equals("1")) {
-			this.name = "Chris";
-		}
-		else if (id.equals("2")) {
-			this.name = "Dennis";
-		}
-		else if (id.equals("3")) {
-			this.name = "Flo";
-		}
-		else if (id.equals("4")) {
-			this.name = "Martin";
-		}
-		else if (id.equals("5")) {
-			this.name = "Schnulf";
-		}
-		else if (id.equals("6")) {
-			this.name = "Vera";
-		}
-		else {
-			//Kontakt nicht gefunden
-			throw new ContactNotExistException();
-		}
+		this.name = c.getName();
+		// public key
+		this.public_key = c.getPublicKey();
 	}
 	
 	public static void setContext(Context c) {
@@ -105,7 +83,7 @@ public class Contact {
 	public String getID() {
 		return this.id;
 	}
-	public String getPublicKey() {
+	public Key getPublicKey() {
 		return this.public_key;
 	}
 	
@@ -142,6 +120,7 @@ public class Contact {
 		        serializer.startTag(null, "contact");
 		        serializer.attribute(null, "id", this.id);
 		        serializer.attribute(null, "name", this.name);
+		        serializer.attribute(null, "publicKey", this.public_key.toString());
 		        serializer.endTag(null, "contact");
 		        serializer.endTag(null, "root");
 			    serializer.endDocument();
@@ -284,9 +263,11 @@ public class Contact {
 		    
 		    NodeList contact_nodes = root.getChildNodes();
 		    for (int i=1;i<(contact_nodes.getLength()-1);i=i+2) {
+		    	Key key = GlobalHelper.getRSAKey(((Element) contact_nodes.item(i)).getAttribute("publicKey"));
 		        //Neuen Kontakt an Array geben
 		        contactList.add(new Contact(((Element) contact_nodes.item(i)).getAttribute("id"),
-		        							((Element) contact_nodes.item(i)).getAttribute("name")));
+											((Element) contact_nodes.item(i)).getAttribute("name"),
+											key));
 		    }
 	    
 		} catch (IOException
@@ -300,7 +281,7 @@ public class Contact {
 			e.printStackTrace();
 		}
 	}
-	public static String getContactName(String id) throws ConnectionFailedException {
+	public static String getContactName(String id) throws ConnectionFailedException, ContactNotExistException {
 		//XML Kontaktliste bereits eingelesen?
 		if(contactList.isEmpty()) {
 			//Kontakte einlesen
@@ -314,6 +295,7 @@ public class Contact {
 			}
 		}
 		//Kein Kontakt wurde gefunden
-		return "";
+		throw new ContactNotExistException("Contact not found!");
+		//return "";
 	}
 }

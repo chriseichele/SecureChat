@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 import android.app.Activity;
 
 /**
@@ -70,13 +71,23 @@ public class ContactListActivity extends Activity implements
 						ArrayList<Message> messages = new ServerConnector(getApplicationContext(),3).getNewMessages(
 																				last_sync,
 																				currentUserID);
+						//Benachrichtigung ueber neue Nachrichten
+						if (messages.size() > 0) {
+							GlobalHelper.displayToast_newMessage(getApplicationContext(), messages.size());
+						}
 	
 						// Nachrichten verarbeiten
 						for(int i=0;i<messages.size();i++) {
 							// durchgehen und je nach Sender in passende Chat History schreiben
 							Message m = messages.get(i);
-							ChatHistory ch = new ChatHistory(m.getSender(), getApplicationContext());
+							ChatHistory ch = new ChatHistory(m.getSenderID(), getApplicationContext());
 							ch.retrieveMessage(m);
+							//Wenn in TwoPane Modus
+							if(mTwoPane && detailFragment != null) {
+								//Chat Ansicht über neue Nachricht informieren
+								detailFragment.scrollToNewMessage();
+							}
+							
 							//Nachricht neuer? -> Timestamp aktualisieren
 							if (m.getTimestamp() > last_sync) {
 								last_sync = m.getTimestamp();
@@ -133,6 +144,27 @@ public class ContactListActivity extends Activity implements
 		} catch (ConnectionFailedException e) {
 			GlobalHelper.displayToast_ConnectionFailed(getApplicationContext());
 		}
+	}
+	
+	@Override
+    protected void onDestroy() {
+		super.onDestroy();
+        messageUpdater.stopUpdates();
+    }
+	@Override
+	protected void onPause() {
+		super.onPause();
+        messageUpdater.stopUpdates();
+	}
+	@Override
+	protected void onResume() {
+		super.onResume();
+        messageUpdater.startUpdates();
+	}
+	@Override
+	protected void onStart() {
+		super.onStart();
+        messageUpdater.startUpdates();
 	}
 
 	/**

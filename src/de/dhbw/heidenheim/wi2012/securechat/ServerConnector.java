@@ -215,7 +215,7 @@ public class ServerConnector {
 	public Self registerUser(String username, String pw_hash) throws ConnectionFailedException {
 		//TODO register User at Server
 		//TODO get new User ID
-		String user_id = "admin";
+		String user_id = "0";
 
 		//Return User Object with new fetched private Key of User
 		return new Self(user_id, username, getPrivateKey(user_id));

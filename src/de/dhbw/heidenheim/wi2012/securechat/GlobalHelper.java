@@ -63,6 +63,9 @@ public class GlobalHelper {
 		byte[] encodedKey = Base64.decode(pks, Base64.DEFAULT);
 		return new SecretKeySpec(encodedKey,0,encodedKey.length, "RSA"); 
 	}
+	public static String getRSAString(Key key) {
+		return Base64.encodeToString(key.getEncoded(), Base64.DEFAULT);
+	}
 	
 	public static void DeleteRecursive(File fileOrDirectory) {
 	    if (fileOrDirectory.isDirectory())

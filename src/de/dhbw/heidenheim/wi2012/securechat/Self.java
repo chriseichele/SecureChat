@@ -85,7 +85,7 @@ public class Self {
 	        serializer.startTag(null, "user");
 	        serializer.attribute(null, "id", this.id);
 	        serializer.attribute(null, "name", this.name);
-	        serializer.attribute(null, "private_key", this.private_key.toString());
+	        serializer.attribute(null, "private_key", GlobalHelper.getRSAString(this.private_key));
 	        serializer.endTag(null, "user");
 		    serializer.endDocument();
 		    serializer.flush();

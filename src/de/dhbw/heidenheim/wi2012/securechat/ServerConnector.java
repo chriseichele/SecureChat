@@ -14,6 +14,7 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
 import javax.crypto.KeyGenerator;
+import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -21,6 +22,8 @@ import javax.net.ssl.TrustManagerFactory;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Base64;
+import android.util.Log;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ConnectionFailedException;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
 
@@ -186,14 +189,13 @@ public class ServerConnector {
 		//TODO Parse Key as Key Object
 		
 		if(key == null) {
-			KeyGenerator keygen;
-			try {
-				keygen = KeyGenerator.getInstance("AES");
-				key = keygen.generateKey();
-			} catch (NoSuchAlgorithmException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			//KeyGenerator keygen;
+			//keygen = KeyGenerator.getInstance("AES");
+			//key = keygen.generateKey();
+
+			String pks = "E61F8A266A2D876CCE172415386550HK";
+			byte[] encodedKey = Base64.decode(pks, Base64.DEFAULT);
+			key = new SecretKeySpec(encodedKey,0,encodedKey.length, "AES");
 		}
 
 		return key;
@@ -227,8 +229,9 @@ public class ServerConnector {
 
 		//TODO parse XML
 		//TODO get key String out of XML
-		String pks = "TEST";
-		//TODO parse key String to Key Object
+		String pks = "7oN8K0sTDas700OKt8tThM2o";
+		
+		//parse key String to Key Object
 		Key key = GlobalHelper.getRSAKey(pks);
 
 		//Return Key Object

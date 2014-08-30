@@ -120,7 +120,7 @@ public class Contact {
 		        serializer.startTag(null, "contact");
 		        serializer.attribute(null, "id", this.id);
 		        serializer.attribute(null, "name", this.name);
-		        serializer.attribute(null, "publicKey", this.public_key.toString());
+		        serializer.attribute(null, "publicKey", GlobalHelper.getRSAString(this.public_key));
 		        serializer.endTag(null, "contact");
 		        serializer.endTag(null, "root");
 			    serializer.endDocument();
@@ -188,6 +188,7 @@ public class Contact {
 	            Element contact_node = dom.createElement("contact");
 	            contact_node.setAttribute("id", this.id);
 	            contact_node.setAttribute("name", this.name);
+	            contact_node.setAttribute("publicKey", GlobalHelper.getRSAString(this.public_key));
 	            root.appendChild(contact_node);
 
 	            Transformer transformer = TransformerFactory.newInstance().newTransformer();

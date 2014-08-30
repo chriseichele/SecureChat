@@ -8,7 +8,6 @@ import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactExistException;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
 import android.app.Activity;
 import android.os.Bundle;
-import android.view.HapticFeedbackConstants;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;

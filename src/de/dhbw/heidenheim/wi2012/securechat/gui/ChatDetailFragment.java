@@ -119,12 +119,6 @@ public class ChatDetailFragment extends Fragment {
 			textfield.setText("");
 			sendNewMessage(new Message(newMessage, true, my_user_id, chat_opponent_id));
 		}
-
-		// TODO Dummy Antwort nach jeder neuen Nachricht entfernen
-		try {
-			chatHistory.add(new Message("Und was kann die App bis jetzt schon alles?", false, chat_opponent_id, my_user_id));
-			scrollToNewMessage();
-		} catch (Exception e) {}
 	}
 
 	private void sendNewMessage(Message m) {
@@ -151,7 +145,8 @@ public class ChatDetailFragment extends Fragment {
 		//chatList.setSelection(messages.size() - 1);
 	}
 	
-	public void scrollToNewMessage() {
+	public void scrollToNewMessage() throws ConnectionFailedException {
+		messages = chatHistory.getCurrentMessages();
 		adapter.notifyDataSetChanged();
 		scrollChatViewToBottom();
 	}

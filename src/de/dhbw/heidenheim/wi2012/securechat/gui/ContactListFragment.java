@@ -9,7 +9,6 @@ import de.dhbw.heidenheim.wi2012.securechat.exceptions.ConnectionFailedException
 import android.app.Activity;
 import android.os.Bundle;
 import android.app.ListFragment;
-import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;

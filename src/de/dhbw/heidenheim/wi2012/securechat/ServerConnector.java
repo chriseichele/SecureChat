@@ -10,6 +10,7 @@ import java.security.Key;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
 import javax.crypto.KeyGenerator;
@@ -274,7 +275,29 @@ public class ServerConnector {
 	public ArrayList<Message> getNewMessages(Long timestampLastMessage, String userID) throws ConnectionFailedException {
 		//TODO retrieve Messages newer as timestamp for current user id from server
 		//TODO parse Messages as objects
-		return new ArrayList<Message>();
+		ArrayList<Message> messages = new ArrayList<Message>();
+		
+		//TODO remove testing code
+		for (int i=0;i<2;i++) {
+			if(new Random().nextInt(40) == 0) { 
+				messages.add(new Message("Hi :)", false, new Random().nextInt(6)+"", "1"));
+			}
+			if(new Random().nextInt(40) == 0) { 
+				messages.add(new Message("Hey!", false, new Random().nextInt(6)+"", "1"));
+			}
+			if(new Random().nextInt(30) == 0) { 
+				messages.add(new Message("Jemand zuhause?", false, new Random().nextInt(6)+"", "1"));
+			}
+			if(new Random().nextInt(30) == 0) { 
+				messages.add(new Message("Wie geht's dir so?", false, new Random().nextInt(6)+"", "1"));
+			}
+			if(new Random().nextInt(20) == 0) { 
+				messages.add(new Message("Sag mal, wie klappts jetzt mit der App?", false, new Random().nextInt(6)+"", "1"));
+			}
+		}
+		
+		//Return Array with new Messages
+		return messages;
 	}
 	
 	public void sendMessage(Message m) throws ConnectionFailedException {

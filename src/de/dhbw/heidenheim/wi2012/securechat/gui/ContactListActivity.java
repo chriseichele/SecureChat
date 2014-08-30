@@ -8,10 +8,10 @@ import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.EncryptionErrorException;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 import android.app.Activity;
 
 /**
@@ -31,7 +31,7 @@ import android.app.Activity;
  * selections.
  */
 public class ContactListActivity extends Activity implements
-		ContactListFragment.Callbacks {
+ContactListFragment.Callbacks {
 
 	// Contact Name
 	public final static String CHAT_OPPONENT = "";
@@ -46,7 +46,7 @@ public class ContactListActivity extends Activity implements
 	 */
 	private boolean mTwoPane;
 
-	private MessageUpdater messageUpdater;
+	private static MessageUpdater messageUpdater;
 
 	private String currentUserID;
 
@@ -65,42 +65,74 @@ public class ContactListActivity extends Activity implements
 				public void run() {
 					//Definiere Run() Methode des Message Updaters
 
+					//Log.d("MessageUpdater", "Checking for new messages...");
+
 					Long last_sync = ChatHistory.getLatestSynchronizeTimestamp(getApplicationContext());
-					
+
 					try {
 						ArrayList<Message> messages = new ServerConnector(getApplicationContext(),3).getNewMessages(
-																				last_sync,
-																				currentUserID);
-						//Benachrichtigung ueber neue Nachrichten
-						if (messages.size() > 0) {
-							GlobalHelper.displayToast_newMessage(getApplicationContext(), messages.size());
-						}
-	
+								last_sync,
+								currentUserID);
+
 						// Nachrichten verarbeiten
-						for(int i=0;i<messages.size();i++) {
-							// durchgehen und je nach Sender in passende Chat History schreiben
-							Message m = messages.get(i);
-							ChatHistory ch = new ChatHistory(m.getSenderID(), getApplicationContext());
-							ch.retrieveMessage(m);
-							//Wenn in TwoPane Modus
-							if(mTwoPane && detailFragment != null) {
-								//Chat Ansicht über neue Nachricht informieren
-								detailFragment.scrollToNewMessage();
+						if(messages.size() > 0) {
+							int message_counter = 0; //Nachrichtenzaehler initialisieren
+							String prev_absenderID = messages.get(0).getSenderID(); //ersten Absender holen
+							for(int i=0;i<messages.size();i++) {
+								//Message zur aktuellen iteration holen
+								Message m = messages.get(i);
+
+								//Benachrichtigungsausgabe immer zur vorherigen Iteration
+								//Benachrichtung ueber neue Nachrichten, mit Absender
+								if(m.getSenderID().equals(prev_absenderID)) {
+									//Selber Absender? nur Hochzaehlen
+									message_counter++;
+								} else {
+									//Anderer/Neuer Absender?
+									//Benachrichtung für vorherige Nachrichten ausgeben
+									GlobalHelper.displayToast_newMessage(getApplicationContext(),  message_counter, prev_absenderID);
+									//Counter zuruecksetzen
+									message_counter = 1;
+									//Absender zuruecksetzen
+									prev_absenderID = m.getSenderID();
+								}
+
+								// Nachricht je nach Sender in passende Chat History schreiben
+								ChatHistory ch = new ChatHistory(m.getSenderID(), getApplicationContext());
+								ch.retrieveMessage(m);
+
+								//Wenn in TwoPane Modus
+								if(mTwoPane && detailFragment != null) {
+									//Chat Ansicht über neue Nachricht informieren
+									detailFragment.scrollToNewMessage();
+								} else {
+									//Ist aktuelles Detail Fragment in Message Updater referenziert?
+									try {
+										MessageUpdater.getChatDetailFragment().scrollToNewMessage();
+									} catch (NullPointerException e) {
+										//Schade, dann halt nichts machen
+									}
+								}
+
+								//Nachricht neuer? -> Timestamp aktualisieren
+								if (m.getTimestamp() > last_sync) {
+									last_sync = m.getTimestamp();
+								}
 							}
-							
-							//Nachricht neuer? -> Timestamp aktualisieren
-							if (m.getTimestamp() > last_sync) {
-								last_sync = m.getTimestamp();
-							}
+							//Benachrichtigung fuer letzte Iterationauch noch ausgeben
+							GlobalHelper.displayToast_newMessage(getApplicationContext(),  message_counter, prev_absenderID);
 						}
+
+
 						// LatestSyncTimestamp auf Wert von letzter Nachricht setzen
 						ChatHistory.setLatestSynchronizeTimestamp(getApplicationContext(), last_sync);
+
 					} catch(ConnectionFailedException e) {
-			    		//Toast Message mit Fehlermeldung zeigen
-			    		GlobalHelper.displayToast_ConnectionFailed(getApplicationContext());
+						//Toast Message mit Fehlermeldung zeigen
+						GlobalHelper.displayToast_ConnectionFailed(getApplicationContext());
 					} catch (EncryptionErrorException e) {
-			    		//Toast Message mit Fehlermeldung zeigen
-			    		GlobalHelper.displayToast_EncryptionError(getApplicationContext());
+						//Toast Message mit Fehlermeldung zeigen
+						GlobalHelper.displayToast_EncryptionError(getApplicationContext());
 					}
 				}
 			});
@@ -146,25 +178,37 @@ public class ContactListActivity extends Activity implements
 		}
 	}
 	
+	public static MessageUpdater getMessageUpdater() {
+		return messageUpdater;
+	}
+
 	@Override
-    protected void onDestroy() {
+	protected void onDestroy() {
 		super.onDestroy();
-        messageUpdater.stopUpdates();
-    }
+		if(messageUpdater != null) {
+			messageUpdater.stopUpdates();
+		}
+	}
 	@Override
 	protected void onPause() {
 		super.onPause();
-        messageUpdater.stopUpdates();
+		if(messageUpdater != null) {
+			messageUpdater.stopUpdates();
+		}
 	}
 	@Override
 	protected void onResume() {
 		super.onResume();
-        messageUpdater.startUpdates();
+		if(messageUpdater != null) {
+			messageUpdater.startUpdates();
+		}
 	}
 	@Override
 	protected void onStart() {
 		super.onStart();
-        messageUpdater.startUpdates();
+		if(messageUpdater != null) {
+			messageUpdater.startUpdates();
+		}
 	}
 
 	/**
@@ -182,9 +226,9 @@ public class ContactListActivity extends Activity implements
 			this.detailFragment = new ChatDetailFragment();
 			this.detailFragment.setArguments(arguments);
 			getFragmentManager()
-					.beginTransaction()
-					.replace(R.id.contact_detail_container, this.detailFragment)
-					.commit();
+			.beginTransaction()
+			.replace(R.id.contact_detail_container, this.detailFragment)
+			.commit();
 
 		} else {
 			// In single-pane mode, simply start the detail activity

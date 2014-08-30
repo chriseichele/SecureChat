@@ -31,8 +31,11 @@
     <string name="title_section2">Registrieren</string>
     <string name="title_activity_show_profile">Mein Profil</string>
     
-    <string name="message_newMessage">%1$s neue Nachricht</string>
-    <string name="message_newMessages">%1$s neue Nachrichten</string>
+    <string name="message_newMessage_from">%1$s hat ihnen eine neue Nachricht gesendet</string>
+    <string name="message_newMessages_from">%1$s hat ihnen %2$s neue Nachrichten gesendet</string>
+    <string name="message_newMessage_from_unknown">Sie haben eine neue Nachricht von dem Absender mit der ID \""%1$s\"" empfangen</string>
+    <string name="message_newMessages_from_unknown">Sie haben %2$s neue Nachrichten  von dem Absender mit der ID \""%1$s\"" empfangen</string>
+    
     <string name="message_connection_failed">Der Server konnte nicht erreicht werden. 
         					\nBitte überprüfen sie ihre Internetverbindung und versuchen sie es erneut!</string>
     <string name="message_contact_not_exist">Fehler beim Abrufen der Kontaktdaten!</string>

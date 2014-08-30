@@ -9,7 +9,12 @@ import java.security.NoSuchAlgorithmException;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+import de.dhbw.heidenheim.wi2012.securechat.exceptions.ConnectionFailedException;
+import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
 import android.content.Context;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.util.Base64;
 import android.widget.Toast;
 
@@ -17,9 +22,6 @@ public class GlobalHelper {
 
 	private static void displayToast(Context c, String s) {
 		Toast.makeText(c, s, Toast.LENGTH_LONG).show();
-	}
-	private static void displayShortToast(Context c, String s) {
-		Toast.makeText(c, s, Toast.LENGTH_SHORT).show();
 	}
 
 	public static void displayToast_ConnectionFailed(Context c) {
@@ -31,11 +33,29 @@ public class GlobalHelper {
 	public static void displayToast_ContactNotExist(Context c) {
 		displayToast(c, c.getString(R.string.message_contact_not_exist));
 	}
-	public static void displayToast_newMessage(Context c, int anz) {
-		if(anz == 1) {
-			displayShortToast(c, c.getString(R.string.message_newMessage, anz));
-		} else {
-			displayShortToast(c, c.getString(R.string.message_newMessages, anz));
+	public static void displayToast_newMessage(Context c, int anz, String sender_id) {
+		try {
+			if(anz == 1) {
+				displayToast(c, c.getString(R.string.message_newMessage_from, Contact.getContactName(sender_id)));
+			} else {
+				displayToast(c, c.getString(R.string.message_newMessages_from, Contact.getContactName(sender_id), anz));
+			}
+		} catch (ContactNotExistException | ConnectionFailedException e) {
+			if(anz == 1) {
+				displayToast(c, c.getString(R.string.message_newMessage_from_unknown, sender_id));
+			} else {
+				displayToast(c, c.getString(R.string.message_newMessages_from_unknown, sender_id, anz));
+			}
+		}
+		playNotificationSound(c);
+	}
+	private static void playNotificationSound(Context c) {
+		try {
+		    Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+		    Ringtone r = RingtoneManager.getRingtone(c, notification);
+		    r.play();
+		} catch (Exception e) {
+		    e.printStackTrace();
 		}
 	}
 

@@ -2,6 +2,7 @@ package de.dhbw.heidenheim.wi2012.securechat.gui;
 
 import de.dhbw.heidenheim.wi2012.securechat.Contact;
 import de.dhbw.heidenheim.wi2012.securechat.GlobalHelper;
+import de.dhbw.heidenheim.wi2012.securechat.MessageUpdater;
 import de.dhbw.heidenheim.wi2012.securechat.R;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ConnectionFailedException;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
@@ -62,6 +63,47 @@ public class ChatDetailActivity extends Activity {
     		//Als Fallback ID in Titel schreiben, damit er nicht leer bleibt
 			this.setTitle(getIntent().getStringExtra(ChatDetailFragment.CHAT_OPPONENT));
     	}
+	}
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		MessageUpdater messageUpdater = ContactListActivity.getMessageUpdater();
+		if(messageUpdater != null) {
+			messageUpdater.stopUpdates();
+		}
+		//Set Detail Fragment to enable Message Updater to Notify Fragment of new Messages
+		MessageUpdater.setChatDetailFragment(null);
+	}
+	@Override
+	protected void onPause() {
+		super.onPause();
+		MessageUpdater messageUpdater = ContactListActivity.getMessageUpdater();
+		if(messageUpdater != null) {
+			messageUpdater.stopUpdates();
+		}
+		//Set Detail Fragment to enable Message Updater to Notify Fragment of new Messages
+		MessageUpdater.setChatDetailFragment(null);
+	}
+	@Override
+	protected void onResume() {
+		super.onResume();
+		MessageUpdater messageUpdater = ContactListActivity.getMessageUpdater();
+		if(messageUpdater != null) {
+			messageUpdater.startUpdates();
+		}
+		//Set Detail Fragment to enable Message Updater to Notify Fragment of new Messages
+		MessageUpdater.setChatDetailFragment(detailFragment);
+	}
+	@Override
+	protected void onStart() {
+		super.onStart();
+		MessageUpdater messageUpdater = ContactListActivity.getMessageUpdater();
+		if(messageUpdater != null) {
+			messageUpdater.startUpdates();
+		}
+		//Set Detail Fragment to enable Message Updater to Notify Fragment of new Messages
+		MessageUpdater.setChatDetailFragment(detailFragment);
 	}
     
     /** Called when the user clicks the Send button */

@@ -1,23 +1,26 @@
 package de.dhbw.heidenheim.wi2012.securechat;
 
+import de.dhbw.heidenheim.wi2012.securechat.gui.ChatDetailFragment;
 import android.os.Handler;
 import android.os.Looper;
 /**
  * A class used to perform periodical updates,
  * specified inside a runnable object. An update interval
  * may be specified (otherwise, the class will perform the 
- * update every 10 seconds).
+ * update every 12 seconds).
  */
 public class MessageUpdater {
         // Create a Handler that uses the Main Looper to run in
         private Handler mHandler = new Handler(Looper.getMainLooper());
 
         private Runnable mStatusChecker;
-        private int UPDATE_INTERVAL = 10000;
+        private int UPDATE_INTERVAL = 12000;
+
+    	private static ChatDetailFragment chatDetailFragment;
 
         /**
          * Creates an MessageUpdater object, that can be used to
-         * perform UIUpdates on a specified time interval.
+         * perform MessageUpdates on a specified time interval.
          * 
          * @param messageUpdater A runnable containing the update routine.
          */
@@ -47,5 +50,12 @@ public class MessageUpdater {
          */
         public synchronized void stopUpdates(){
             mHandler.removeCallbacks(mStatusChecker);
+        }
+
+        public static void setChatDetailFragment(ChatDetailFragment cdf) {
+        	chatDetailFragment = cdf;
+        }
+        public static ChatDetailFragment getChatDetailFragment() {
+        	return chatDetailFragment;
         }
 }

@@ -90,6 +90,12 @@ public class ContactListFragment extends ListFragment {
     		GlobalHelper.displayToast_ConnectionFailed(getActivity().getApplicationContext());
     	}
 	}
+	
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+	    super.onActivityCreated(savedInstanceState);
+		this.getListView().setSelector(R.drawable.my_selector);
+	}
 
 	@Override
 	public void onViewCreated(View view, Bundle savedInstanceState) {

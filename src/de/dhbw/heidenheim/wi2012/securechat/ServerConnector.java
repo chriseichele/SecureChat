@@ -8,12 +8,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.Key;
 import java.security.KeyStore;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
-import javax.crypto.KeyGenerator;
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManagerFactory;
@@ -23,7 +21,6 @@ import javax.net.ssl.TrustManagerFactory;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Base64;
-import android.util.Log;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ConnectionFailedException;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
 

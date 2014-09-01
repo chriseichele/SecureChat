@@ -87,12 +87,12 @@ public class Contact {
 		return this.public_key;
 	}
 	
-	public void addToContactList() throws ContactExistException {
+	public void addToContactList() throws ContactExistException, ConnectionFailedException {
 		contactList.add(this);
 		saveContactDetailsToXML();
 	}
 	
-	private void saveContactDetailsToXML() throws ContactExistException {
+	private void saveContactDetailsToXML() throws ContactExistException, ConnectionFailedException {
 		//Variablen initialisieren
 		
 		//Check if file for Contact List exists
@@ -130,9 +130,8 @@ public class Contact {
 			} catch (IOException
 					| InvalidKeyException 
 					| NoSuchAlgorithmException 
-					| NoSuchPaddingException
-					| ConnectionFailedException e) {
-				// TODO Auto-generated catch block
+					| NoSuchPaddingException e) {
+				// TODO Auto-generated catch block -> do nothing
 				e.printStackTrace();
 			}
 		}
@@ -211,9 +210,8 @@ public class Contact {
 					| NoSuchPaddingException 
 					| IOException 
 					| SAXException 
-					| ParserConfigurationException
-					| ConnectionFailedException  e) {
-				// TODO Auto-generated catch block
+					| ParserConfigurationException e) {
+				// TODO Auto-generated catch block -> do nothing
 				e.printStackTrace();
 			}
 		}
@@ -276,10 +274,10 @@ public class Contact {
 				| NoSuchAlgorithmException 
 				| NoSuchPaddingException 
 				| SAXException 
-				| ParserConfigurationException 
-				| ConnectionFailedException  e) {
-			// TODO Auto-generated catch block
+				| ParserConfigurationException e) {
+			// Auto-generated catch block
 			e.printStackTrace();
+			// do Nothing, Contact List will just stay empty
 		}
 	}
 	public static String getContactName(String id) throws ConnectionFailedException, ContactNotExistException {

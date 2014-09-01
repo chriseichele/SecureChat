@@ -96,8 +96,9 @@ public class Self {
 				| NoSuchAlgorithmException 
 				| NoSuchPaddingException
 				| ConnectionFailedException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
+			//Do Nothing on Failure, User has just to Log in next Time again
 		}
 	}
 	

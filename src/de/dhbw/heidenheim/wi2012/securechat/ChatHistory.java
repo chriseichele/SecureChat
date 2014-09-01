@@ -188,8 +188,8 @@ public class ChatHistory {
 	public void send(Message m) throws ConnectionFailedException, EncryptionErrorException {
 		//Encrypt
 		m = encryptMessageContent(m);
-		//TODO Add to server
-		
+		//Add to server
+		new ServerConnector(context).sendMessage(m);//Context sollte hier schon lange initialisiert sein
 		//Add to local 
 		add(m);
 	}
@@ -289,13 +289,14 @@ public class ChatHistory {
 	}
 
 	private Message encryptMessageContent(Message m) throws EncryptionErrorException {
-		//TODO get public Encryption Key for Reciever from Server
 
 		String inhalt = m.getMessage();
 
 		try {
 
+			//get recievers/own private Key
 			Key privateKey = getPrivateKey();
+			//get senders public key
 			Key publicKey = getPublicKey(m.getSenderID());
 			
 			//TODO Encrypt Message Content with public Key
@@ -312,13 +313,14 @@ public class ChatHistory {
 	}
 
 	private Message decryptMessageContent(Message m) throws EncryptionErrorException {
-		//TODO get public Encryption Key for Reciever from Server
 
 		String inhalt = m.getMessage();
 
 		try {
 
+			//get recievers/own private Key
 			Key privateKey = getPrivateKey();
+			//get senders public key
 			Key publicKey = getPublicKey(m.getSenderID());
 
 			//TODO Check Signed Content

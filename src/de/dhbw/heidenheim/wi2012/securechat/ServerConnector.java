@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.Key;
@@ -40,7 +41,7 @@ public class ServerConnector {
 		} else {
 			this.connection_trys = max_connection_trys;
 		}
-		
+
 		this.protokoll = "https://";
 		//Selber Server, da nur einer von der DHBW zur Verfuegung gestellt wurde
 		this.login_server_directory = "wwi12-01.dhbw-heidenheim.de/SecureChat/webresources/";
@@ -52,12 +53,18 @@ public class ServerConnector {
 
 	//Assynchroner Task um XML Datei von URL zu holen
 	private class RetrieveXMLTask extends AsyncTask<String, Void, String> {
-		
+
+		private String method;
+
+		public RetrieveXMLTask(String method) {
+			this.method = method;
+		}
+
 		private Exception exception;
 
 		protected String doInBackground(String... urls) {
 			try {
-				
+
 				urls[0] = "https://wwi12-01.dhbw-heidenheim.de/SecureChat/webresources/entities.message"; //TODO currently working URL -> remove this line later
 
 				char[] pw = "changeit".toCharArray();
@@ -90,13 +97,19 @@ public class ServerConnector {
 				URL url = new URL(urls[0]);
 				HttpsURLConnection urlConnection = (HttpsURLConnection)url.openConnection();
 				urlConnection.setSSLSocketFactory(ssl.getSocketFactory());
-				urlConnection.setRequestMethod("GET");
 				urlConnection.setRequestProperty("Accept", "application/xml");
 
-				// Send the request
-				//OutputStream outputStream = urlConnection.getOutputStream();
-				//outputStream.write( "Output Stream Content".getBytes("UTF-8") );
-				//outputStream.close();
+				if(this.method == "POST") {
+					urlConnection.setRequestMethod("POST");
+
+					// Send the request
+					OutputStream outputStream = urlConnection.getOutputStream();
+					outputStream.write( urls[1].getBytes("UTF-8") );
+					outputStream.close();
+				} else {
+					// == GET
+					urlConnection.setRequestMethod("GET");
+				}
 
 				// Check for errors
 				int responseCode = urlConnection.getResponseCode();
@@ -133,7 +146,6 @@ public class ServerConnector {
 			// check this.exception 
 			// do something with the feed
 
-
 			// -> durch Aufruf von .get() synchron geschaltet
 			// asynchrone verarbeitung nicht notwendig.
 
@@ -145,13 +157,19 @@ public class ServerConnector {
 				// Exception behandeln...
 			}
 		}
-		
+
 		public Exception getException() {
 			return this.exception;
 		}
 	}
 
 	private String getXML(String url) throws ConnectionFailedException {
+		return connect("GET", url, null);
+	}
+	private String postXML(String url, String parameter) throws ConnectionFailedException {
+		return connect("POST", url, parameter);
+	}
+	private String connect(String method,String url, String post_parameter) throws ConnectionFailedException {
 
 		try {
 
@@ -160,8 +178,8 @@ public class ServerConnector {
 			RetrieveXMLTask task = null;
 			//Versuche für Verbindungsaufbau
 			while ((result == null || result.trim().isEmpty()) && trys > 0) {
-				task = new RetrieveXMLTask();
-				result = task.execute(url).get();
+				task = new RetrieveXMLTask(method);
+				result = task.execute(url, post_parameter).get();
 				trys--;
 			}
 			if(result == null || result.trim().isEmpty()) {
@@ -179,12 +197,18 @@ public class ServerConnector {
 		}
 
 	}
+	
+	
+	/* ----------------------------------------------------------------------------------------
+	 * Ab hier kommen oeffentliche Methoden zum Aufruf der Verbindungen
+	 * ----------------------------------------------------------------------------------------
+	 */
 
 	public Key getFileEncryptionKey() throws ConnectionFailedException {
 
 		//TODO Get Key for Local Encryption from Server
 		//TODO Parse Key as Key Object
-		
+
 		if(key == null) {
 			//KeyGenerator keygen;
 			//keygen = KeyGenerator.getInstance("AES");
@@ -197,7 +221,7 @@ public class ServerConnector {
 
 		return key;
 	}
-	
+
 	public Self loginUser(String user_id, String pw_hash) throws ConnectionFailedException, ContactNotExistException {
 		//TODO check user data on server
 		if (false) {
@@ -210,7 +234,7 @@ public class ServerConnector {
 		//Return User Object with new fetched private Key of User
 		return new Self(user_id, username, getPrivateKey(user_id));
 	}
-	
+
 	public Self registerUser(String username, String pw_hash) throws ConnectionFailedException {
 		//TODO register User at Server
 		//TODO get new User ID
@@ -227,7 +251,7 @@ public class ServerConnector {
 		//TODO parse XML
 		//TODO get key String out of XML
 		String pks = "7oN8K0sTDas700OKt8tThM2o";
-		
+
 		//parse key String to Key Object
 		Key key = GlobalHelper.getRSAKey(pks);
 
@@ -239,7 +263,7 @@ public class ServerConnector {
 		//TODO Get Contact Details from Server (Name & public Key)
 		//TODO Parse As Object
 
-		
+
 		//TODO Remove Dummy Code
 		String name;
 		if (contactID.equals("0")) {
@@ -267,7 +291,7 @@ public class ServerConnector {
 			//Kontakt nicht gefunden
 			throw new ContactNotExistException();
 		}
-		
+
 		//Contact Objekt mit Daten zurueck geben
 		return new Contact(contactID, name, GlobalHelper.getRSAKey("TESTKEY"));
 	}
@@ -276,7 +300,7 @@ public class ServerConnector {
 		//TODO retrieve Messages newer as timestamp for current user id from server
 		//TODO parse Messages as objects
 		ArrayList<Message> messages = new ArrayList<Message>();
-		
+
 		//TODO remove testing code
 		for (int i=0;i<2;i++) {
 			if(new Random().nextInt(40) == 0) { 
@@ -295,11 +319,11 @@ public class ServerConnector {
 				messages.add(new Message("Sag mal, wie klappts jetzt mit der App?", false, new Random().nextInt(6)+"", "1"));
 			}
 		}
-		
+
 		//Return Array with new Messages
 		return messages;
 	}
-	
+
 	public void sendMessage(Message m) throws ConnectionFailedException {
 		//TODO send Message to server
 		//TODO throw Exception on failure

@@ -9,6 +9,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.Key;
 import java.security.KeyStore;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
@@ -206,9 +207,24 @@ public class ServerConnector {
 	 */
 
 	public Key getFileEncryptionKey() throws ConnectionFailedException {
-		
+		String android_id = Secure.getString(context.getContentResolver(),Secure.ANDROID_ID);
+		try {
+			//Versuche SHA-Hash der ID zu erstellen
+			MessageDigest md = MessageDigest.getInstance("SHA-512");
+			md.update(android_id.getBytes());
+			byte[] bytes = md.digest();
+			StringBuffer buffer = new StringBuffer();
+			for (int i = 0; i < bytes.length; i++) {
+				String tmp = Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1);
+				buffer.append(tmp);
+			}
+			//ID mit hash ueberschreiben
+			android_id = buffer.toString();
+		} catch(Exception e) {
+			//Do nothing -> User Normal Android ID
+		}
 
-		//TODO Get Key for Local Encryption from Server
+		//TODO Get Key for Local Encryption from Server (unique for Android Device)
 		//TODO Parse Key as Key Object
 
 		if(key == null) {

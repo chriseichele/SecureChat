@@ -21,6 +21,7 @@ import javax.net.ssl.TrustManagerFactory;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.provider.Settings.Secure;
 import android.util.Base64;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ConnectionFailedException;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
@@ -205,6 +206,7 @@ public class ServerConnector {
 	 */
 
 	public Key getFileEncryptionKey() throws ConnectionFailedException {
+		
 
 		//TODO Get Key for Local Encryption from Server
 		//TODO Parse Key as Key Object
@@ -238,6 +240,7 @@ public class ServerConnector {
 	public Self registerUser(String username, String pw_hash) throws ConnectionFailedException {
 		//TODO register User at Server
 		//TODO get new User ID
+		String xml = getXML(this.protokoll + this.login_server_directory + "entities.loginmessageserver/" + username );
 		String user_id = "0";
 
 		//Return User Object with new fetched private Key of User
@@ -261,6 +264,7 @@ public class ServerConnector {
 
 	public Contact getContact(String contactID) throws ConnectionFailedException, ContactNotExistException {
 		//TODO Get Contact Details from Server (Name & public Key)
+		String xml = getXML(this.protokoll + this.message_server_directory + "entities.loginmessageserver/" + contactID );
 		//TODO Parse As Object
 
 
@@ -297,7 +301,8 @@ public class ServerConnector {
 	}
 
 	public ArrayList<Message> getNewMessages(Long timestampLastMessage, String userID) throws ConnectionFailedException {
-		//TODO retrieve Messages newer as timestamp for current user id from server
+		// retrieve Messages newer as timestamp for current user id from server
+		String xml = getXML(this.protokoll + this.message_server_directory + "entities.loginmessageserver/" + timestampLastMessage + userID );
 		//TODO parse Messages as objects
 		ArrayList<Message> messages = new ArrayList<Message>();
 

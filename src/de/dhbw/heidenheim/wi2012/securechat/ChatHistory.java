@@ -246,7 +246,7 @@ public class ChatHistory {
 			Element connection = dom.createElement("connection");
 			connection.setAttribute("mine", m.isMine()+"");
 			connection.setAttribute("sender", m.getSenderID()+"");
-			connection.setAttribute("reciever", m.getReciever()+"");
+			connection.setAttribute("reciever", m.getRecieverID()+"");
 			message_node.appendChild(connection);
 
 			Element content = dom.createElement("content");

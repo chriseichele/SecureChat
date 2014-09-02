@@ -2,14 +2,21 @@ package de.dhbw.heidenheim.wi2012.securechat;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.Key;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
@@ -19,6 +26,16 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -46,8 +63,8 @@ public class ServerConnector {
 
 		this.protokoll = "https://";
 		//Selber Server, da nur einer von der DHBW zur Verfuegung gestellt wurde
-		this.login_server_directory = "wwi12-01.dhbw-heidenheim.de/SecureChat/webresources/";
-		this.message_server_directory = "wwi12-01.dhbw-heidenheim.de/SecureChat/webresources/";
+		this.login_server_directory = "wwi12-01.dhbw-heidenheim.de/SecureChat/webresources/de.dhbwheidenheim.wwi1201.securechat.";
+		this.message_server_directory = "wwi12-01.dhbw-heidenheim.de/SecureChat/webresources/de.dhbwheidenheim.wwi1201.securechat.";
 	}
 	public ServerConnector(Context context) {
 		this(context, 2); //Default max_connection_trys
@@ -66,8 +83,6 @@ public class ServerConnector {
 
 		protected String doInBackground(String... urls) {
 			try {
-
-				urls[0] = "https://wwi12-01.dhbw-heidenheim.de/SecureChat/webresources/entities.message"; //TODO currently working URL -> remove this line later
 
 				char[] pw = "changeit".toCharArray();
 
@@ -104,13 +119,17 @@ public class ServerConnector {
 				if(this.method == "POST") {
 					urlConnection.setRequestMethod("POST");
 
-					// Send the request
-					OutputStream outputStream = urlConnection.getOutputStream();
-					outputStream.write( urls[1].getBytes("UTF-8") );
-					outputStream.close();
-				} else {
-					// == GET
+					urlConnection.setRequestProperty( "Content-Type", "application/json; charset=utf8" );
+					urlConnection.setRequestProperty( "Content-Length", Integer.toString(urls[1].length()) );
+
+					// Sent the Post Parameter
+					OutputStream os = urlConnection.getOutputStream();
+					os.write(urls[1].getBytes("UTF-8"));
+					os.close();
+				} else if(this.method == "GET") {
 					urlConnection.setRequestMethod("GET");
+				} else {
+					//nicht definiert
 				}
 
 				// Check for errors
@@ -199,44 +218,82 @@ public class ServerConnector {
 		}
 
 	}
-	
-	
+
+
 	/* ----------------------------------------------------------------------------------------
 	 * Ab hier kommen oeffentliche Methoden zum Aufruf der Verbindungen
 	 * ----------------------------------------------------------------------------------------
 	 */
 
 	public Key getFileEncryptionKey() throws ConnectionFailedException {
-		String android_id = Secure.getString(context.getContentResolver(),Secure.ANDROID_ID);
-		try {
-			//Versuche SHA-Hash der ID zu erstellen
-			MessageDigest md = MessageDigest.getInstance("SHA-512");
-			md.update(android_id.getBytes());
-			byte[] bytes = md.digest();
-			StringBuffer buffer = new StringBuffer();
-			for (int i = 0; i < bytes.length; i++) {
-				String tmp = Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1);
-				buffer.append(tmp);
-			}
-			//ID mit hash ueberschreiben
-			android_id = buffer.toString();
-		} catch(Exception e) {
-			//Do nothing -> User Normal Android ID
-		}
 
-		//TODO Get Key for Local Encryption from Server (unique for Android Device)
-		//TODO Parse Key as Key Object
-
+		//Key nur vom server holen, wenn nicht bereits lokal zwischengespeichert
 		if(key == null) {
-			//KeyGenerator keygen;
-			//keygen = KeyGenerator.getInstance("AES");
-			//key = keygen.generateKey();
 
-			String pks = "E61F8A266A2D876CCE172415386550HK";
-			byte[] encodedKey = Base64.decode(pks, Base64.DEFAULT);
+			//File Encryption Key ist abhaengig vom Client Geraet
+			String android_id = Secure.getString(context.getContentResolver(),Secure.ANDROID_ID);
+			try {
+				//Versuche SHA-Hash der ID zu erstellen
+				MessageDigest md = MessageDigest.getInstance("SHA-512");
+				md.update(android_id.getBytes());
+				byte[] bytes = md.digest();
+				StringBuffer buffer = new StringBuffer();
+				for (int i = 0; i < bytes.length; i++) {
+					String tmp = Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1);
+					buffer.append(tmp);
+				}
+				//ID mit hash ueberschreiben
+				android_id = buffer.toString();
+			} catch(Exception e) {
+				//Do nothing -> Use normal Android ID instead of hash
+			}
+
+			//Get Key for Local Encryption from Server (unique for Android Device)
+			String xml;
+			try {
+				//Versuche Schluessel abzurufen
+				xml = getXML(this.protokoll + this.login_server_directory + "keystore/" + android_id );
+			} catch (ConnectionFailedException e2) {
+				//Schluessel fuer ID noch nicht vorhanden -> neuen anlegen
+				try {
+					//Generate JSON Data
+					JSONObject json = new JSONObject();
+					json.put("ID", android_id);
+					json.put("aeskey", "dummy");
+
+					//Post Aufruf mit XML als Parameter
+					xml = postXML(this.protokoll + this.login_server_directory + "keystore" , json.toString());
+
+				} catch (JSONException e) {
+					throw new ConnectionFailedException("Error Sending JSON Data for POST");
+				}
+			}
+
+			//Parse Key as Key Object out of Return XML
+			String ks = null; //Key String
+			try {
+				DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+				DocumentBuilder db = dbf.newDocumentBuilder();
+				InputSource is = new InputSource();
+				is.setCharacterStream(new StringReader(xml));
+
+				Document doc = db.parse(is);
+				ks = doc.getDocumentElement().getNodeValue();
+
+			} catch (ParserConfigurationException
+					| SAXException 
+					| IOException e) {
+				// handle ParserConfigurationException
+				throw new ConnectionFailedException("Error parsing FileEncryptionKey!");
+			}
+
+			ks = "E61F8A266A2D876CCE172415386550HK";//TODO remove Testing Code
+
+			byte[] encodedKey = Base64.decode(ks, Base64.DEFAULT);
 			key = new SecretKeySpec(encodedKey,0,encodedKey.length, "AES");
 		}
 
+		//Return Key Object
 		return key;
 	}
 
@@ -246,30 +303,113 @@ public class ServerConnector {
 			//If Contact does not exist or wrong login details
 			throw new ContactNotExistException();
 		}
-		//TODO get username form server
+		//TODO get username (& private Key) form server
 		String username = "Dummy";
 
-		//Return User Object with new fetched private Key of User
+		//TODO Return User Object with new fetched private Key of User
 		return new Self(user_id, username, getPrivateKey(user_id));
 	}
 
 	public Self registerUser(String username, String pw_hash) throws ConnectionFailedException {
-		//TODO register User at Server
-		//TODO get new User ID
-		String xml = getXML(this.protokoll + this.login_server_directory + "entities.loginmessageserver/" + username );
-		String user_id = "0";
+		//Generieren von RSA Keypaar (private_key & public_key)
+		PrivateKey privateKey = null;
+		PublicKey publicKey = null;
+		try {
+			KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+			keyPairGenerator.initialize(2048);
+			KeyPair keyPair = keyPairGenerator.genKeyPair();
+			privateKey = keyPair.getPrivate();
+			publicKey = keyPair.getPublic();
+		} catch(NoSuchAlgorithmException e) {
+			throw new ConnectionFailedException(e.getMessage());
+		}
 
-		//Return User Object with new fetched private Key of User
-		return new Self(user_id, username, getPrivateKey(user_id));
+		//User bei userloginserver registrieren (mit Username, password & private_key) -> return ID
+		String xml = null;
+		try {
+			//TODO Generate JSON Data for new User
+			JSONObject json = new JSONObject();
+			json.put("username", username);
+			json.put("password", pw_hash);
+			json.put("privateKey", privateKey);
+
+			//Post Aufruf mit XML als Parameter
+			xml = postXML(this.protokoll + this.login_server_directory + "userloginserver" , json.toString());
+
+		} catch (JSONException e) {
+			throw new ConnectionFailedException("Error Sending JSON Data for POST to user server");
+		}
+		
+		//TODO parse XML Data and get new User ID
+		String user_id = null;
+		try {
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			InputSource is = new InputSource();
+			is.setCharacterStream(new StringReader(xml));
+
+			Document doc = db.parse(is);
+			NodeList attributes = doc.getDocumentElement().getChildNodes();
+			for(int i=0;i<attributes.getLength();i++) {
+				if(attributes.item(i).getLocalName().equals("ID")) {
+					//get ID String out of XML
+					user_id = attributes.item(i).getNodeValue();
+					break;
+				}
+			}  
+		} catch (ParserConfigurationException
+				| SAXException 
+				| IOException e) {
+			throw new ConnectionFailedException("Error parsing user ID!");
+		}
+		
+		//User bei usermessageserver registrieren (mit ID, Username & public_key)
+		try {
+			//TODO Generate JSON Data for new User
+			JSONObject json = new JSONObject();
+			json.put("ID", user_id);
+			json.put("username", username);
+			json.put("publicKey", publicKey);
+
+			//Post Aufruf mit XML als Parameter
+			xml = postXML(this.protokoll + this.login_server_directory + "userloginserver" , json.toString());
+
+		} catch (JSONException e) {
+			throw new ConnectionFailedException("Error Sending JSON Data for POST to message server");
+		}
+
+		//Return User Object
+		return new Self(user_id, username, privateKey);
 	}
 
 	private Key getPrivateKey(String user_id) throws ConnectionFailedException {
 		//Get XML from server
-		String xml = getXML(this.protokoll + this.login_server_directory + "entities.userloginserver/" + user_id);
+		String xml = getXML(this.protokoll + this.login_server_directory + "userloginserver/" + user_id);
 
-		//TODO parse XML
-		//TODO get key String out of XML
-		String pks = "7oN8K0sTDas700OKt8tThM2o";
+		//parse XML
+		String pks = null; //Private Key String
+		try {
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			InputSource is = new InputSource();
+			is.setCharacterStream(new StringReader(xml));
+
+			Document doc = db.parse(is);
+			NodeList attributes = doc.getDocumentElement().getChildNodes();
+			for(int i=0;i<attributes.getLength();i++) {
+				if(attributes.item(i).getLocalName().equals("privateKey")) {
+					//get key String out of XML
+					pks = attributes.item(i).getNodeValue();
+					break;
+				}
+			}  
+		} catch (ParserConfigurationException
+				| SAXException 
+				| IOException e) {
+			throw new ConnectionFailedException("Error parsing privateKey!");
+		}
+
+		pks = "7oN8K0sTDas700OKt8tThM2o"; //TODO remove dummy key string
 
 		//parse key String to Key Object
 		Key key = GlobalHelper.getRSAKey(pks);
@@ -279,10 +419,10 @@ public class ServerConnector {
 	}
 
 	public Contact getContact(String contactID) throws ConnectionFailedException, ContactNotExistException {
-		//TODO Get Contact Details from Server (Name & public Key)
-		String xml = getXML(this.protokoll + this.message_server_directory + "entities.loginmessageserver/" + contactID );
-		//TODO Parse As Object
+		//Get Contact Details from Server (Name & public Key)
+		String xml = getXML(this.protokoll + this.message_server_directory + "usermessageserver/" + contactID );
 
+		//TODO Parse As Object
 
 		//TODO Remove Dummy Code
 		String name;
@@ -317,8 +457,9 @@ public class ServerConnector {
 	}
 
 	public ArrayList<Message> getNewMessages(Long timestampLastMessage, String userID) throws ConnectionFailedException {
-		// retrieve Messages newer as timestamp for current user id from server
-		String xml = getXML(this.protokoll + this.message_server_directory + "entities.loginmessageserver/" + timestampLastMessage + userID );
+		//TODO retrieve Messages newer as timestamp for current user id from server
+		String xml = getXML(this.protokoll + this.message_server_directory + "message/" + timestampLastMessage + userID );
+
 		//TODO parse Messages as objects
 		ArrayList<Message> messages = new ArrayList<Message>();
 
@@ -346,8 +487,22 @@ public class ServerConnector {
 	}
 
 	public void sendMessage(Message m) throws ConnectionFailedException {
-		//TODO send Message to server
-		//TODO throw Exception on failure
+		//send Message to server
+		try {
+			//TODO Generate JSON Data for new Message
+			JSONObject json = new JSONObject();
+			json.put("timestamp", m.getTimestamp()+"");
+			json.put("sender", m.getSenderID());
+			json.put("reciever", m.getRecieverID());
+			json.put("content", m.getMessage());
+
+			//Post Aufruf mit XML als Parameter
+			postXML(this.protokoll + this.login_server_directory + "message" , json.toString());
+
+		} catch (JSONException e2) {
+			//throw Exception on Failure
+			throw new ConnectionFailedException("Error parsing JSON to send Message!");
+		}
 	}
 
 }

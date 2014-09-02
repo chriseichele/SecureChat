@@ -68,7 +68,7 @@ public class Message {
 	public String getSenderID() {
 		return this.sender;
 	}
-	public String getReciever() {
+	public String getRecieverID() {
 		return this.reciever;
 	}
 	

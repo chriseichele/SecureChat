@@ -8,15 +8,20 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
-import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Date;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -38,6 +43,7 @@ import de.dhbw.heidenheim.wi2012.securechat.exceptions.ConnectionFailedException
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.EncryptionErrorException;
 import android.content.Context;
+import android.util.Base64;
 import android.util.Xml;
 
 public class ChatHistory {
@@ -45,8 +51,8 @@ public class ChatHistory {
 	private ArrayList<Message> messages;
 	private String filename;
 	
-	private static Key own_privateKey;
-	private Key sender_publicKey;
+	private static PrivateKey own_privateKey;
+	private PublicKey sender_publicKey;
 
 	private static final String filename_last_sync = "sync.xml";
 
@@ -144,9 +150,10 @@ public class ChatHistory {
 					String sender_id = (attributes.item(1).getAttributes().item(1).getNodeValue());
 					String reciever_id = (attributes.item(1).getAttributes().item(2).getNodeValue());
 					String content = attributes.item(3).getFirstChild().getNodeValue();
-					long timestamp = Long.parseLong(attributes.item(5).getFirstChild().getNodeValue(), 10);
+					String signature = attributes.item(5).getFirstChild().getNodeValue();
+					long timestamp = Long.parseLong(attributes.item(7).getFirstChild().getNodeValue(), 10);
 					//Neue Nachricht an Array ausgeben
-					messages.add(new Message(content, is_my_message, sender_id, reciever_id, new Date(timestamp)));
+					messages.add(new Message(content, signature, is_my_message, sender_id, reciever_id, new Date(timestamp)));
 				}
 			}
 
@@ -253,6 +260,10 @@ public class ChatHistory {
 			content.appendChild(dom.createTextNode(m.getMessage()));
 			message_node.appendChild(content);
 
+			Element sign = dom.createElement("signature");
+			sign.appendChild(dom.createTextNode(m.getSignature()));
+			message_node.appendChild(sign);
+
 			Element timestamp = dom.createElement("timestamp");
 			timestamp.appendChild(dom.createTextNode(m.getTimestamp()+""));
 			message_node.appendChild(timestamp);
@@ -295,17 +306,31 @@ public class ChatHistory {
 		try {
 
 			//get recievers/own private Key
-			Key privateKey = getPrivateKey();
+			PrivateKey privateKey = getPrivateKey();
 			//get senders public key
-			Key publicKey = getPublicKey(m.getSenderID());
+			PublicKey publicKey = getPublicKey(m.getRecieverID());
+
+			   RSAHelper helper = new RSAHelper();
+		       byte[] data = inhalt.getBytes("UTF-8");
+				// Sign Message Content with own private Key
+		       byte[] digitalSignature = helper.signData(data, privateKey);       
+		       String signatur = new String(Base64.encode(digitalSignature, Base64.DEFAULT));
+				// Encrypt Message Content with public Key
+		       String encryptedText = helper.encrypt(inhalt, publicKey);
+		       
 			
-			//TODO Encrypt Message Content with public Key
-			//TODO Sign Message Content with own private Key
-			
-			m.setMessage(inhalt);
+			m.setMessage(encryptedText);
+			m.setSignature(signatur);
 
 		} catch(ContactNotExistException
-			   | ConnectionFailedException  e) {
+			   | ConnectionFailedException
+			   | UnsupportedEncodingException 
+			   | InvalidKeyException 
+			   | NoSuchAlgorithmException 
+			   | NoSuchPaddingException 
+			   | IllegalBlockSizeException 
+			   | BadPaddingException 
+			   | SignatureException e) {
 			throw new EncryptionErrorException("Cannot retrieve Key!");
 		}
 
@@ -319,33 +344,51 @@ public class ChatHistory {
 		try {
 
 			//get recievers/own private Key
-			Key privateKey = getPrivateKey();
+			PrivateKey privateKey = getPrivateKey();
 			//get senders public key
-			Key publicKey = getPublicKey(m.getSenderID());
+			PublicKey publicKey = getPublicKey(m.getSenderID());
 
 			//TODO Check Signed Content
 			//TODO Decrypt Message Content with public Key
+			   RSAHelper helper = new RSAHelper();
+			 String klartext = helper.decrypt(inhalt, privateKey); 
+
+		       byte[] ByteSignature = Base64.decode(m.getSignature(), Base64.DEFAULT);
+		       
+		       //Signatur echt?
+		       boolean echt = helper.verifySig(klartext.getBytes("UTF-8"), publicKey, ByteSignature);
 			
-			m.setMessage(inhalt);
+		       if(echt) {
+					m.setMessage(klartext);
+		       } else {
+		    	   throw new EncryptionErrorException("Signature cannot be verified! Message content may be modified!");
+		       }
 
 		} catch(ContactNotExistException
-				| ConnectionFailedException e) {
+				| ConnectionFailedException 
+				| InvalidKeyException 
+				| NoSuchAlgorithmException 
+				| NoSuchPaddingException 
+				| IllegalBlockSizeException 
+				| BadPaddingException 
+				| SignatureException 
+				| UnsupportedEncodingException e) {
 			throw new EncryptionErrorException("Cannot retrieve Key!");
 		}
 
 		return m;
 	}
 	
-	private Key getPrivateKey() throws ContactNotExistException, ConnectionFailedException {
+	private PrivateKey getPrivateKey() throws ContactNotExistException, ConnectionFailedException {
 		if (own_privateKey == null) {
-			own_privateKey = Self.getUserFromFile(context).getPrivateKey();
+			own_privateKey = (PrivateKey) Self.getUserFromFile(context).getPrivateKey();
 		}
 		return own_privateKey;
 	}
 	
-	private Key getPublicKey(String senderID)  throws ConnectionFailedException, ContactNotExistException {
+	private PublicKey getPublicKey(String senderID)  throws ConnectionFailedException, ContactNotExistException {
 		if (this.sender_publicKey == null) {
-			this.sender_publicKey = new ServerConnector(context).getContact(senderID).getPublicKey();
+			this.sender_publicKey = (PublicKey) new ServerConnector(context).getContact(senderID).getPublicKey();
 		}
 		return this.sender_publicKey;
 	}

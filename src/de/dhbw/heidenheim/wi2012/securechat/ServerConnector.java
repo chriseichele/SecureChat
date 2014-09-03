@@ -19,7 +19,6 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
 import javax.crypto.spec.SecretKeySpec;
@@ -506,6 +505,7 @@ public class ServerConnector {
 					if(name != null && name.equals("message")) {
 						NodeList attributes = item.getChildNodes();
 						String content = null;
+						String signature = null;
 						String datetime = null;
 						boolean is_mine = false;
 						String sender_id = null;
@@ -515,6 +515,9 @@ public class ServerConnector {
 							String name2 = item2.getNodeName();
 							if(name2 != null && name.equals("content")) {
 								content = item2.getChildNodes().item(0).getNodeValue();
+							}
+							if(name2 != null && name.equals("signature")) { //TODO check parsing
+								signature = item2.getChildNodes().item(0).getNodeValue();
 							}
 							if(name2 != null && name.equals("datetime")) {
 								datetime = item2.getChildNodes().item(0).getNodeValue();
@@ -536,6 +539,7 @@ public class ServerConnector {
 							}
 						}
 						messages.add(new Message(content, 
+												 signature,
 												 is_mine, 
 												 sender_id, 
 												 reciever_id, 

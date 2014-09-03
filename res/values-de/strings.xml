@@ -23,6 +23,7 @@
     <string name="button_login">Login</string>
     <string name="button_register">Registrieren</string>
     <string name="button_proceed">Weiter</string>
+    <string name="button_send_private_key_to_server">Aktiviere die Loginfunktion und sende den privaten Schlüssel zum gesicherten Loginserver</string>
     
     <string name="title_activity_contact_list">Kontaktliste</string>
     <string name="title_activity_chat">Chat</string>
@@ -30,6 +31,13 @@
     <string name="title_section1">Login</string>
     <string name="title_section2">Registrieren</string>
     <string name="title_activity_show_profile">Mein Profil</string>
+    <string name="title_areYouSure">Sind Sie sicher?</string>
+    
+    <string name="info_keep_key_private">Ihr privater Schlüssel wird auf dem Gerät behalten. 
+        								\nDies bringt maximale Sicherheit. 
+        								\nAllerdings können sie sich nach einem Logout oder Datenverlust nicht wieder in diesen Account einloggen.</string>
+    <string name="info_send_key_to_server">Ihr privater Schlüssel wird an unseren Loginserver gesendet und dort gesichert abgelegt. 
+        								\nZusammen mit Ihrer ID und Ihrem Passwort können sie sich jederzeit wieder in ihren Account einloggen.</string>
     
     <string name="message_newMessage_from">%1$s hat ihnen eine neue Nachricht gesendet</string>
     <string name="message_newMessages_from">%1$s hat ihnen %2$s neue Nachrichten gesendet</string>

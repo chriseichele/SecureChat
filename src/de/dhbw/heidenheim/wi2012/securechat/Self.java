@@ -161,6 +161,7 @@ public class Self {
 				throw new ContactNotExistException("No Contact File!");
 			}
 		} else {
+			//Context sollte immergesetzt sein, da sorgfaeltig programmiert
 			throw new ContactNotExistException("Cannot Access Contact File!");
 		}
 	}

@@ -12,6 +12,7 @@
     <string name="button_register">Register</string>
     <string name="button_addContact">Add contact</string>
     <string name="button_proceed">Continue</string>
+    <string name="button_send_private_key_to_server">Enable future logins and send private key to secured login server</string>
     
     <string name="edit_message">Enter a message&#8230;</string>
     <string name="label_id">ID</string>
@@ -26,6 +27,13 @@
     <string name="title_section1">Login</string>
     <string name="title_section2">Register</string>
     <string name="title_activity_show_profile">My profile</string>
+    <string name="title_areYouSure">Are you sure?</string>
+    
+    <string name="info_keep_key_private">Your private key stays on your device. 
+        								\nThis guarantees maximal security. 
+        								\nUnfortunately it is impossible to log in to this account again after a logout or data loss.</string>
+    <string name="info_send_key_to_server">Your private key is sent to our server and stored there secured. 
+        								\nTogether with your ID and password, you can always log in to your account again.</string>
     
     <string name="message_newMessage_from">%1$s has sent you a new message</string>
     <string name="message_newMessages_from">%1$s has sent you %2$s new messages</string>

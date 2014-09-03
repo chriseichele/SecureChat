@@ -79,6 +79,13 @@
             <requestFocus />
             
         </EditText>
+
+        <Switch
+            android:id="@+id/send_private_key_to_server"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+    		android:layout_marginBottom="20dp"
+            android:text="@string/button_send_private_key_to_server" />
     
 	        <Button
 	            android:layout_width="match_parent"

@@ -137,11 +137,11 @@ public class ServerConnector {
 				// Check for errors
 				this.responseCode = urlConnection.getResponseCode();
 				InputStream inputStream;
-				if (responseCode == HttpURLConnection.HTTP_OK) {
+				if (this.responseCode == HttpURLConnection.HTTP_OK) {
 					inputStream = urlConnection.getInputStream();
 				} else {
 					//inputStream = urlConnection.getErrorStream(); //Alternativ Error Input lesen
-					throw new RuntimeException("HTTP Error "+ responseCode);
+					throw new RuntimeException("HTTP Error "+ this.responseCode);
 				}
 
 				// Process the response
@@ -259,7 +259,7 @@ public class ServerConnector {
 				//ID mit hash ueberschreiben
 				android_id = buffer.toString();
 			} catch(Exception e) {
-				//Do nothing -> Use normal Android ID instead of hash
+				//Do nothing -> Use normal Android ID instead of hash as Fallback
 			}
 
 			//Get Key for Local Encryption from Server (unique for Android Device)
@@ -354,12 +354,12 @@ public class ServerConnector {
 			return new Self(user_id, username, key);
 
 		} catch (NoContentException e) {
-			//Kein Inhalt -> Kontakt existiert nichts
+			//Kein Inhalt -> Kontakt existiert nicht
 			throw new ContactNotExistException();
 		}
 	}
 
-	public Self registerUser(String username, String pw_hash) throws ConnectionFailedException {
+	public Self registerUser(String username, String pw_hash, boolean send_private_key) throws ConnectionFailedException {
 		//Generieren von RSA Keypaar (private_key & public_key)
 		PrivateKey privateKey = null;
 		PublicKey publicKey = null;
@@ -380,7 +380,10 @@ public class ServerConnector {
 			JSONObject json = new JSONObject();
 			json.put("username", username);
 			json.put("password", pw_hash);
-			json.put("privateKey", privateKey);
+			if(send_private_key) {
+				//Privater Schlüssel nur an den Server Senden, wenn vom Benutzer gewünscht
+				json.put("privateKey", privateKey);
+			}
 
 			//Post Aufruf mit XML als Parameter
 			xml = postXML(this.protokoll + this.login_server_directory + "userloginserver" , json.toString());

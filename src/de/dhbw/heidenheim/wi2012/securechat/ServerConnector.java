@@ -43,6 +43,7 @@ import android.provider.Settings.Secure;
 import android.util.Base64;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ConnectionFailedException;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
+import de.dhbw.heidenheim.wi2012.securechat.exceptions.NoContentException;
 
 public class ServerConnector {
 
@@ -80,6 +81,7 @@ public class ServerConnector {
 		}
 
 		private Exception exception;
+		private int responseCode;
 
 		protected String doInBackground(String... urls) {
 			try {
@@ -133,7 +135,7 @@ public class ServerConnector {
 				}
 
 				// Check for errors
-				int responseCode = urlConnection.getResponseCode();
+				this.responseCode = urlConnection.getResponseCode();
 				InputStream inputStream;
 				if (responseCode == HttpURLConnection.HTTP_OK) {
 					inputStream = urlConnection.getInputStream();
@@ -182,30 +184,42 @@ public class ServerConnector {
 		public Exception getException() {
 			return this.exception;
 		}
+		public int getResponseCode() {
+			return this.responseCode;
+		}
 	}
 
-	private String getXML(String url) throws ConnectionFailedException {
+	private String getXML(String url) throws ConnectionFailedException, NoContentException {
 		return connect("GET", url, null);
 	}
-	private String postXML(String url, String parameter) throws ConnectionFailedException {
+	private String postXML(String url, String parameter) throws ConnectionFailedException, NoContentException {
 		return connect("POST", url, parameter);
 	}
-	private String connect(String method,String url, String post_parameter) throws ConnectionFailedException {
+	private String connect(String method,String url, String post_parameter) throws ConnectionFailedException, NoContentException {
 
 		try {
 
 			int trys = this.connection_trys;
 			String result = null;
 			RetrieveXMLTask task = null;
-			//Versuche für Verbindungsaufbau
+			//Versuche fuer Verbindungsaufbau, bis Return wert vorhanden
 			while ((result == null || result.trim().isEmpty()) && trys > 0) {
 				task = new RetrieveXMLTask(method);
 				result = task.execute(url, post_parameter).get();
+				if(task.getResponseCode() == HttpURLConnection.HTTP_NO_CONTENT) {
+					//Kein Inhalt: Verbindung erfolgreich, abbrechen
+					break;
+				}
 				trys--;
 			}
 			if(result == null || result.trim().isEmpty()) {
-				//Kein Ergebnis -> Aufruf fehlgeschlagen
-				throw new ConnectionFailedException("Connection to Server Failed! " + task.getException().getMessage());
+				if(task.getResponseCode() == HttpURLConnection.HTTP_NO_CONTENT) {
+					//Kein Inhalt
+					throw new NoContentException();
+				} else {
+					//Kein Ergebnis -> Aufruf fehlgeschlagen
+					throw new ConnectionFailedException("Connection to Server Failed! " + task.getException().getMessage());
+				}
 			} else {
 				return result;
 			}
@@ -253,7 +267,8 @@ public class ServerConnector {
 			try {
 				//Versuche Schluessel abzurufen
 				xml = getXML(this.protokoll + this.login_server_directory + "keystore/" + android_id );
-			} catch (ConnectionFailedException e2) {
+			} catch (ConnectionFailedException 
+					| NoContentException e2) {
 				//Schluessel fuer ID noch nicht vorhanden -> neuen anlegen
 				try {
 					//Generate JSON Data
@@ -264,7 +279,8 @@ public class ServerConnector {
 					//Post Aufruf mit XML als Parameter
 					xml = postXML(this.protokoll + this.login_server_directory + "keystore" , json.toString());
 
-				} catch (JSONException e) {
+				} catch (JSONException 
+						| NoContentException e) {
 					throw new ConnectionFailedException("Error Sending JSON Data for POST");
 				}
 			}
@@ -287,8 +303,6 @@ public class ServerConnector {
 				throw new ConnectionFailedException("Error parsing FileEncryptionKey!");
 			}
 
-			ks = "E61F8A266A2D876CCE172415386550HK";//TODO remove Testing Code
-
 			byte[] encodedKey = Base64.decode(ks, Base64.DEFAULT);
 			key = new SecretKeySpec(encodedKey,0,encodedKey.length, "AES");
 		}
@@ -298,16 +312,51 @@ public class ServerConnector {
 	}
 
 	public Self loginUser(String user_id, String pw_hash) throws ConnectionFailedException, ContactNotExistException {
-		//TODO check user data on server
-		if (false) {
-			//If Contact does not exist or wrong login details
+
+		try {
+			//TODO Get XML from server (server checks)
+			String xml = getXML(this.protokoll + this.login_server_directory + "userloginserver/" + user_id + pw_hash);
+
+			//parse XML
+			String pks = null; //Private Key String
+			String username = null;
+			try {
+				DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+				DocumentBuilder db = dbf.newDocumentBuilder();
+				InputSource is = new InputSource();
+				is.setCharacterStream(new StringReader(xml));
+
+				Document doc = db.parse(is);
+				NodeList attributes = doc.getDocumentElement().getChildNodes();
+				for(int i=0;i<attributes.getLength();i++) {
+					if(attributes.item(i).getLocalName().equals("privateKey")) {
+						//get key String out of XML
+						pks = attributes.item(i).getNodeValue();
+					}
+					if(attributes.item(i).getLocalName().equals("username")) {
+						//get username String out of XML
+						username = attributes.item(i).getNodeValue();
+					}
+				}  
+			} catch (ParserConfigurationException
+					| SAXException 
+					| IOException e) {
+				throw new ConnectionFailedException("Error parsing privateKey!");
+			}
+
+			pks = "7oN8K0sTDas700OKt8tThM2o"; //TODO remove dummy key string
+			username = "Dummy"; //TODO remove dummy name string
+
+			//parse key String to Key Object
+			Key key = GlobalHelper.getRSAKey(pks);
+
+			//TODO Return User Object with new fetched private Key of User
+			return new Self(user_id, username, key);
+
+		} catch (NoContentException e) {
+			//Kein Inhalt -> Kontakt existiert nichts
 			throw new ContactNotExistException();
 		}
-		//TODO get username (& private Key) form server
-		String username = "Dummy";
-
-		//TODO Return User Object with new fetched private Key of User
-		return new Self(user_id, username, getPrivateKey(user_id));
 	}
 
 	public Self registerUser(String username, String pw_hash) throws ConnectionFailedException {
@@ -336,10 +385,11 @@ public class ServerConnector {
 			//Post Aufruf mit XML als Parameter
 			xml = postXML(this.protokoll + this.login_server_directory + "userloginserver" , json.toString());
 
-		} catch (JSONException e) {
+		} catch (JSONException
+				| NoContentException e) {
 			throw new ConnectionFailedException("Error Sending JSON Data for POST to user server");
 		}
-		
+
 		//TODO parse XML Data and get new User ID
 		String user_id = null;
 		try {
@@ -362,7 +412,7 @@ public class ServerConnector {
 				| IOException e) {
 			throw new ConnectionFailedException("Error parsing user ID!");
 		}
-		
+
 		//User bei usermessageserver registrieren (mit ID, Username & public_key)
 		try {
 			//TODO Generate JSON Data for new User
@@ -374,7 +424,8 @@ public class ServerConnector {
 			//Post Aufruf mit XML als Parameter
 			xml = postXML(this.protokoll + this.login_server_directory + "userloginserver" , json.toString());
 
-		} catch (JSONException e) {
+		} catch (JSONException
+				| NoContentException e) {
 			throw new ConnectionFailedException("Error Sending JSON Data for POST to message server");
 		}
 
@@ -382,50 +433,19 @@ public class ServerConnector {
 		return new Self(user_id, username, privateKey);
 	}
 
-	private Key getPrivateKey(String user_id) throws ConnectionFailedException {
-		//Get XML from server
-		String xml = getXML(this.protokoll + this.login_server_directory + "userloginserver/" + user_id);
-
-		//parse XML
-		String pks = null; //Private Key String
-		try {
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			DocumentBuilder db = dbf.newDocumentBuilder();
-			InputSource is = new InputSource();
-			is.setCharacterStream(new StringReader(xml));
-
-			Document doc = db.parse(is);
-			NodeList attributes = doc.getDocumentElement().getChildNodes();
-			for(int i=0;i<attributes.getLength();i++) {
-				if(attributes.item(i).getLocalName().equals("privateKey")) {
-					//get key String out of XML
-					pks = attributes.item(i).getNodeValue();
-					break;
-				}
-			}  
-		} catch (ParserConfigurationException
-				| SAXException 
-				| IOException e) {
-			throw new ConnectionFailedException("Error parsing privateKey!");
-		}
-
-		pks = "7oN8K0sTDas700OKt8tThM2o"; //TODO remove dummy key string
-
-		//parse key String to Key Object
-		Key key = GlobalHelper.getRSAKey(pks);
-
-		//Return Key Object
-		return key;
-	}
-
 	public Contact getContact(String contactID) throws ConnectionFailedException, ContactNotExistException {
 		//Get Contact Details from Server (Name & public Key)
-		String xml = getXML(this.protokoll + this.message_server_directory + "usermessageserver/" + contactID );
+		try {
+			String xml = getXML(this.protokoll + this.message_server_directory + "usermessageserver/" + contactID );
+		} catch (NoContentException e) {
+			//Kontakt nicht gefunden
+			throw new ContactNotExistException();
+		}
 
-		//TODO Parse As Object
+		//TODO Parse XML Contact Data Object
+		String name = null;
 
 		//TODO Remove Dummy Code
-		String name;
 		if (contactID.equals("0")) {
 			name = "Testkontakt";
 		}
@@ -457,29 +477,36 @@ public class ServerConnector {
 	}
 
 	public ArrayList<Message> getNewMessages(Long timestampLastMessage, String userID) throws ConnectionFailedException {
-		//TODO retrieve Messages newer as timestamp for current user id from server
-		String xml = getXML(this.protokoll + this.message_server_directory + "message/" + timestampLastMessage + userID );
 
-		//TODO parse Messages as objects
 		ArrayList<Message> messages = new ArrayList<Message>();
 
-		//TODO remove testing code
-		for (int i=0;i<2;i++) {
-			if(new Random().nextInt(40) == 0) { 
-				messages.add(new Message("Hi :)", false, new Random().nextInt(6)+"", "1"));
+		try {
+			//TODO retrieve Messages newer as timestamp for current user id from server
+			String xml = getXML(this.protokoll + this.message_server_directory + "message/" + timestampLastMessage + userID );
+
+			//TODO parse Messages as objects
+
+			//TODO remove testing code
+			for (int i=0;i<2;i++) {
+				if(new Random().nextInt(40) == 0) { 
+					messages.add(new Message("Hi :)", false, new Random().nextInt(6)+"", "1"));
+				}
+				if(new Random().nextInt(40) == 0) { 
+					messages.add(new Message("Hey!", false, new Random().nextInt(6)+"", "1"));
+				}
+				if(new Random().nextInt(30) == 0) { 
+					messages.add(new Message("Jemand zuhause?", false, new Random().nextInt(6)+"", "1"));
+				}
+				if(new Random().nextInt(30) == 0) { 
+					messages.add(new Message("Wie geht's dir so?", false, new Random().nextInt(6)+"", "1"));
+				}
+				if(new Random().nextInt(20) == 0) { 
+					messages.add(new Message("Sag mal, wie klappts jetzt mit der App?", false, new Random().nextInt(6)+"", "1"));
+				}
 			}
-			if(new Random().nextInt(40) == 0) { 
-				messages.add(new Message("Hey!", false, new Random().nextInt(6)+"", "1"));
-			}
-			if(new Random().nextInt(30) == 0) { 
-				messages.add(new Message("Jemand zuhause?", false, new Random().nextInt(6)+"", "1"));
-			}
-			if(new Random().nextInt(30) == 0) { 
-				messages.add(new Message("Wie geht's dir so?", false, new Random().nextInt(6)+"", "1"));
-			}
-			if(new Random().nextInt(20) == 0) { 
-				messages.add(new Message("Sag mal, wie klappts jetzt mit der App?", false, new Random().nextInt(6)+"", "1"));
-			}
+		} catch (NoContentException e) {
+			//Do Nothing
+			//Return empty message Array
 		}
 
 		//Return Array with new Messages
@@ -497,9 +524,10 @@ public class ServerConnector {
 			json.put("content", m.getMessage());
 
 			//Post Aufruf mit XML als Parameter
-			postXML(this.protokoll + this.login_server_directory + "message" , json.toString());
+			postXML(this.protokoll + this.message_server_directory + "message" , json.toString());
 
-		} catch (JSONException e2) {
+		} catch (JSONException
+				| NoContentException e2) {
 			//throw Exception on Failure
 			throw new ConnectionFailedException("Error parsing JSON to send Message!");
 		}

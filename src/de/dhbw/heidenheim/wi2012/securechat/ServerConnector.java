@@ -18,6 +18,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
@@ -122,6 +123,8 @@ public class ServerConnector {
 
 				if(this.method == "POST") {
 					urlConnection.setRequestMethod("POST");
+					
+					urlConnection.setDoOutput(true);
 
 					urlConnection.setRequestProperty( "Content-Type", "application/json; charset=utf8" );
 					//urlConnection.setRequestProperty( "Content-Length", Integer.toString(urls[1].length()) );
@@ -330,13 +333,15 @@ public class ServerConnector {
 				Document doc = db.parse(is);
 				NodeList attributes = doc.getDocumentElement().getChildNodes();
 				for(int i=0;i<attributes.getLength();i++) {
-					if(attributes.item(i).getLocalName() != null && attributes.item(i).getLocalName().equals("privateKey")) {
+					Node item = attributes.item(i);
+					String name = item.getNodeName();
+					if(name != null && name.equals("privateKey")) {
 						//get key String out of XML
-						pks = attributes.item(i).getNodeValue();
+						pks = item.getChildNodes().item(0).getNodeValue();
 					}
-					if(attributes.item(i).getLocalName() != null && attributes.item(i).getLocalName().equals("username")) {
+					if(name != null && name.equals("username")) {
 						//get username String out of XML
-						username = attributes.item(i).getNodeValue();
+						username = item.getChildNodes().item(0).getNodeValue();
 					}
 				}  
 			} catch (ParserConfigurationException
@@ -344,9 +349,6 @@ public class ServerConnector {
 					| IOException e) {
 				throw new ConnectionFailedException("Error parsing privateKey!");
 			}
-
-			pks = "7oN8K0sTDas700OKt8tThM2o"; //TODO remove dummy key string
-			username = "Dummy"; //TODO remove dummy name string
 
 			//parse key String to Key Object
 			Key key = GlobalHelper.getRSAKey(pks);
@@ -385,7 +387,7 @@ public class ServerConnector {
 				json.put("privateKey", GlobalHelper.getRSAString(privateKey));
 			}
 
-			//Post Aufruf mit XML als Parameter
+			//Post Aufruf mit JSON als Parameter
 			xml = postXML(this.protokoll + this.login_server_directory + "userloginserver" , json.toString());
 
 		} catch (JSONException
@@ -426,10 +428,11 @@ public class ServerConnector {
 			json.put("public_key", GlobalHelper.getRSAString(publicKey));
 			json.put("username", username);
 
-			//Post Aufruf mit XML als Parameter
-			xml = postXML(this.protokoll + this.login_server_directory + "usermessageserver" , json.toString());
+			//Post Aufruf mit JSON als Parameter
+			postXML(this.protokoll + this.message_server_directory + "usermessageserver" , json.toString());
 
-		} catch (Exception /*JSONException | NoContentException*/ e ) {
+		} catch (JSONException 
+				| NoContentException e ) {
 			throw new ConnectionFailedException("Error Sending JSON Data for POST to message server");
 		}
 
@@ -486,12 +489,67 @@ public class ServerConnector {
 
 		try {
 			//TODO retrieve Messages newer as timestamp for current user id from server
-			String xml = getXML(this.protokoll + this.message_server_directory + "message/" + timestampLastMessage + userID );
+			String xml = getXML(this.protokoll + this.message_server_directory + "message/reciever/" + userID + "/" + timestampLastMessage );
 
 			//TODO parse Messages as objects
+			try {
+				DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+				DocumentBuilder db = dbf.newDocumentBuilder();
+				InputSource is = new InputSource();
+				is.setCharacterStream(new StringReader(xml));
+
+				Document doc = db.parse(is);
+				NodeList childs = doc.getDocumentElement().getChildNodes();
+				for(int i=0;i<childs.getLength();i++) {
+					Node item = childs.item(i);
+					String name = item.getNodeName();
+					if(name != null && name.equals("message")) {
+						NodeList attributes = item.getChildNodes();
+						String content = null;
+						String datetime = null;
+						boolean is_mine = false;
+						String sender_id = null;
+						String reciever_id = null;
+						for(int j=0;j<attributes.getLength();j++) {
+							Node item2 = childs.item(j);
+							String name2 = item2.getNodeName();
+							if(name2 != null && name.equals("content")) {
+								content = item2.getChildNodes().item(0).getNodeValue();
+							}
+							if(name2 != null && name.equals("datetime")) {
+								datetime = item2.getChildNodes().item(0).getNodeValue();
+							}
+							if(name2 != null && name.equals("messsagePK")) {
+								NodeList sub_attributes = item2.getChildNodes();
+								for(int k=0;k<sub_attributes.getLength();k++) {
+									Node item3 = sub_attributes.item(k);
+									String name3 = item3.getNodeName();
+									if(name3 != null && name3.equals("recieverID")) {
+										reciever_id = item3.getChildNodes().item(0).getNodeValue();
+									}
+									if(name3 != null && name3.equals("senderID")) {
+										sender_id = item3.getChildNodes().item(0).getNodeValue();
+										is_mine = sender_id.equals(userID);
+									}
+								}
+								content = item2.getChildNodes().item(0).getNodeValue();
+							}
+						}
+						messages.add(new Message(content, 
+												 is_mine, 
+												 sender_id, 
+												 reciever_id, 
+												 new Date(Long.parseLong(datetime)) ));
+					}
+				}  
+			} catch (ParserConfigurationException
+					| SAXException 
+					| IOException e) {
+				throw new ConnectionFailedException("Error parsing new messages!");
+			}
 
 			//TODO remove testing code
-			for (int i=0;i<2;i++) {
+			/*for (int i=0;i<2;i++) {
 				if(new Random().nextInt(40) == 0) { 
 					messages.add(new Message("Hi :)", false, new Random().nextInt(6)+"", "1"));
 				}
@@ -507,7 +565,8 @@ public class ServerConnector {
 				if(new Random().nextInt(20) == 0) { 
 					messages.add(new Message("Sag mal, wie klappts jetzt mit der App?", false, new Random().nextInt(6)+"", "1"));
 				}
-			}
+			}*/
+			
 		} catch (NoContentException e) {
 			//Do Nothing
 			//Return empty message Array
@@ -522,10 +581,10 @@ public class ServerConnector {
 		try {
 			//TODO Generate JSON Data for new Message
 			JSONObject json = new JSONObject();
-			json.put("timestamp", m.getTimestamp()+"");
-			json.put("sender", m.getSenderID());
-			json.put("reciever", m.getRecieverID());
 			json.put("content", m.getMessage());
+			json.put("datetime", m.getTimestamp()+"");
+			json.put("reciever_ID", m.getRecieverID());
+			json.put("sender_ID", m.getSenderID());
 
 			//Post Aufruf mit XML als Parameter
 			postXML(this.protokoll + this.message_server_directory + "message" , json.toString());

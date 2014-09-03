@@ -33,6 +33,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -82,6 +83,7 @@ public class ServerConnector {
 
 		private Exception exception;
 		private int responseCode;
+		private String output;
 
 		protected String doInBackground(String... urls) {
 			try {
@@ -122,7 +124,7 @@ public class ServerConnector {
 					urlConnection.setRequestMethod("POST");
 
 					urlConnection.setRequestProperty( "Content-Type", "application/json; charset=utf8" );
-					urlConnection.setRequestProperty( "Content-Length", Integer.toString(urls[1].length()) );
+					//urlConnection.setRequestProperty( "Content-Length", Integer.toString(urls[1].length()) );
 
 					// Sent the Post Parameter
 					OutputStream os = urlConnection.getOutputStream();
@@ -145,20 +147,15 @@ public class ServerConnector {
 				}
 
 				// Process the response
-				BufferedReader reader;
-				String line = null;
-				String output = "";
-				reader = new BufferedReader( new InputStreamReader( inputStream ) );
-				while( ( line = reader.readLine() ) != null )
-				{
-					output += line;
+				BufferedReader r = new BufferedReader(new InputStreamReader(inputStream));
+				StringBuilder total = new StringBuilder();
+				String line;
+				while ((line = r.readLine()) != null) {
+				    total.append(line);
 				}
-
-				inputStream.close();
-
-				//HTTP Body = XML zurueck geben
-				return output;
-
+				this.output = total.toString();
+				return total.toString();//TODO funktioniert aus unerfindlichen gründen nicht...
+				
 			} catch (Exception e) {
 				this.exception = e;
 				return null;
@@ -172,13 +169,13 @@ public class ServerConnector {
 			// -> durch Aufruf von .get() synchron geschaltet
 			// asynchrone verarbeitung nicht notwendig.
 
-			if (this.exception == null) {
+			//if (this.exception == null) {
 				// Log.d("SecureChat", "URL Call finished successfully.");
 				// Daten irgendwo hin schreiben, sodass sie vom UI Task weiter verarbeitet werden koennen
-			} else {
+			//} else {
 				// Log.d("SecureChat", "URL Call finished with Exception.");
 				// Exception behandeln...
-			}
+			//}
 		}
 
 		public Exception getException() {
@@ -186,6 +183,9 @@ public class ServerConnector {
 		}
 		public int getResponseCode() {
 			return this.responseCode;
+		}
+		public String getOutput() {
+			return this.output;
 		}
 	}
 
@@ -206,6 +206,7 @@ public class ServerConnector {
 			while ((result == null || result.trim().isEmpty()) && trys > 0) {
 				task = new RetrieveXMLTask(method);
 				result = task.execute(url, post_parameter).get();
+				result = task.getOutput();
 				if(task.getResponseCode() == HttpURLConnection.HTTP_NO_CONTENT) {
 					//Kein Inhalt: Verbindung erfolgreich, abbrechen
 					break;
@@ -329,11 +330,11 @@ public class ServerConnector {
 				Document doc = db.parse(is);
 				NodeList attributes = doc.getDocumentElement().getChildNodes();
 				for(int i=0;i<attributes.getLength();i++) {
-					if(attributes.item(i).getLocalName().equals("privateKey")) {
+					if(attributes.item(i).getLocalName() != null && attributes.item(i).getLocalName().equals("privateKey")) {
 						//get key String out of XML
 						pks = attributes.item(i).getNodeValue();
 					}
-					if(attributes.item(i).getLocalName().equals("username")) {
+					if(attributes.item(i).getLocalName() != null && attributes.item(i).getLocalName().equals("username")) {
 						//get username String out of XML
 						username = attributes.item(i).getNodeValue();
 					}
@@ -376,13 +377,12 @@ public class ServerConnector {
 		//User bei userloginserver registrieren (mit Username, password & private_key) -> return ID
 		String xml = null;
 		try {
-			//TODO Generate JSON Data for new User
+			//Generate JSON Data for new User
 			JSONObject json = new JSONObject();
-			json.put("username", username);
-			json.put("password", pw_hash);
+			json.put("password_hash", pw_hash);
 			if(send_private_key) {
 				//Privater Schlüssel nur an den Server Senden, wenn vom Benutzer gewünscht
-				json.put("privateKey", privateKey);
+				json.put("privateKey", GlobalHelper.getRSAString(privateKey));
 			}
 
 			//Post Aufruf mit XML als Parameter
@@ -393,7 +393,7 @@ public class ServerConnector {
 			throw new ConnectionFailedException("Error Sending JSON Data for POST to user server");
 		}
 
-		//TODO parse XML Data and get new User ID
+		//parse XML Data and get new User ID
 		String user_id = null;
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -404,9 +404,11 @@ public class ServerConnector {
 			Document doc = db.parse(is);
 			NodeList attributes = doc.getDocumentElement().getChildNodes();
 			for(int i=0;i<attributes.getLength();i++) {
-				if(attributes.item(i).getLocalName().equals("ID")) {
+				Node item = attributes.item(i);
+				String name = item.getNodeName();
+				if(name != null && name.equals("id")) {
 					//get ID String out of XML
-					user_id = attributes.item(i).getNodeValue();
+					user_id = item.getChildNodes().item(0).getNodeValue();
 					break;
 				}
 			}  
@@ -418,17 +420,16 @@ public class ServerConnector {
 
 		//User bei usermessageserver registrieren (mit ID, Username & public_key)
 		try {
-			//TODO Generate JSON Data for new User
+			//Generate JSON Data for new User
 			JSONObject json = new JSONObject();
-			json.put("ID", user_id);
+			json.put("userloginserver_ID", user_id);
+			json.put("public_key", GlobalHelper.getRSAString(publicKey));
 			json.put("username", username);
-			json.put("publicKey", publicKey);
 
 			//Post Aufruf mit XML als Parameter
-			xml = postXML(this.protokoll + this.login_server_directory + "userloginserver" , json.toString());
+			xml = postXML(this.protokoll + this.login_server_directory + "usermessageserver" , json.toString());
 
-		} catch (JSONException
-				| NoContentException e) {
+		} catch (Exception /*JSONException | NoContentException*/ e ) {
 			throw new ConnectionFailedException("Error Sending JSON Data for POST to message server");
 		}
 

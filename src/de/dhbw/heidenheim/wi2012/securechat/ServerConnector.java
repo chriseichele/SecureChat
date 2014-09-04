@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
+import javax.crypto.KeyGenerator;
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManagerFactory;
@@ -327,12 +328,8 @@ public class ServerConnector {
 			}
 			
 			//Parse Key String
-			//byte[] encodedKey = ks.getBytes();
 			byte[] encodedKey = Base64.decode(ks, Base64.DEFAULT);
 			return new SecretKeySpec(encodedKey,0,encodedKey.length, "AES");
-			//ByteArrayInputStream bais = new ByteArrayInputStream(ks.getBytes("UTF-8"));
-			//ObjectInputStream ois = new ObjectInputStream(bais);
-			//return (Key) ois.readObject();
 
 		} catch (ParserConfigurationException
 				| SAXException 
@@ -578,7 +575,8 @@ public class ServerConnector {
 				}  
 			} catch (ParserConfigurationException
 					| SAXException 
-					| IOException e) {
+					| IOException
+					| NullPointerException e) {
 				throw new ConnectionFailedException("Error parsing new messages!");
 			}
 

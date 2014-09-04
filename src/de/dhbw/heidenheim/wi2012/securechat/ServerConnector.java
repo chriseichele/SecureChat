@@ -2,9 +2,11 @@ package de.dhbw.heidenheim.wi2012.securechat;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
@@ -45,6 +47,7 @@ import android.provider.Settings.Secure;
 import android.util.Base64;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ConnectionFailedException;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
+import de.dhbw.heidenheim.wi2012.securechat.exceptions.EncryptionErrorException;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.NoContentException;
 
 public class ServerConnector {
@@ -275,8 +278,11 @@ public class ServerConnector {
 			try {
 				//Versuche Schluessel abzurufen
 				xml = getXML(this.protokoll + this.login_server_directory + "keystore/" + android_id );
+				key = parseFileEncryptionKey(xml);
+				
 			} catch (ConnectionFailedException 
-					| NoContentException e2) {
+					| NoContentException
+					| EncryptionErrorException e2) {
 				//Schluessel fuer ID noch nicht vorhanden -> neuen anlegen
 				try {
 					//Generate JSON Data
@@ -285,37 +291,57 @@ public class ServerConnector {
 
 					//Post Aufruf mit XML als Parameter
 					xml = postXML(this.protokoll + this.login_server_directory + "keystore" , json.toString());
+					key = parseFileEncryptionKey(xml);
 
 				} catch (JSONException 
-						| NoContentException e) {
+						| NoContentException
+						| EncryptionErrorException e) {
 					throw new ConnectionFailedException("Error Sending JSON Data for POST");
 				}
 			}
-
-			//Parse Key as Key Object out of Return XML
-			String ks = null; //Key String
-			try {
-				DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-				DocumentBuilder db = dbf.newDocumentBuilder();
-				InputSource is = new InputSource();
-				is.setCharacterStream(new StringReader(xml));
-
-				Document doc = db.parse(is);
-				ks = doc.getDocumentElement().getNodeValue();
-
-			} catch (ParserConfigurationException
-					| SAXException 
-					| IOException e) {
-				// handle ParserConfigurationException
-				throw new ConnectionFailedException("Error parsing FileEncryptionKey!");
-			}
-
-			byte[] encodedKey = Base64.decode(ks, Base64.DEFAULT);
-			key = new SecretKeySpec(encodedKey,0,encodedKey.length, "AES");
 		}
 
 		//Return Key Object
 		return key;
+	}
+	private Key parseFileEncryptionKey(String xml) throws EncryptionErrorException {
+
+		//Parse Key as Key Object out of Return XML
+		String ks = null; //Key String
+		try {
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			InputSource is = new InputSource();
+			is.setCharacterStream(new StringReader(xml));
+
+			Document doc = db.parse(is);
+			NodeList attributes = doc.getChildNodes().item(0).getChildNodes();
+			for(int i=0;i<attributes.getLength();i++) {
+				Node item = attributes.item(i);
+				String node_name = item.getNodeName();
+				if(node_name != null && node_name.equals("aeskey")) {
+					//Get AES Key string out of xml
+					ks = item.getChildNodes().item(0).getNodeValue();
+					break;
+				}
+			}
+			
+			//Parse Key String
+			//byte[] encodedKey = ks.getBytes();
+			byte[] encodedKey = Base64.decode(ks, Base64.DEFAULT);
+			return new SecretKeySpec(encodedKey,0,encodedKey.length, "AES");
+			//ByteArrayInputStream bais = new ByteArrayInputStream(ks.getBytes("UTF-8"));
+			//ObjectInputStream ois = new ObjectInputStream(bais);
+			//return (Key) ois.readObject();
+
+		} catch (ParserConfigurationException
+				| SAXException 
+				| IOException 
+				| NullPointerException e) {
+			// handle ParserConfigurationException
+			throw new EncryptionErrorException("Error parsing FileEncryptionKey!");
+		}
+		
 	}
 
 	public Self loginUser(String user_id, String pw_hash) throws ConnectionFailedException, ContactNotExistException {

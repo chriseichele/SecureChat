@@ -11,6 +11,8 @@ import java.io.InputStreamReader;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.spec.InvalidKeySpecException;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
@@ -34,7 +36,7 @@ public class Self {
 	
 	private String id;
 	private String name;
-	private Key private_key;
+	private PrivateKey private_key;
 	
 	private static Context context;
 	private static String filename = "user.xml";
@@ -42,7 +44,7 @@ public class Self {
 	private static Cipher cipher_enc;
 	private static Cipher cipher_dec;
 
-	public Self(String id, String name, Key private_key) {
+	public Self(String id, String name, PrivateKey private_key) {
 		this.id = id;
 		this.name = name;
 		this.private_key = private_key;
@@ -143,7 +145,7 @@ public class Self {
 				    String username = root.getAttribute("name");
 				    String private_key_string = root.getAttribute("private_key");
 				    
-				    Key private_key = GlobalHelper.getRSAKey(private_key_string);
+				    PrivateKey private_key = GlobalHelper.getRSAprivateKey(private_key_string);
 				    
 					//User Objekt anlegen und zurueckgeben
 					return new Self(id, username, private_key);
@@ -153,7 +155,8 @@ public class Self {
 						| NoSuchAlgorithmException 
 						| NoSuchPaddingException
 						| SAXException 
-						| ParserConfigurationException e) {
+						| ParserConfigurationException 
+						| InvalidKeySpecException e) {
 					//Exception bei Fehler
 					throw new ContactNotExistException("Userdaten konnten nicht gelesen werden!");
 				}

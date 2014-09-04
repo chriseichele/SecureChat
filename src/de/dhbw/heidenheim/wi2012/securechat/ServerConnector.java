@@ -2,16 +2,13 @@ package de.dhbw.heidenheim.wi2012.securechat;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -20,11 +17,11 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
-import javax.crypto.KeyGenerator;
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManagerFactory;
@@ -377,12 +374,14 @@ public class ServerConnector {
 			}
 
 			//parse key String to Key Object
-			Key key = GlobalHelper.getRSAKey(pks);
+			PrivateKey key = GlobalHelper.getRSAprivateKey(pks);
 
 			//TODO Return User Object with new fetched private Key of User
 			return new Self(user_id, username, key);
 
-		} catch (NoContentException e) {
+		} catch (NoContentException 
+				| NoSuchAlgorithmException 
+				| InvalidKeySpecException e) {
 			//Kein Inhalt -> Kontakt existiert nicht
 			throw new ContactNotExistException();
 		}
@@ -501,7 +500,7 @@ public class ServerConnector {
 
 			if(username != null && publicKeyString != null) {
 				//Contact Objekt mit Daten zurueck geben
-				return new Contact(contactID, username, GlobalHelper.getRSAKey(publicKeyString));
+				return new Contact(contactID, username, GlobalHelper.getRSApublicKey(publicKeyString));
 			} else {
 				//Kontaktdaten fehlerhaft
 				throw new ContactNotExistException();
@@ -512,7 +511,9 @@ public class ServerConnector {
 				| ParserConfigurationException
 				| SAXException 
 				| IOException 
-				| NullPointerException e) {
+				| NullPointerException 
+				| NoSuchAlgorithmException 
+				| InvalidKeySpecException e) {
 			//Kontakt nicht gefunden
 			throw new ContactNotExistException();
 		}

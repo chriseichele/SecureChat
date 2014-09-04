@@ -300,7 +300,7 @@ public class ChatHistory {
 	}
 
 	private Message encryptMessageContent(Message m) throws EncryptionErrorException {
-
+/*
 		String inhalt = m.getMessage();
 
 		try {
@@ -333,12 +333,12 @@ public class ChatHistory {
 			   | SignatureException e) {
 			throw new EncryptionErrorException("Cannot retrieve Key!");
 		}
-
+*/
 		return m;
 	}
 
 	private Message decryptMessageContent(Message m) throws EncryptionErrorException {
-
+/*
 		String inhalt = m.getMessage();
 
 		try {
@@ -375,7 +375,7 @@ public class ChatHistory {
 				| UnsupportedEncodingException e) {
 			throw new EncryptionErrorException("Cannot retrieve Key!");
 		}
-
+*/
 		return m;
 	}
 	

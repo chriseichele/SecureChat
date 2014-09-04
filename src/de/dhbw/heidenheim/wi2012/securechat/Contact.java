@@ -11,6 +11,8 @@ import java.io.InputStreamReader;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 
 import javax.crypto.Cipher;
@@ -262,7 +264,7 @@ public class Contact {
 		    
 		    NodeList contact_nodes = root.getChildNodes();
 		    for (int i=1;i<(contact_nodes.getLength()-1);i=i+2) {
-		    	Key key = GlobalHelper.getRSAKey(((Element) contact_nodes.item(i)).getAttribute("publicKey"));
+		    	PublicKey key = GlobalHelper.getRSApublicKey(((Element) contact_nodes.item(i)).getAttribute("publicKey"));
 		        //Neuen Kontakt an Array geben
 		        contactList.add(new Contact(((Element) contact_nodes.item(i)).getAttribute("id"),
 											((Element) contact_nodes.item(i)).getAttribute("name"),
@@ -274,7 +276,8 @@ public class Contact {
 				| NoSuchAlgorithmException 
 				| NoSuchPaddingException 
 				| SAXException 
-				| ParserConfigurationException e) {
+				| ParserConfigurationException 
+				| InvalidKeySpecException e) {
 			// Auto-generated catch block
 			e.printStackTrace();
 			// do Nothing, Contact List will just stay empty

@@ -341,8 +341,8 @@ public class ServerConnector {
 	public Self loginUser(String user_id, String pw_hash) throws ConnectionFailedException, ContactNotExistException {
 
 		try {
-			//TODO Get XML from server (server checks)
-			String xml = getXML(this.protokoll + this.login_server_directory + "userloginserver/" + user_id + pw_hash);
+			//Get XML with ID from server (server checks)
+			String xml = getXML(this.protokoll + this.login_server_directory + "userloginserver/login/" + user_id + "/" + pw_hash);
 
 			//parse XML
 			String pks = null; //Private Key String
@@ -362,10 +362,6 @@ public class ServerConnector {
 						//get key String out of XML
 						pks = item.getChildNodes().item(0).getNodeValue();
 					}
-					else if(name != null && name.equals("username")) {
-						//get username String out of XML
-						username = item.getChildNodes().item(0).getNodeValue();
-					}
 				}  
 			} catch (ParserConfigurationException
 					| SAXException 
@@ -375,8 +371,11 @@ public class ServerConnector {
 
 			//parse key String to Key Object
 			PrivateKey key = RSAHelper.getPrivateKey(pks);
+			
+			//Get Username
+			username = getContact(user_id).getName();
 
-			//TODO Return User Object with new fetched private Key of User
+			//Return User Object with new fetched private Key of User
 			return new Self(user_id, username, key);
 
 		} catch (NoContentException 

@@ -16,9 +16,7 @@
 <TextView 
     android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/contactline_margin"
         android:id="@+id/contact_id"
-        android:textSize="12sp"
-        android:textColor="@color/grey" />
+        android:textSize="12sp" />
 
 </LinearLayout>

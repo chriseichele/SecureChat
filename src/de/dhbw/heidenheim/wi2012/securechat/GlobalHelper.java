@@ -11,6 +11,8 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.RSAPublicKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -82,7 +84,7 @@ public class GlobalHelper {
 		byte[] encodedKey = Base64.decode(pks, Base64.DEFAULT);
 		// get the public key
 		KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-		KeySpec publicKeySpec = new PKCS8EncodedKeySpec(encodedKey);
+		KeySpec publicKeySpec = new X509EncodedKeySpec(encodedKey);
 		PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
 		return publicKey;
 

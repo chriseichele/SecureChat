@@ -125,7 +125,7 @@ public class ServerConnector {
 
 				if(this.method == "POST") {
 					urlConnection.setRequestMethod("POST");
-					
+
 					urlConnection.setDoOutput(true);
 
 					urlConnection.setRequestProperty( "Content-Type", "application/json; charset=utf8" );
@@ -158,11 +158,11 @@ public class ServerConnector {
 				StringBuilder total = new StringBuilder();
 				String line;
 				while ((line = r.readLine()) != null) {
-				    total.append(line);
+					total.append(line);
 				}
 				this.output = total.toString();
 				return total.toString();//TODO funktioniert aus unerfindlichen gründen nicht...
-				
+
 			} catch (Exception e) {
 				this.exception = e;
 				this.output = null;
@@ -178,11 +178,11 @@ public class ServerConnector {
 			// asynchrone verarbeitung nicht notwendig.
 
 			//if (this.exception == null) {
-				// Log.d("SecureChat", "URL Call finished successfully.");
-				// Daten irgendwo hin schreiben, sodass sie vom UI Task weiter verarbeitet werden koennen
+			// Log.d("SecureChat", "URL Call finished successfully.");
+			// Daten irgendwo hin schreiben, sodass sie vom UI Task weiter verarbeitet werden koennen
 			//} else {
-				// Log.d("SecureChat", "URL Call finished with Exception.");
-				// Exception behandeln...
+			// Log.d("SecureChat", "URL Call finished with Exception.");
+			// Exception behandeln...
 			//}
 		}
 
@@ -277,7 +277,7 @@ public class ServerConnector {
 				//Versuche Schluessel abzurufen
 				xml = getXML(this.protokoll + this.login_server_directory + "keystore/" + android_id );
 				key = parseFileEncryptionKey(xml);
-				
+
 			} catch (ConnectionFailedException 
 					| NoContentException
 					| EncryptionErrorException e2) {
@@ -323,7 +323,7 @@ public class ServerConnector {
 					break;
 				}
 			}
-			
+
 			//Parse Key String
 			byte[] encodedKey = Base64.decode(ks, Base64.DEFAULT);
 			return new SecretKeySpec(encodedKey,0,encodedKey.length, "AES");
@@ -335,7 +335,7 @@ public class ServerConnector {
 			// handle ParserConfigurationException
 			throw new EncryptionErrorException("Error parsing FileEncryptionKey!");
 		}
-		
+
 	}
 
 	public Self loginUser(String user_id, String pw_hash) throws ConnectionFailedException, ContactNotExistException {
@@ -476,7 +476,7 @@ public class ServerConnector {
 
 			String username = null;
 			String publicKeyString = null;
-			
+
 			//Parse XML Data
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
@@ -505,8 +505,8 @@ public class ServerConnector {
 				//Kontaktdaten fehlerhaft
 				throw new ContactNotExistException();
 			}
-		
-		
+
+
 		} catch (NoContentException
 				| ParserConfigurationException
 				| SAXException 
@@ -525,91 +525,62 @@ public class ServerConnector {
 
 		try {
 			//TODO retrieve Messages newer as timestamp for current user id from server
-			String xml = getXML(this.protokoll + this.message_server_directory + "message/reciever/" + userID + "/" + timestampLastMessage );
+			String xml = getXML(this.protokoll + this.message_server_directory + "message/receiver/" + userID + "/" + timestampLastMessage );
 
 			//TODO parse Messages as objects
-			try {
-				DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-				DocumentBuilder db = dbf.newDocumentBuilder();
-				InputSource is = new InputSource();
-				is.setCharacterStream(new StringReader(xml));
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			InputSource is = new InputSource();
+			is.setCharacterStream(new StringReader(xml));
 
-				Document doc = db.parse(is);
-				NodeList childs = doc.getDocumentElement().getChildNodes();
-				for(int i=0;i<childs.getLength();i++) {
-					Node item = childs.item(i);
-					String name = item.getNodeName();
-					if(name != null && name.equals("message")) {
-						NodeList attributes = item.getChildNodes();
-						String content = null;
-						String signature = null;
-						String datetime = null;
-						boolean is_mine = false;
-						String sender_id = null;
-						String reciever_id = null;
-						for(int j=0;j<attributes.getLength();j++) {
-							Node item2 = childs.item(j);
-							String name2 = item2.getNodeName();
-							if(name2 != null && name.equals("content")) {
-								content = item2.getChildNodes().item(0).getNodeValue();
-							}
-							else if(name2 != null && name.equals("signature")) { //TODO check parsing
-								signature = item2.getChildNodes().item(0).getNodeValue();
-							}
-							else if(name2 != null && name.equals("datetime")) {
-								datetime = item2.getChildNodes().item(0).getNodeValue();
-							}
-							else if(name2 != null && name.equals("messsagePK")) {
-								NodeList sub_attributes = item2.getChildNodes();
-								for(int k=0;k<sub_attributes.getLength();k++) {
-									Node item3 = sub_attributes.item(k);
-									String name3 = item3.getNodeName();
-									if(name3 != null && name3.equals("recieverID")) {
-										reciever_id = item3.getChildNodes().item(0).getNodeValue();
-									}
-									else if(name3 != null && name3.equals("senderID")) {
-										sender_id = item3.getChildNodes().item(0).getNodeValue();
-										is_mine = sender_id.equals(userID);
-									}
-								}
-								content = item2.getChildNodes().item(0).getNodeValue();
-							}
+			Document doc = db.parse(is);
+			NodeList childs = doc.getDocumentElement().getChildNodes();
+			for(int i=0;i<childs.getLength();i++) {
+				Node item = childs.item(i);
+				String name = item.getNodeName();
+				if(name != null && name.equals("message")) {
+					NodeList attributes = item.getChildNodes();
+					String content = null;
+					String signature = null;
+					Date datetime = null;
+					boolean is_mine = false;
+					String sender_id = null;
+					String reciever_id = null;
+					for(int j=0;j<attributes.getLength();j++) {
+						Node item2 = childs.item(0).getChildNodes().item(j);
+						String name2 = item2.getNodeName();
+						if(name2 != null && name2.equals("content")) {
+							content = item2.getChildNodes().item(0).getNodeValue();
 						}
-						messages.add(new Message(content, 
-												 signature,
-												 is_mine, 
-												 sender_id, 
-												 reciever_id, 
-												 new Date(Long.parseLong(datetime)) ));
+						else if(name2 != null && name2.equals("signature")) { //TODO check parsing
+							signature = item2.getChildNodes().item(0).getNodeValue();
+						}
+						else if(name2 != null && name2.equals("datetime")) {
+							Long timestamp = Long.parseLong(item2.getChildNodes().item(0).getNodeValue());
+							datetime = new Date(timestamp);
+						}
+						else if(name2 != null && name2.equals("receiverID")) {
+							reciever_id = item2.getChildNodes().item(0).getNodeValue();
+						}
+						else if(name2 != null && name2.equals("senderID")) {
+							sender_id = item2.getChildNodes().item(0).getNodeValue();
+							is_mine = sender_id.equals(userID);
+						}
 					}
-				}  
-			} catch (ParserConfigurationException
-					| SAXException 
-					| IOException
-					| NullPointerException e) {
-				throw new ConnectionFailedException("Error parsing new messages!");
-			}
+					messages.add(new Message(content, 
+							signature,
+							is_mine, 
+							sender_id, 
+							reciever_id, 
+							datetime ));
+				}
+			} 
 
-			//TODO remove testing code
-			/*for (int i=0;i<2;i++) {
-				if(new Random().nextInt(40) == 0) { 
-					messages.add(new Message("Hi :)", false, new Random().nextInt(6)+"", "1"));
-				}
-				if(new Random().nextInt(40) == 0) { 
-					messages.add(new Message("Hey!", false, new Random().nextInt(6)+"", "1"));
-				}
-				if(new Random().nextInt(30) == 0) { 
-					messages.add(new Message("Jemand zuhause?", false, new Random().nextInt(6)+"", "1"));
-				}
-				if(new Random().nextInt(30) == 0) { 
-					messages.add(new Message("Wie geht's dir so?", false, new Random().nextInt(6)+"", "1"));
-				}
-				if(new Random().nextInt(20) == 0) { 
-					messages.add(new Message("Sag mal, wie klappts jetzt mit der App?", false, new Random().nextInt(6)+"", "1"));
-				}
-			}*/
-			
-		} catch (NoContentException e) {
+		} catch (NoContentException
+				| ParserConfigurationException
+				| SAXException 
+				| IOException
+				| NullPointerException  e) {
 			//Do Nothing
 			//Return empty message Array
 		}
@@ -624,9 +595,10 @@ public class ServerConnector {
 			//TODO Generate JSON Data for new Message
 			JSONObject json = new JSONObject();
 			json.put("content", m.getMessage());
+			json.put("signature", m.getSignature());
 			json.put("datetime", m.getTimestamp()+"");
-			json.put("reciever_ID", m.getRecieverID());
-			json.put("sender_ID", m.getSenderID());
+			json.put("receiverID", m.getRecieverID());
+			json.put("senderID", m.getSenderID());
 
 			//Post Aufruf mit XML als Parameter
 			postXML(this.protokoll + this.message_server_directory + "message" , json.toString());

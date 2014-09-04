@@ -117,7 +117,7 @@ public class ChatDetailFragment extends Fragment {
 		String newMessage = textfield.getText().toString().trim();
 		if (newMessage.length() > 0) {
 			textfield.setText("");
-			sendNewMessage(new Message(newMessage, "", true, my_user_id, chat_opponent_id));
+			sendNewMessage(new Message(newMessage, "dummy_signatur", true, my_user_id, chat_opponent_id));
 		}
 	}
 

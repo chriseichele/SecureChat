@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -119,6 +120,7 @@ public class ServerConnector {
 				HttpsURLConnection urlConnection = (HttpsURLConnection)url.openConnection();
 				urlConnection.setSSLSocketFactory(ssl.getSocketFactory());
 				urlConnection.setRequestProperty("Accept", "application/xml");
+				urlConnection.setRequestProperty("Accept-Charset", "UTF-8");
 
 				if(this.method == "POST") {
 					urlConnection.setRequestMethod("POST");
@@ -126,11 +128,13 @@ public class ServerConnector {
 					urlConnection.setDoOutput(true);
 
 					urlConnection.setRequestProperty( "Content-Type", "application/json; charset=utf8" );
+					//urlConnection.setRequestProperty( "Content-Type", "application/json" );
 					//urlConnection.setRequestProperty( "Content-Length", Integer.toString(urls[1].length()) );
 
 					// Sent the Post Parameter
 					OutputStream os = urlConnection.getOutputStream();
 					os.write(urls[1].getBytes("UTF-8"));
+					os.flush();
 					os.close();
 				} else if(this.method == "GET") {
 					urlConnection.setRequestMethod("GET");
@@ -160,6 +164,7 @@ public class ServerConnector {
 				
 			} catch (Exception e) {
 				this.exception = e;
+				this.output = null;
 				return null;
 			}
 		}
@@ -197,7 +202,7 @@ public class ServerConnector {
 	private String postXML(String url, String parameter) throws ConnectionFailedException, NoContentException {
 		return connect("POST", url, parameter);
 	}
-	private String connect(String method,String url, String post_parameter) throws ConnectionFailedException, NoContentException {
+	private String connect(String method, String url, String post_parameter) throws ConnectionFailedException, NoContentException {
 
 		try {
 
@@ -276,8 +281,7 @@ public class ServerConnector {
 				try {
 					//Generate JSON Data
 					JSONObject json = new JSONObject();
-					json.put("ID", android_id);
-					json.put("aeskey", "dummy");
+					json.put("id", android_id);
 
 					//Post Aufruf mit XML als Parameter
 					xml = postXML(this.protokoll + this.login_server_directory + "keystore" , json.toString());
@@ -423,8 +427,8 @@ public class ServerConnector {
 		try {
 			//Generate JSON Data for new User
 			JSONObject json = new JSONObject();
-			json.put("userloginserver_ID", user_id);
-			json.put("public_key", GlobalHelper.getRSAString(publicKey));
+			json.put("userloginserverID", user_id);
+			json.put("publicKey", GlobalHelper.getRSAString(publicKey));
 			json.put("username", username);
 
 			//Post Aufruf mit JSON als Parameter

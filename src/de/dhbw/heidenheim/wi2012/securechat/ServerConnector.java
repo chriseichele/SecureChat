@@ -381,7 +381,8 @@ public class ServerConnector {
 		} catch (NoContentException 
 				| IOException 
 				| NoSuchAlgorithmException 
-				| InvalidKeySpecException e) {
+				| InvalidKeySpecException
+				| NullPointerException e) {
 			//Kein Inhalt -> Kontakt existiert nicht
 			throw new ContactNotExistException();
 		}

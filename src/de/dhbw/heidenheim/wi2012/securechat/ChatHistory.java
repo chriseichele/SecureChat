@@ -104,7 +104,7 @@ public class ChatHistory {
 		}
 	}
 
-	public ArrayList<Message> getCurrentMessages() throws ConnectionFailedException {
+	public synchronized ArrayList<Message> getCurrentMessages() throws ConnectionFailedException {
 
 		messages.clear();
 

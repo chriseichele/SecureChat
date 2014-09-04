@@ -11,7 +11,6 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 import javax.crypto.Mac;
@@ -66,18 +65,16 @@ public class GlobalHelper {
 			e.printStackTrace();
 		}
 	}
-
+/*
 	public static PrivateKey getRSAprivateKey(String pks) throws NoSuchAlgorithmException, InvalidKeySpecException {
-
+		
 		byte[] encodedKey = Base64.decode(pks, Base64.DEFAULT);
 		// get the private key
 		KeyFactory keyFactory = KeyFactory.getInstance("RSA");
 		KeySpec privateKeySpec = new PKCS8EncodedKeySpec(encodedKey);
 		PrivateKey privateKey = keyFactory.generatePrivate(privateKeySpec);
 		return privateKey;
-
-		//byte[] encodedKey = Base64.decode(pks, Base64.DEFAULT);
-		//return new SecretKeySpec(encodedKey,0,encodedKey.length, "RSA"); 
+		
 	}
 	public static PublicKey getRSApublicKey(String pks) throws NoSuchAlgorithmException, InvalidKeySpecException {
 
@@ -88,13 +85,11 @@ public class GlobalHelper {
 		PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
 		return publicKey;
 
-		//byte[] encodedKey = Base64.decode(pks, Base64.DEFAULT);
-		//return new SecretKeySpec(encodedKey,0,encodedKey.length, "RSA"); 
 	}
 	public static String getRSAString(Key key) {
 		return Base64.encodeToString(key.getEncoded(), Base64.DEFAULT);
 	}
-
+*/
 	public static void DeleteRecursive(File fileOrDirectory) {
 		if (fileOrDirectory.isDirectory())
 			for (File child : fileOrDirectory.listFiles())

@@ -87,7 +87,7 @@ public class Self {
 	        serializer.startTag(null, "user");
 	        serializer.attribute(null, "id", this.id);
 	        serializer.attribute(null, "name", this.name);
-	        serializer.attribute(null, "private_key", GlobalHelper.getRSAString(this.private_key));
+	        serializer.attribute(null, "private_key", RSAHelper.getPrivateKeyString(this.private_key));
 	        serializer.endTag(null, "user");
 		    serializer.endDocument();
 		    serializer.flush();
@@ -97,7 +97,9 @@ public class Self {
 				| InvalidKeyException 
 				| NoSuchAlgorithmException 
 				| NoSuchPaddingException
-				| ConnectionFailedException e) {
+				| ConnectionFailedException 
+				| IllegalArgumentException 
+				| IllegalStateException e) {
 			// Auto-generated catch block
 			e.printStackTrace();
 			//Do Nothing on Failure, User has just to Log in next Time again
@@ -145,7 +147,7 @@ public class Self {
 				    String username = root.getAttribute("name");
 				    String private_key_string = root.getAttribute("private_key");
 				    
-				    PrivateKey private_key = GlobalHelper.getRSAprivateKey(private_key_string);
+				    PrivateKey private_key = RSAHelper.getPrivateKey(private_key_string);
 				    
 					//User Objekt anlegen und zurueckgeben
 					return new Self(id, username, private_key);

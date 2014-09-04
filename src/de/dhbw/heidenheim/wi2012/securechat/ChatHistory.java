@@ -50,7 +50,7 @@ public class ChatHistory {
 
 	private ArrayList<Message> messages;
 	private String filename;
-	
+
 	private static PrivateKey own_privateKey;
 	private PublicKey sender_publicKey;
 
@@ -191,12 +191,16 @@ public class ChatHistory {
 			return 0L;
 		}
 	}
-	
+
 	public void send(Message m) throws ConnectionFailedException, EncryptionErrorException {
+		//Copy Message Content for local storage
+		String inhalt = m.getMessage();
 		//Encrypt
 		m = encryptMessageContent(m);
 		//Add to server
 		new ServerConnector(context).sendMessage(m);//Context sollte hier schon lange initialisiert sein
+		//Nachdem die nachricht gesendet wurde, wieder entschluesselt lokal ablegen
+		m.setMessage(inhalt);
 		//Add to local 
 		add(m);
 	}
@@ -300,7 +304,7 @@ public class ChatHistory {
 	}
 
 	private Message encryptMessageContent(Message m) throws EncryptionErrorException {
-/*
+
 		String inhalt = m.getMessage();
 
 		try {
@@ -310,35 +314,34 @@ public class ChatHistory {
 			//get senders public key
 			PublicKey publicKey = getPublicKey(m.getRecieverID());
 
-			   RSAHelper helper = new RSAHelper();
-		       byte[] data = inhalt.getBytes("UTF-8");
-				// Sign Message Content with own private Key
-		       byte[] digitalSignature = helper.signData(data, privateKey);       
-		       String signatur = new String(Base64.encode(digitalSignature, Base64.DEFAULT));
-				// Encrypt Message Content with public Key
-		       String encryptedText = helper.encrypt(inhalt, publicKey);
-		       
-			
+			RSAHelper helper = new RSAHelper();
+			byte[] data = inhalt.getBytes("UTF-8");
+			// Sign Message Content with own private Key
+			byte[] digitalSignature = helper.signData(data, privateKey);       
+			String signatur = new String(Base64.encode(digitalSignature, Base64.DEFAULT));
+			// Encrypt Message Content with public Key
+			String encryptedText = helper.encrypt(inhalt, publicKey);
+
 			m.setMessage(encryptedText);
 			m.setSignature(signatur);
 
 		} catch(ContactNotExistException
-			   | ConnectionFailedException
-			   | UnsupportedEncodingException 
-			   | InvalidKeyException 
-			   | NoSuchAlgorithmException 
-			   | NoSuchPaddingException 
-			   | IllegalBlockSizeException 
-			   | BadPaddingException 
-			   | SignatureException e) {
+				| ConnectionFailedException
+				| UnsupportedEncodingException 
+				| InvalidKeyException 
+				| NoSuchAlgorithmException 
+				| NoSuchPaddingException 
+				| IllegalBlockSizeException 
+				| BadPaddingException 
+				| SignatureException e) {
 			throw new EncryptionErrorException("Cannot retrieve Key!");
 		}
-*/
+
 		return m;
 	}
 
 	private Message decryptMessageContent(Message m) throws EncryptionErrorException {
-/*
+
 		String inhalt = m.getMessage();
 
 		try {
@@ -348,21 +351,17 @@ public class ChatHistory {
 			//get senders public key
 			PublicKey publicKey = getPublicKey(m.getSenderID());
 
-			//TODO Check Signed Content
-			//TODO Decrypt Message Content with public Key
-			   RSAHelper helper = new RSAHelper();
-			 String klartext = helper.decrypt(inhalt, privateKey); 
-
-		       byte[] ByteSignature = Base64.decode(m.getSignature(), Base64.DEFAULT);
-		       
-		       //Signatur echt?
-		       boolean echt = helper.verifySig(klartext.getBytes("UTF-8"), publicKey, ByteSignature);
-			
-		       if(echt) {
-					m.setMessage(klartext);
-		       } else {
-		    	   throw new EncryptionErrorException("Signature cannot be verified! Message content may be modified!");
-		       }
+			//Decrypt Message Content with public Key
+			RSAHelper helper = new RSAHelper();
+			String klartext = helper.decrypt(inhalt, privateKey); 
+			byte[] ByteSignature = Base64.decode(m.getSignature(), Base64.DEFAULT);
+			//Signatur echt?
+			boolean echt = helper.verifySig(klartext.getBytes("UTF-8"), publicKey, ByteSignature);
+			if(echt) {
+				m.setMessage(klartext);
+			} else {
+				throw new EncryptionErrorException("Signature cannot be verified! Message content may be modified!");
+			}
 
 		} catch(ContactNotExistException
 				| ConnectionFailedException 
@@ -375,17 +374,17 @@ public class ChatHistory {
 				| UnsupportedEncodingException e) {
 			throw new EncryptionErrorException("Cannot retrieve Key!");
 		}
-*/
+
 		return m;
 	}
-	
+
 	private PrivateKey getPrivateKey() throws ContactNotExistException, ConnectionFailedException {
 		if (own_privateKey == null) {
 			own_privateKey = (PrivateKey) Self.getUserFromFile(context).getPrivateKey();
 		}
 		return own_privateKey;
 	}
-	
+
 	private PublicKey getPublicKey(String senderID)  throws ConnectionFailedException, ContactNotExistException {
 		if (this.sender_publicKey == null) {
 			this.sender_publicKey = (PublicKey) new ServerConnector(context).getContact(senderID).getPublicKey();

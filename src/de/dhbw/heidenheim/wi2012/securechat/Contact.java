@@ -29,6 +29,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -45,7 +46,7 @@ public class Contact {
 	
 	private String name;
 	private String id;
-	private Key public_key;
+	private PublicKey public_key;
 	private static Context context;
 	private static String filename = "contactlist.xml";
 
@@ -54,7 +55,7 @@ public class Contact {
 	
 	private static ArrayList<Contact> contactList = new ArrayList<Contact>();
 
-	public Contact(String id, String name, Key public_key) {
+	public Contact(String id, String name, PublicKey public_key) {
 		this.id = id;
 		this.name = name;
 		this.public_key = public_key;
@@ -85,7 +86,7 @@ public class Contact {
 	public String getID() {
 		return this.id;
 	}
-	public Key getPublicKey() {
+	public PublicKey getPublicKey() {
 		return this.public_key;
 	}
 	
@@ -122,7 +123,7 @@ public class Contact {
 		        serializer.startTag(null, "contact");
 		        serializer.attribute(null, "id", this.id);
 		        serializer.attribute(null, "name", this.name);
-		        serializer.attribute(null, "publicKey", GlobalHelper.getRSAString(this.public_key));
+		        serializer.attribute(null, "publicKey", RSAHelper.getPublicKeyString(this.public_key));
 		        serializer.endTag(null, "contact");
 		        serializer.endTag(null, "root");
 			    serializer.endDocument();
@@ -132,7 +133,9 @@ public class Contact {
 			} catch (IOException
 					| InvalidKeyException 
 					| NoSuchAlgorithmException 
-					| NoSuchPaddingException e) {
+					| NoSuchPaddingException 
+					| IllegalArgumentException 
+					| IllegalStateException e) {
 				// TODO Auto-generated catch block -> do nothing
 				e.printStackTrace();
 			}
@@ -189,7 +192,7 @@ public class Contact {
 	            Element contact_node = dom.createElement("contact");
 	            contact_node.setAttribute("id", this.id);
 	            contact_node.setAttribute("name", this.name);
-	            contact_node.setAttribute("publicKey", GlobalHelper.getRSAString(this.public_key));
+	            contact_node.setAttribute("publicKey", RSAHelper.getPublicKeyString(this.public_key));
 	            root.appendChild(contact_node);
 
 	            Transformer transformer = TransformerFactory.newInstance().newTransformer();
@@ -212,7 +215,8 @@ public class Contact {
 					| NoSuchPaddingException 
 					| IOException 
 					| SAXException 
-					| ParserConfigurationException e) {
+					| ParserConfigurationException 
+					| DOMException e) {
 				// TODO Auto-generated catch block -> do nothing
 				e.printStackTrace();
 			}
@@ -264,7 +268,7 @@ public class Contact {
 		    
 		    NodeList contact_nodes = root.getChildNodes();
 		    for (int i=1;i<(contact_nodes.getLength()-1);i=i+2) {
-		    	PublicKey key = GlobalHelper.getRSApublicKey(((Element) contact_nodes.item(i)).getAttribute("publicKey"));
+		    	PublicKey key = RSAHelper.getPublicKey(((Element) contact_nodes.item(i)).getAttribute("publicKey"));
 		        //Neuen Kontakt an Array geben
 		        contactList.add(new Contact(((Element) contact_nodes.item(i)).getAttribute("id"),
 											((Element) contact_nodes.item(i)).getAttribute("name"),

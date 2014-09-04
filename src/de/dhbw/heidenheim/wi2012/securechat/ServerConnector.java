@@ -374,12 +374,13 @@ public class ServerConnector {
 			}
 
 			//parse key String to Key Object
-			PrivateKey key = GlobalHelper.getRSAprivateKey(pks);
+			PrivateKey key = RSAHelper.getPrivateKey(pks);
 
 			//TODO Return User Object with new fetched private Key of User
 			return new Self(user_id, username, key);
 
 		} catch (NoContentException 
+				| IOException 
 				| NoSuchAlgorithmException 
 				| InvalidKeySpecException e) {
 			//Kein Inhalt -> Kontakt existiert nicht
@@ -409,7 +410,7 @@ public class ServerConnector {
 			json.put("password_hash", pw_hash);
 			if(send_private_key) {
 				//Privater Schlüssel nur an den Server Senden, wenn vom Benutzer gewünscht
-				json.put("privateKey", GlobalHelper.getRSAString(privateKey));
+				json.put("privateKey", RSAHelper.getPrivateKeyString(privateKey));
 			}
 
 			//Post Aufruf mit JSON als Parameter
@@ -450,7 +451,7 @@ public class ServerConnector {
 			//Generate JSON Data for new User
 			JSONObject json = new JSONObject();
 			json.put("userloginserverID", user_id);
-			json.put("publicKey", GlobalHelper.getRSAString(publicKey));
+			json.put("publicKey", RSAHelper.getPublicKeyString(publicKey));
 			json.put("username", username);
 
 			//Post Aufruf mit JSON als Parameter
@@ -500,7 +501,7 @@ public class ServerConnector {
 
 			if(username != null && publicKeyString != null) {
 				//Contact Objekt mit Daten zurueck geben
-				return new Contact(contactID, username, GlobalHelper.getRSApublicKey(publicKeyString));
+				return new Contact(contactID, username, RSAHelper.getPublicKey(publicKeyString));
 			} else {
 				//Kontaktdaten fehlerhaft
 				throw new ContactNotExistException();
@@ -524,10 +525,10 @@ public class ServerConnector {
 		ArrayList<Message> messages = new ArrayList<Message>();
 
 		try {
-			//TODO retrieve Messages newer as timestamp for current user id from server
+			// retrieve Messages newer as timestamp for current user id from server
 			String xml = getXML(this.protokoll + this.message_server_directory + "message/receiver/" + userID + "/" + timestampLastMessage );
 
-			//TODO parse Messages as objects
+			// parse Messages as objects
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
 			InputSource is = new InputSource();
@@ -552,7 +553,7 @@ public class ServerConnector {
 						if(name2 != null && name2.equals("content")) {
 							content = item2.getChildNodes().item(0).getNodeValue();
 						}
-						else if(name2 != null && name2.equals("signature")) { //TODO check parsing
+						else if(name2 != null && name2.equals("signature")) {
 							signature = item2.getChildNodes().item(0).getNodeValue();
 						}
 						else if(name2 != null && name2.equals("datetime")) {
@@ -592,8 +593,9 @@ public class ServerConnector {
 	public void sendMessage(Message m) throws ConnectionFailedException {
 		//send Message to server
 		try {
-			//TODO Generate JSON Data for new Message
+			// Generate JSON Data for new Message
 			JSONObject json = new JSONObject();
+			json.put("id", "6");
 			json.put("content", m.getMessage());
 			json.put("signature", m.getSignature());
 			json.put("datetime", m.getTimestamp()+"");

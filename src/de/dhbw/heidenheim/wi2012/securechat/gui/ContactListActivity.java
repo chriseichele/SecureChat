@@ -129,9 +129,6 @@ ContactListFragment.Callbacks {
 					} catch(ConnectionFailedException e) {
 						//Toast Message mit Fehlermeldung zeigen
 						GlobalHelper.displayToast_ConnectionFailed(getApplicationContext());
-					} catch (EncryptionErrorException e) {
-						//Toast Message mit Fehlermeldung zeigen
-						GlobalHelper.displayToast_EncryptionError(getApplicationContext());
 					}
 				}
 			});

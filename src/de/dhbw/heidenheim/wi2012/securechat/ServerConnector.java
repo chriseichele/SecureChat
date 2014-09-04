@@ -595,7 +595,7 @@ public class ServerConnector {
 		try {
 			// Generate JSON Data for new Message
 			JSONObject json = new JSONObject();
-			json.put("id", "6");
+			json.put("id", "0");
 			json.put("content", m.getMessage());
 			json.put("signature", m.getSignature());
 			json.put("datetime", m.getTimestamp()+"");

@@ -365,7 +365,7 @@ public class ServerConnector {
 						//get key String out of XML
 						pks = item.getChildNodes().item(0).getNodeValue();
 					}
-					if(name != null && name.equals("username")) {
+					else if(name != null && name.equals("username")) {
 						//get username String out of XML
 						username = item.getChildNodes().item(0).getNodeValue();
 					}
@@ -462,51 +462,60 @@ public class ServerConnector {
 			throw new ConnectionFailedException("Error Sending JSON Data for POST to message server");
 		}
 
-		//Return User Object
-		return new Self(user_id, username, privateKey);
+		if(user_id != null && privateKey != null) {
+			//Return User Object
+			return new Self(user_id, username, privateKey);
+		} else {
+			throw new ConnectionFailedException("Error retrieving new User Data!");
+		}
 	}
 
 	public Contact getContact(String contactID) throws ConnectionFailedException, ContactNotExistException {
 		//Get Contact Details from Server (Name & public Key)
 		try {
 			String xml = getXML(this.protokoll + this.message_server_directory + "usermessageserver/" + contactID );
-		} catch (NoContentException e) {
+
+			String username = null;
+			String publicKeyString = null;
+			
+			//Parse XML Data
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			InputSource is = new InputSource();
+			is.setCharacterStream(new StringReader(xml));
+
+			Document doc = db.parse(is);
+			NodeList attributes = doc.getChildNodes().item(0).getChildNodes();
+			for(int i=0;i<attributes.getLength();i++) {
+				Node item = attributes.item(i);
+				String node_name = item.getNodeName();
+				if(node_name != null && node_name.equals("publicKey")) {
+					//Get RSA Key string out of xml
+					publicKeyString = item.getChildNodes().item(0).getNodeValue();
+				}
+				else if(node_name != null && node_name.equals("username")) {
+					//Get Username string out of xml
+					username = item.getChildNodes().item(0).getNodeValue();
+				}
+			}
+
+			if(username != null && publicKeyString != null) {
+				//Contact Objekt mit Daten zurueck geben
+				return new Contact(contactID, username, GlobalHelper.getRSAKey(publicKeyString));
+			} else {
+				//Kontaktdaten fehlerhaft
+				throw new ContactNotExistException();
+			}
+		
+		
+		} catch (NoContentException
+				| ParserConfigurationException
+				| SAXException 
+				| IOException 
+				| NullPointerException e) {
 			//Kontakt nicht gefunden
 			throw new ContactNotExistException();
 		}
-
-		//TODO Parse XML Contact Data Object
-		String name = null;
-
-		//TODO Remove Dummy Code
-		if (contactID.equals("0")) {
-			name = "Testkontakt";
-		}
-		else if (contactID.equals("1")) {
-			name = "Chris";
-		}
-		else if (contactID.equals("2")) {
-			name = "Dennis";
-		}
-		else if (contactID.equals("3")) {
-			name = "Flo";
-		}
-		else if (contactID.equals("4")) {
-			name = "Martin";
-		}
-		else if (contactID.equals("5")) {
-			name = "Schnulf";
-		}
-		else if (contactID.equals("6")) {
-			name = "Vera";
-		}
-		else {
-			//Kontakt nicht gefunden
-			throw new ContactNotExistException();
-		}
-
-		//Contact Objekt mit Daten zurueck geben
-		return new Contact(contactID, name, GlobalHelper.getRSAKey("TESTKEY"));
 	}
 
 	public ArrayList<Message> getNewMessages(Long timestampLastMessage, String userID) throws ConnectionFailedException {
@@ -543,13 +552,13 @@ public class ServerConnector {
 							if(name2 != null && name.equals("content")) {
 								content = item2.getChildNodes().item(0).getNodeValue();
 							}
-							if(name2 != null && name.equals("signature")) { //TODO check parsing
+							else if(name2 != null && name.equals("signature")) { //TODO check parsing
 								signature = item2.getChildNodes().item(0).getNodeValue();
 							}
-							if(name2 != null && name.equals("datetime")) {
+							else if(name2 != null && name.equals("datetime")) {
 								datetime = item2.getChildNodes().item(0).getNodeValue();
 							}
-							if(name2 != null && name.equals("messsagePK")) {
+							else if(name2 != null && name.equals("messsagePK")) {
 								NodeList sub_attributes = item2.getChildNodes();
 								for(int k=0;k<sub_attributes.getLength();k++) {
 									Node item3 = sub_attributes.item(k);
@@ -557,7 +566,7 @@ public class ServerConnector {
 									if(name3 != null && name3.equals("recieverID")) {
 										reciever_id = item3.getChildNodes().item(0).getNodeValue();
 									}
-									if(name3 != null && name3.equals("senderID")) {
+									else if(name3 != null && name3.equals("senderID")) {
 										sender_id = item3.getChildNodes().item(0).getNodeValue();
 										is_mine = sender_id.equals(userID);
 									}

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import de.dhbw.heidenheim.wi2012.securechat.*;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ConnectionFailedException;
 import de.dhbw.heidenheim.wi2012.securechat.exceptions.ContactNotExistException;
-import de.dhbw.heidenheim.wi2012.securechat.exceptions.EncryptionErrorException;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;

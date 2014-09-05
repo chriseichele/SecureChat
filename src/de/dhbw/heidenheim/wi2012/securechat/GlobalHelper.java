@@ -2,9 +2,11 @@ package de.dhbw.heidenheim.wi2012.securechat;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyFactory;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -65,31 +67,7 @@ public class GlobalHelper {
 			e.printStackTrace();
 		}
 	}
-/*
-	public static PrivateKey getRSAprivateKey(String pks) throws NoSuchAlgorithmException, InvalidKeySpecException {
-		
-		byte[] encodedKey = Base64.decode(pks, Base64.DEFAULT);
-		// get the private key
-		KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-		KeySpec privateKeySpec = new PKCS8EncodedKeySpec(encodedKey);
-		PrivateKey privateKey = keyFactory.generatePrivate(privateKeySpec);
-		return privateKey;
-		
-	}
-	public static PublicKey getRSApublicKey(String pks) throws NoSuchAlgorithmException, InvalidKeySpecException {
 
-		byte[] encodedKey = Base64.decode(pks, Base64.DEFAULT);
-		// get the public key
-		KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-		KeySpec publicKeySpec = new X509EncodedKeySpec(encodedKey);
-		PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
-		return publicKey;
-
-	}
-	public static String getRSAString(Key key) {
-		return Base64.encodeToString(key.getEncoded(), Base64.DEFAULT);
-	}
-*/
 	public static void DeleteRecursive(File fileOrDirectory) {
 		if (fileOrDirectory.isDirectory())
 			for (File child : fileOrDirectory.listFiles())
@@ -98,17 +76,10 @@ public class GlobalHelper {
 		fileOrDirectory.delete();
 	}
 
-	public static String hash(String input, String keyString) throws UnsupportedEncodingException, 
-	NoSuchAlgorithmException, 
-	InvalidKeyException {
-		//Hash Password with HMAC
-		SecretKeySpec key = new SecretKeySpec((keyString).getBytes("UTF-8"), "HmacSHA1");
-		Mac mac = Mac.getInstance("HmacSHA1");
-		mac.init(key);
-
-		byte[] bytes = mac.doFinal(input.getBytes("UTF-8"));
-
-		return new String( Base64.encode(bytes, 0) );
+	public static String hash(String input) throws NoSuchAlgorithmException {
+	        MessageDigest digest = MessageDigest.getInstance("SHA-1");
+	        digest.update(input.getBytes());
+	        return new BigInteger(1, digest.digest()).toString(16);
 	}
 
 }

@@ -7,8 +7,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -407,7 +409,7 @@ public class ServerConnector {
 		try {
 			//Generate JSON Data for new User
 			JSONObject json = new JSONObject();
-			json.put("password_hash", pw_hash);
+			json.put("passwordHash", pw_hash);
 			if(send_private_key) {
 				//Privater Schlüssel nur an den Server Senden, wenn vom Benutzer gewünscht
 				json.put("privateKey", RSAHelper.getPrivateKeyString(privateKey));

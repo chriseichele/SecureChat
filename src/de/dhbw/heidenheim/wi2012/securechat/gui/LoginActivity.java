@@ -216,7 +216,7 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
 
 			try {
 				//Passwort hashen & AppName als Salt verwenden
-				String password_hash = GlobalHelper.hash(password, "SecureChat");
+				String password_hash = GlobalHelper.hash(password);
 
 				//Login
 				doLogin(user_id, password_hash);
@@ -236,9 +236,7 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
 				mSectionsPagerAdapter.getLoginFragment().displayErrorMessage(getString(R.string.message_wrong_login));
 			} catch (ConnectionFailedException e) {
 				GlobalHelper.displayToast_ConnectionFailed(getApplicationContext());
-			} catch (UnsupportedEncodingException 
-					| NoSuchAlgorithmException 
-					| InvalidKeyException e) {
+			} catch (NoSuchAlgorithmException e) {
 				GlobalHelper.displayToast_EncryptionError(getApplicationContext());
 			}
 		}
@@ -272,7 +270,7 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
 		} else {
 			try {
 			//Passwort hashen & AppName als Salt verwenden
-			this.password_hash = GlobalHelper.hash(password1, "SecureChat");
+			this.password_hash = GlobalHelper.hash(password1);
 
 			if(send_key_to_server) {
 				//Warnpopup mit Hinweis & Erklaerung zeigen
@@ -299,9 +297,7 @@ public class LoginActivity extends Activity implements ActionBar.TabListener {
 					.setNegativeButton(android.R.string.no, null).show();
 			}
 
-			} catch (UnsupportedEncodingException 
-					| NoSuchAlgorithmException 
-					| InvalidKeyException e) {
+			} catch (NoSuchAlgorithmException e) {
 				GlobalHelper.displayToast_EncryptionError(getApplicationContext());
 			}
 		}

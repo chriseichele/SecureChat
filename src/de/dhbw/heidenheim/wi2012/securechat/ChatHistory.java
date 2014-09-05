@@ -204,16 +204,11 @@ public class ChatHistory {
 		//Add to local 
 		add(m);
 	}
-	public void retrieveMessage(Message m) throws ConnectionFailedException {
-		try {
-			//Decrypt
-			m = decryptMessageContent(m);
-			//Add to local 
-			add(m);
-		} catch(EncryptionErrorException e) {
-			//Do Nothing
-			//just wont recieve this message
-		}
+	public void retrieveMessage(Message m) throws ConnectionFailedException, EncryptionErrorException {
+		//Decrypt
+		m = decryptMessageContent(m);
+		//Add to local 
+		add(m);
 	}
 
 	public synchronized void add(Message m) throws ConnectionFailedException, EncryptionErrorException {
